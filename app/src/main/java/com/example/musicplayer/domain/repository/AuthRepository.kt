@@ -1,4 +1,13 @@
 package com.example.musicplayer.domain.repository
 
-class AuthRepository {
+interface AuthRepository {
+
+    suspend fun signIn(email: String, password: String) : Result<Unit>
+
+    suspend fun signUp(
+        email: String,
+        password: String,
+        userName: String,
+    ) : Result<Unit>
+
 }
