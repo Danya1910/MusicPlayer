@@ -32,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.musicplayer.R
+import com.example.musicplayer.presentation.auth.AuthViewModel
 import com.example.musicplayer.presentation.auth.component.LogInButton
 import com.example.musicplayer.presentation.auth.component.NextButton
 import com.example.musicplayer.presentation.auth.component.SocialMediaAccountButton
@@ -45,7 +46,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun WelcomeScreen(
-
+    viewModel: AuthViewModel,
 ) {
 
     val coroutineScope = rememberCoroutineScope()
@@ -168,9 +169,9 @@ fun WelcomeScreen(
                                     )
                                 } else {
                                     if (isSignUpMode) {
-                                        //viewModel.signUp(email, password, name)
+                                        viewModel.signUp(email, password, name)
                                     } else {
-                                        //viewModel.signIn(email, password)
+                                        viewModel.signIn(email, password)
                                     }
                                     //onAuthSuccess()
                                 }
@@ -182,6 +183,8 @@ fun WelcomeScreen(
         }
     }
 }
+
+
 
 @Composable
 private fun WelcomeContent(
@@ -390,5 +393,138 @@ private fun PasswordStep(
 @Composable
 @Preview(showBackground = true)
 private fun WelcomeScreenPreview() {
-    WelcomeScreen()
+
+    val coroutineScope = rememberCoroutineScope()
+
+    var isSignUpMode by remember { mutableStateOf(true) }
+
+    val steps = remember(isSignUpMode) {
+        if (isSignUpMode) {
+            listOf("Welcome", "Email", "Name", "Password")
+        } else {
+            listOf("Welcome", "Email", "Password")
+        }
+    }
+
+    val pagerState = rememberPagerState(pageCount = { steps.size })
+
+    var email by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+
+    Scaffold(
+        containerColor = DeepBlack,
+    ) { paddingValues ->
+        Column(
+            verticalArrangement = Arrangement.Top,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            HorizontalPager(
+                state = pagerState,
+                userScrollEnabled = false,
+                modifier = Modifier.weight(1f)
+            ) { page ->
+                when (steps[page]) {
+                    "Welcome" -> WelcomeContent(
+                        onSignUpClick = {
+                            isSignUpMode = true
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(1, animationSpec = tween(400))
+                            }
+                        },
+                        onLogInClick = {
+                            isSignUpMode = false
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(1, animationSpec = tween(400))
+                            }
+                        }
+                    )
+
+                    "Email" -> EmailStep(
+                        email = email,
+                        onEmailChange = { email = it },
+                        onBackClick = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                            }
+                        },
+                        onNextClick = {
+                            coroutineScope.launch {
+                                if (pagerState.currentPage < steps.size - 1) {
+                                    pagerState.animateScrollToPage(
+                                        page = pagerState.currentPage + 1,
+                                        animationSpec = tween(400)
+                                    )
+                                } else {
+                                    if (isSignUpMode) {
+                                        //viewModel.signUp(email, password, name)
+                                    } else {
+                                        //viewModel.signIn(email, password)
+                                    }
+                                    //onAuthSuccess()
+                                }
+                            }
+                        }
+                    )
+
+                    "Name" -> NameStep(
+                        name = name,
+                        onNameChange = { name = it },
+                        onBackClick = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                            }
+                        },
+                        onNextClick = {
+                            coroutineScope.launch {
+                                if (pagerState.currentPage < steps.size - 1) {
+                                    pagerState.animateScrollToPage(
+                                        page = pagerState.currentPage + 1,
+                                        animationSpec = tween(400)
+                                    )
+                                } else {
+                                    if (isSignUpMode) {
+                                        //viewModel.signUp(email, password, name)
+                                    } else {
+                                        //viewModel.signIn(email, password)
+                                    }
+                                    //onAuthSuccess()
+                                }
+                            }
+                        },
+                    )
+
+                    "Password" -> PasswordStep(
+                        password = password,
+                        onPasswordChange = { password = it },
+                        onBackClick = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                            }
+                        },
+                        onNextClick = {
+                            coroutineScope.launch {
+                                if (pagerState.currentPage < steps.size - 1) {
+                                    pagerState.animateScrollToPage(
+                                        page = pagerState.currentPage + 1,
+                                        animationSpec = tween(400)
+                                    )
+                                } else {
+                                    if (isSignUpMode) {
+                                        //viewModel.signUp(email, password, name)
+                                    } else {
+                                        //viewModel.signIn(email, password)
+                                    }
+                                    //onAuthSuccess()
+                                }
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    }
 }
