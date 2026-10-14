@@ -16,6 +16,8 @@ class AuthRepositoryImpl @Inject constructor(
         val result = firebaseAuth.signInWithEmailAndPassword(email, password).await()
 
         Log.d("AuthRepository", "результат входа: $result")
+
+        Unit
     }
 
     override suspend fun signUp(
@@ -39,6 +41,8 @@ class AuthRepositoryImpl @Inject constructor(
         firestore.collection("users").document(userCreatedUid).set(user).await()
 
         Log.d("AuthRepository", "Юзер успешно создан")
+
+        Unit
     }
 
 }
