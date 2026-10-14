@@ -1,4 +1,7 @@
 package com.example.musicplayer.domain.model
 
-class User {
-}
+data class User (
+    val name: String = "",
+    val uid: String = "",
+    val avatarUrl: String = "",
+)
