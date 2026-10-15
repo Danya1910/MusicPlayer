@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.musicplayer.domain.repository.AuthRepository
 import com.example.musicplayer.presentation.auth.state.AuthUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.Lazy
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -12,7 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authRepository: AuthRepository,
+    private val authRepository: Lazy<AuthRepository>,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
@@ -30,7 +31,7 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = AuthUiState.Loading
 
-            authRepository.signIn(
+            authRepository.get().signIn(
                 email = email,
                 password = password
             )
@@ -57,7 +58,7 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = AuthUiState.Loading
 
-            authRepository.signUp(
+            authRepository.get().signUp(
                 email = email,
                 password = password,
                 name = name,
