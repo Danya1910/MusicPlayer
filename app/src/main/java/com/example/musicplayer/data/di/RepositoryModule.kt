@@ -1,7 +1,9 @@
 package com.example.musicplayer.data.di
 
 import com.example.musicplayer.data.repositoryImpl.AuthRepositoryImpl
+import com.example.musicplayer.data.repositoryImpl.TrackRepositoryImpl
 import com.example.musicplayer.domain.repository.AuthRepository
+import com.example.musicplayer.domain.repository.TrackRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -18,5 +20,11 @@ abstract class RepositoryModule {
     abstract fun bindAuthRepository(
         authRepository: AuthRepositoryImpl
     ) : AuthRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTrackRepository(
+        trackRepository: TrackRepositoryImpl
+    ) : TrackRepository
 
 }
