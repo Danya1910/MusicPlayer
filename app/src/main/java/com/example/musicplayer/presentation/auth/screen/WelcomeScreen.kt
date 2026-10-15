@@ -325,7 +325,7 @@ private fun NameStep(
         )
         Spacer(modifier = Modifier.height(25.dp))
         Text(
-            text = "What's your email?",
+            text = "What's your name?",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color = White,
