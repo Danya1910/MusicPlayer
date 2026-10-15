@@ -4,13 +4,18 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.kotlin.serialization)
+    id("com.google.gms.google-services") version "4.4.2"
+
+}
+
+kotlin {
+    jvmToolchain(17)
 }
 
 android {
     namespace = "com.example.musicplayer"
-    compileSdk {
-        version = release(37)
-    }
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.example.musicplayer"
@@ -24,15 +29,10 @@ android {
 
     buildTypes {
         release {
-            optimization {
-                enable = false
-            }
+            isMinifyEnabled = false
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
+
     buildFeatures {
         compose = true
     }
@@ -40,11 +40,14 @@ android {
 
 dependencies {
 
+
     implementation("com.google.dagger:hilt-android:2.56")
     ksp("com.google.dagger:hilt-compiler:2.56")
-    implementation("androidx.hilt:hilt-navigation-compose:1.4.0")
 
-    // Если планируете использовать ViewModel с Hilt
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation("androidx.navigation:navigation-compose:2.8.0")
+
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
 
