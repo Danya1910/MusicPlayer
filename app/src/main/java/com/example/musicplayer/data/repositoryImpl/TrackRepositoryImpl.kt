@@ -1,8 +1,12 @@
 package com.example.musicplayer.data.repositoryImpl
 
+import com.example.musicplayer.data.local.dao.AlbumDao
 import com.example.musicplayer.data.local.dao.TrackDao
+import com.example.musicplayer.data.local.entity.AlbumEntity
 import com.example.musicplayer.data.local.entity.toDomain
 import com.example.musicplayer.data.local.entity.toEntity
+import com.example.musicplayer.data.wrapper.toDomain
+import com.example.musicplayer.domain.model.Album
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.domain.repository.TrackRepository
 import com.google.firebase.auth.FirebaseAuth
@@ -21,6 +25,7 @@ class TrackRepositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val firebaseAuth: FirebaseAuth,
     private val trackDao: TrackDao,
+    private val albumDao: AlbumDao,
 ) : TrackRepository {
 
     override fun getAllTrack(): Flow<List<Track>> = flow {
@@ -50,8 +55,11 @@ class TrackRepositoryImpl @Inject constructor(
                     audioUrl = document.getString("audioUrl") ?: "",
                     imageUrl = document.getString("coverUrl") ?: "",
                     duration = document.getLong("duration") ?: 0L,
+                    genre = document.getString("genre") ?: "",
                     isFavorite = favoriteTrackIds.contains(trackId),
-                    localAudioPath = null
+                    localAudioPath = null,
+                    albumName = document.getString("albumName") ?: "",
+                    albumId = document.getString("albumId") ?: "",
                 )
             }
             val entitiesToInsert = remoteTracks.map { remoteTrack ->
@@ -67,6 +75,34 @@ class TrackRepositoryImpl @Inject constructor(
 
         emitAll(trackDao.getAllTracksFlow().map { list -> list.map { it.toDomain() } })
 
+    }.flowOn(Dispatchers.IO)
+
+    override fun getAlbums(): Flow<List<Album>> = flow {
+
+        emitAll(albumDao.getAllAlbumsWithTracks().map { listWithTracks ->
+            listWithTracks.map { it.toDomain() }
+        })
+
+        try {
+            if (firebaseAuth.currentUser == null) throw Exception(
+                "Пользователь не авторизирован"
+            )
+
+            val allAlbumsSnapshot = firestore.collection("albums").get().await()
+
+            val remoteAlbumsEntities = allAlbumsSnapshot.documents.map { document ->
+                AlbumEntity(
+                    albumId = document.id,
+                    title = document.getString("title") ?: "Без названия",
+                    artist = document.getString("artist") ?: "Неизвестный исполнитель",
+                    imageUrl = document.getString("imageUrl") ?: ""
+                )
+            }
+
+            albumDao.insertAlbums(remoteAlbumsEntities)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }.flowOn(Dispatchers.IO)
 
 }
