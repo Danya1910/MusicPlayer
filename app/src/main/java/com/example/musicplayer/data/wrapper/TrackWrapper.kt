@@ -12,8 +12,11 @@ fun TrackDto.toDomain() : Track {
         audioUrl = audioUrl,
         imageUrl = imageUrl,
         duration = duration,
+        genre = genre,
         isFavorite = isFavorite,
         localAudioPath = localAudioPath,
+        albumName = albumName,
+        albumId = albumId,
     )
 }
 
@@ -25,7 +28,10 @@ fun Track.toDto() : TrackDto {
         audioUrl = audioUrl,
         imageUrl = imageUrl,
         duration = duration,
+        genre = genre,
         isFavorite = isFavorite,
         localAudioPath = localAudioPath,
+        albumName = albumName,
+        albumId = albumId,
     )
 }
