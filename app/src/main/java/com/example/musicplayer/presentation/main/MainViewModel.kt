@@ -5,10 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.musicplayer.domain.repository.TrackRepository
 import com.example.musicplayer.presentation.main.state.MainUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 
@@ -17,27 +18,20 @@ class MainViewModel @Inject constructor(
     private val trackRepository: TrackRepository,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<MainUiState>(MainUiState.Loading)
-    val uiState = _uiState.asStateFlow()
 
-    init {
-        loadTracks()
+    val uiState: StateFlow<MainUiState> = combine(
+        trackRepository.getAllTrack(),
+        trackRepository.getAlbums()
+    ) { tracks, albums ->
+        MainUiState.Success(tracks = tracks, albums = albums) as MainUiState
     }
-
-    fun loadTracks() {
-        viewModelScope.launch {
-            _uiState.value = MainUiState.Loading
-
-            trackRepository.getAllTrack()
-                .catch { exception ->
-                    _uiState.value = MainUiState.Error(
-                        exception.localizedMessage ?: "Неизвестная ошибка"
-                    )
-                }
-                .collect { tracks ->
-                    _uiState.value = MainUiState.Success(tracks = tracks)
-                }
+        .catch { exception ->
+            emit(MainUiState.Error(exception.localizedMessage ?: "Неизвестная ошибка"))
         }
-    }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = MainUiState.Loading
+        )
 
 }
