@@ -6,7 +6,7 @@ import com.example.musicplayer.domain.model.Track
 
 
 @Entity(tableName = "tracks_table")
-data class TrackEntity (
+data class TrackEntity(
     @PrimaryKey
     val id: String,
     val title: String,
@@ -14,8 +14,11 @@ data class TrackEntity (
     val audioUrl: String,
     val imageUrl: String,
     val duration: Long,
+    val genre: String = "",
     val isFavorite: Boolean,
-    val localAudioPath: String? = null
+    val localAudioPath: String?,
+    val albumName: String?,
+    val albumId: String?,
 )
 
 fun TrackEntity.toDomain(): Track {
@@ -26,8 +29,11 @@ fun TrackEntity.toDomain(): Track {
         audioUrl = audioUrl,
         imageUrl = imageUrl,
         duration = duration,
+        genre = genre,
         isFavorite = isFavorite,
-        localAudioPath = localAudioPath
+        localAudioPath = localAudioPath,
+        albumName = albumName,
+        albumId = albumId,
     )
 }
 
@@ -39,7 +45,10 @@ fun Track.toEntity(): TrackEntity {
         audioUrl = audioUrl,
         imageUrl = imageUrl,
         duration = duration,
+        genre = genre,
         isFavorite = isFavorite,
-        localAudioPath = localAudioPath
+        localAudioPath = localAudioPath,
+        albumName = albumName,
+        albumId = albumId,
     )
 }
