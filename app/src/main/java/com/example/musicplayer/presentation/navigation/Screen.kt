@@ -9,6 +9,6 @@ sealed interface Screen {
     @Serializable data object MainGraph: Screen
 
     @Serializable data object Welcome: Screen
-    @Serializable data object Home: Screen
+    @Serializable data object Main: Screen
 
 }
