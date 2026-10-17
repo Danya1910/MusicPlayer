@@ -19,6 +19,9 @@ fun NavGraphBuilder.authGraph(
 
             WelcomeScreen(
                 viewModel = authViewModel,
+                onAuthSuccess = {
+                    onAuthSuccess()
+                }
             )
         }
      }
