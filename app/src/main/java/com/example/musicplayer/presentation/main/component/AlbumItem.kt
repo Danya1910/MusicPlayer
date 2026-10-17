@@ -21,7 +21,7 @@ import com.example.musicplayer.ui.theme.White
 
 
 @Composable
-fun Album(
+fun AlbumItem(
     album: Album,
     onClick: () -> Unit,
 ) {
