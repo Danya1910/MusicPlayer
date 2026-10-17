@@ -20,7 +20,9 @@ fun AlbumsList(
         items(albums) { album ->
             AlbumItem(
                 album = album,
-                onClick = {}
+                onClick = {
+                    onAlbumClick(album.id)
+                }
             )
         }
     }
