@@ -53,7 +53,7 @@ class TrackRepositoryImpl @Inject constructor(
                     title = document.getString("title") ?: "",
                     artist = document.getString("artist") ?: "",
                     audioUrl = document.getString("audioUrl") ?: "",
-                    imageUrl = document.getString("coverUrl") ?: "",
+                    imageUrl = document.getString("imageUrl") ?: "",
                     duration = document.getLong("duration") ?: 0L,
                     genre = document.getString("genre") ?: "",
                     isFavorite = favoriteTrackIds.contains(trackId),
