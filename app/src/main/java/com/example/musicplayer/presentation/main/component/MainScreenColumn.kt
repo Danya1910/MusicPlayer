@@ -28,7 +28,7 @@ fun MainScreenColumn(
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
 
-        item{
+        item {
             Text(
                 text = "Слушать плейлисты",
                 fontSize = 24.sp,
@@ -42,13 +42,15 @@ fun MainScreenColumn(
         item {
             AlbumsList(
                 albums = albums,
-                onAlbumClick = {}
+                onAlbumClick = { albumId ->
+                    onAlbumClick(albumId)
+                }
             )
         }
         item {
             Spacer(modifier = Modifier.height(10.dp))
         }
-        item{
+        item {
             Text(
                 text = "Слушать музыку",
                 fontSize = 24.sp,
@@ -62,8 +64,8 @@ fun MainScreenColumn(
         items(tracks) { track ->
             TrackItem(
                 track = track,
-                onTrackClick = {
-                    //старт
+                onTrackClick = { trackId ->
+                    onTrackClick(trackId)
                 }
             )
         }

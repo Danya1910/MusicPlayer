@@ -31,7 +31,7 @@ import com.example.musicplayer.ui.theme.White
 @Composable
 fun TrackItem(
     track: Track,
-    onTrackClick: () -> Unit,
+    onTrackClick: (String) -> Unit,
 ) {
 
     Row(
@@ -40,7 +40,7 @@ fun TrackItem(
             .fillMaxWidth()
             .height(60.dp)
             .clickable{
-                onTrackClick()
+                onTrackClick(track.id)
             }
             .padding(horizontal = 20.dp)
     ) {
