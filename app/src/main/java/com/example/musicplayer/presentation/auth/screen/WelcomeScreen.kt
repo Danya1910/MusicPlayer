@@ -47,6 +47,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun WelcomeScreen(
     viewModel: AuthViewModel,
+    onAuthSuccess: () -> Unit,
 ) {
 
     val coroutineScope = rememberCoroutineScope()
@@ -113,13 +114,6 @@ fun WelcomeScreen(
                                         page = pagerState.currentPage + 1,
                                         animationSpec = tween(400)
                                     )
-                                } else {
-                                    if (isSignUpMode) {
-                                        //viewModel.signUp(email, password, name)
-                                    } else {
-                                        //viewModel.signIn(email, password)
-                                    }
-                                    //onAuthSuccess()
                                 }
                             }
                         }
@@ -140,13 +134,6 @@ fun WelcomeScreen(
                                         page = pagerState.currentPage + 1,
                                         animationSpec = tween(400)
                                     )
-                                } else {
-                                    if (isSignUpMode) {
-                                        //viewModel.signUp(email, password, name)
-                                    } else {
-                                        //viewModel.signIn(email, password)
-                                    }
-                                    //onAuthSuccess()
                                 }
                             }
                         },
@@ -173,7 +160,7 @@ fun WelcomeScreen(
                                     } else {
                                         viewModel.signIn(email, password)
                                     }
-                                    //onAuthSuccess()
+                                    onAuthSuccess()
                                 }
                             }
                         }
