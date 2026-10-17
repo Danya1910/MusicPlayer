@@ -6,7 +6,6 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.musicplayer.data.local.entity.TrackEntity
-import com.example.musicplayer.domain.model.Track
 import kotlinx.coroutines.flow.Flow
 
 
@@ -23,7 +22,7 @@ interface TrackDao {
     suspend fun insertTracks(tracks: List<TrackEntity>)
 
     @Update
-    suspend fun updateTrack(track: Track)
+    suspend fun updateTrack(track: TrackEntity)
 
     @Query("DELETE FROM tracks_table")
     suspend fun clearCache()
