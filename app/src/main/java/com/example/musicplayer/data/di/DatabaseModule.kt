@@ -3,13 +3,14 @@ package com.example.musicplayer.data.di
 import android.content.Context
 import androidx.room.Room
 import com.example.musicplayer.data.local.AppDatabase
+import com.example.musicplayer.data.local.dao.AlbumDao
 import com.example.musicplayer.data.local.dao.TrackDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import jakarta.inject.Singleton
+import javax.inject.Singleton
 
 
 @Module
@@ -33,4 +34,11 @@ object DatabaseModule {
     fun provideTrackDao(database: AppDatabase): TrackDao {
         return database.trackDao()
     }
+
+    @Provides
+    @Singleton
+    fun provideAlbumDao(database: AppDatabase): AlbumDao {
+        return database.albumDao()
+    }
+
 }
