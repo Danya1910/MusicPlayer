@@ -1,22 +1,25 @@
 package com.example.musicplayer.presentation.main.screen
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.musicplayer.presentation.main.MainViewModel
 import com.example.musicplayer.presentation.main.component.BottomBar
 import com.example.musicplayer.presentation.main.component.MainScreenColumn
+import com.example.musicplayer.presentation.main.component.NowPlayingBar
 import com.example.musicplayer.presentation.main.state.MainUiState
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.White
@@ -66,16 +69,29 @@ fun MainScreen(
                             modifier = Modifier.fillMaxSize()
                         )
                     } else {
-                        MainScreenColumn(
-                            tracks = state.tracks,
-                            albums = state.albums,
-                            onTrackClick = {
-                                //старт трека
-                            },
-                            onAlbumClick = {
-                                //навигация на страницу альбома
+                        Box(
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            MainScreenColumn(
+                                tracks = state.tracks,
+                                albums = state.albums,
+                                onTrackClick = {
+                                    //старт трека
+                                },
+                                onAlbumClick = {
+                                    //навигация на страницу альбома
+                                }
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(bottom = 5.dp)
+                            ) {
+                                NowPlayingBar(
+                                    track = state.tracks[1],
+                                )
                             }
-                        )
+                        }
                     }
 
                 is MainUiState.Error ->
