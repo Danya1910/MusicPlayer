@@ -42,7 +42,7 @@ fun TrackItem(
             .clickable{
                 onTrackClick(track.id)
             }
-            .padding(horizontal = 20.dp)
+            .padding(horizontal = 12.dp)
     ) {
         AsyncImage(
             model = track.imageUrl,
