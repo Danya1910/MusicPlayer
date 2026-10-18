@@ -10,4 +10,6 @@ interface AuthRepository {
         name: String,
     ) : Result<Unit>
 
+    fun isUserAuthenticated(): Boolean
+
 }
