@@ -1,5 +1,6 @@
 package com.example.musicplayer.data.repositoryImpl
 
+import android.util.Log
 import com.example.musicplayer.data.local.dao.AlbumDao
 import com.example.musicplayer.data.local.dao.TrackDao
 import com.example.musicplayer.data.local.entity.AlbumEntity
@@ -79,9 +80,8 @@ class TrackRepositoryImpl @Inject constructor(
 
     override fun getAlbums(): Flow<List<Album>> = flow {
 
-        emitAll(albumDao.getAllAlbumsWithTracks().map { listWithTracks ->
-            listWithTracks.map { it.toDomain() }
-        })
+        val cachedAlbums = albumDao.getAllAlbumsWithTracksOnce().map { it.toDomain() }
+        emit(cachedAlbums)
 
         try {
             if (firebaseAuth.currentUser == null) throw Exception(
@@ -89,6 +89,7 @@ class TrackRepositoryImpl @Inject constructor(
             )
 
             val allAlbumsSnapshot = firestore.collection("albums").get().await()
+
 
             val remoteAlbumsEntities = allAlbumsSnapshot.documents.map { document ->
                 AlbumEntity(
@@ -99,6 +100,7 @@ class TrackRepositoryImpl @Inject constructor(
                 )
             }
 
+            Log.d("Album", remoteAlbumsEntities.toString())
             albumDao.insertAlbums(remoteAlbumsEntities)
         } catch (e: Exception) {
             e.printStackTrace()
