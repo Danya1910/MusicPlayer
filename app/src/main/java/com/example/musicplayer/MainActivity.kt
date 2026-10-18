@@ -21,8 +21,6 @@ class MainActivity : ComponentActivity() {
 
                 RootNavGraph(
                     navController = navController,
-                    isUserLoggedIn = false
-
                 )
             }
         }
