@@ -24,6 +24,10 @@ interface AlbumDao {
     fun getAllAlbumsWithTracks(): Flow<List<AlbumWithTracks>>
 
     @Transaction
+    @Query("SELECT * FROM albums")
+    suspend fun getAllAlbumsWithTracksOnce(): List<AlbumWithTracks>
+
+    @Transaction
     @Query("SELECT * FROM albums WHERE albumId = :albumId")
     fun getAlbumWithTracksById(albumId: String): Flow<AlbumWithTracks?>
 
