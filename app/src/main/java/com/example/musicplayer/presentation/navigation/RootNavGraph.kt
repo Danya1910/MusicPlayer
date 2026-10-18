@@ -57,7 +57,9 @@ fun RootNavGraph(
                 }
             )
 
-            mainGraph()
+            mainGraph(
+                navController = navController,
+            )
         }
     }
 }
