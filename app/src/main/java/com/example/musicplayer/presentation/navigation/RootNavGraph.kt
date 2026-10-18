@@ -26,7 +26,6 @@ fun RootNavGraph(
 
     val startDestination by splashViewModel.startDestination.collectAsStateWithLifecycle()
 
-
     if(startDestination == null) {
         Box(
             contentAlignment = Alignment.Center,
