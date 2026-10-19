@@ -1,6 +1,7 @@
 package com.example.musicplayer.presentation.main.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,11 +16,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -88,13 +93,14 @@ private fun TopBarPreview() {
     ) {
         PlayerHead(
             onCancelClick = {},
-            title = "Hope"
+            title = "?"
         )
         TrackInfoAndHeart(
             title = "Hope",
             artist = "XXXTENTACION",
             onHeartClick = {}
         )
+        PlayerControl()
     }
 }
 
@@ -184,6 +190,8 @@ private fun TrackInfoAndHeart(
                 color = Black,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .basicMarquee()
             )
             Spacer(modifier = Modifier.height(15.dp))
             Text(
@@ -202,7 +210,7 @@ private fun TrackInfoAndHeart(
             tint = White,
             modifier = Modifier
                 .size(23.dp)
-                .clickable{
+                .clickable {
                     onHeartClick()
                 },
         )
@@ -215,11 +223,65 @@ private fun PlayerSlider(
 ) {
 
 
-
 }
 
 @Composable
 private fun PlayerControl() {
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 21.dp)
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_random),
+            contentDescription = null,
+            tint = White,
+            modifier = Modifier.size(22.dp)
+        )
+        Spacer(modifier = Modifier.width(7.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceAround,
+            modifier = Modifier.weight(1f)
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_track_back),
+                contentDescription = null,
+                tint = White,
+            )
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(67.dp)
+                    .clip(
+                        shape = CircleShape
+                    )
+                    .background(
+                        color = White
+                    )
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_pause),
+                    contentDescription = null,
+                    tint = DeepBlack,
+                )
+            }
+            Icon(
+                painter = painterResource(R.drawable.ic_track_next),
+                contentDescription = null,
+                tint = White,
+            )
+        }
+
+        Icon(
+            painter = painterResource(R.drawable.ic_repeat),
+            contentDescription = null,
+            tint = White,
+            modifier = Modifier.size(29.dp)
+        )
+    }
 
 }
 
