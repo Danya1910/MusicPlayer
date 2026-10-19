@@ -266,6 +266,9 @@ private fun PlayerControl() {
                     painter = painterResource(R.drawable.ic_pause),
                     contentDescription = null,
                     tint = DeepBlack,
+                    modifier = Modifier
+                        .width(21.dp)
+                        .height(26.dp)
                 )
             }
             Icon(
