@@ -2,6 +2,7 @@ package com.example.musicplayer.presentation.main.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -62,6 +63,13 @@ fun TrackView(
 
         Spacer(modifier = Modifier.weight(1f))
 
+        TrackInfoAndHeart(
+            title = "Hope",
+            artist = "XXXTENTACION",
+            onHeartClick = {}
+        )
+
+        Spacer(modifier = Modifier.height(15.dp))
 
     }
 
@@ -70,10 +78,24 @@ fun TrackView(
 @Composable
 @Preview(showBackground = true)
 private fun TopBarPreview() {
-    PlayerHead(
-        onCancelClick = {},
-        title = "Hope"
-    )
+    Column(
+        verticalArrangement = Arrangement.SpaceAround,
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                DeepBlack,
+            )
+    ) {
+        PlayerHead(
+            onCancelClick = {},
+            title = "Hope"
+        )
+        TrackInfoAndHeart(
+            title = "Hope",
+            artist = "XXXTENTACION",
+            onHeartClick = {}
+        )
+    }
 }
 
 @Composable
@@ -151,7 +173,9 @@ private fun TrackInfoAndHeart(
             .fillMaxWidth()
     ) {
         Column(
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 15.dp)
         ) {
             Text(
                 text = title,
@@ -179,10 +203,18 @@ private fun TrackInfoAndHeart(
             modifier = Modifier
                 .size(23.dp)
                 .clickable{
-                    onHeartClick
+                    onHeartClick()
                 },
         )
     }
+}
+
+@Composable
+private fun PlayerSlider(
+
+) {
+
+    
 
 }
 
