@@ -214,7 +214,12 @@ private fun PlayerSlider(
 
 ) {
 
-    
+
+
+}
+
+@Composable
+private fun PlayerControl() {
 
 }
 
