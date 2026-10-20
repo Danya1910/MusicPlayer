@@ -12,6 +12,9 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TrackDao {
 
+    @Query("SELECT * FROM tracks_table WHERE id = :trackId LIMIT 1")
+    suspend fun getTrackById(trackId: String): TrackEntity?
+
     @Query("SELECT * FROM tracks_table")
     fun getAllTracksFlow() : Flow<List<TrackEntity>>
 
