@@ -40,6 +40,13 @@ android {
 
 dependencies {
 
+    // Базовая библиотека плеера ExoPlayer (для проигрывания аудио по URL)
+    implementation("androidx.media3:media3-exoplayer:1.5.1")
+// Библиотека для работы с сессиями и MediaSessionService (управление из шторки, наушников)
+    implementation("androidx.media3:media3-session:1.5.1")
+// UI компоненты Media3 (если в будущем пригодятся готовые контроллеры)
+    implementation("androidx.media3:media3-ui:1.5.1")
+
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
