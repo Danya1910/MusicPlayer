@@ -20,7 +20,7 @@ import com.example.musicplayer.ui.theme.White
 fun MainScreenColumn(
     tracks: List<Track>,
     albums: List<Album>,
-    onTrackClick: (String) -> Unit,
+    onTrackClick: (Track) -> Unit,
     onAlbumClick: (String) -> Unit,
 ) {
 
@@ -64,8 +64,8 @@ fun MainScreenColumn(
         items(tracks) { track ->
             TrackItem(
                 track = track,
-                onTrackClick = { trackId ->
-                    onTrackClick(trackId)
+                onTrackClick = {
+                    onTrackClick(track)
                 }
             )
         }
