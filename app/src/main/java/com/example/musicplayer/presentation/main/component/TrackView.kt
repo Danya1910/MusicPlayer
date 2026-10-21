@@ -76,6 +76,7 @@ fun TrackView(
                 horizontal = 24.dp
             )
             .statusBarsPadding()
+            .padding(top = 10.dp)
     ) {
         PlayerHead(
             onCancelClick = {
