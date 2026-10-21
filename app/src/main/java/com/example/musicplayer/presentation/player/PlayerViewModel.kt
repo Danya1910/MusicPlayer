@@ -26,9 +26,7 @@ class PlayerViewModel @Inject constructor(
     private val musicRepository: MusicRepository,
 ) : ViewModel() {
 
-    private val _paletteState = MutableStateFlow(
-        Triple(DeepBlack, White, Gray)
-    )
+    private val _paletteState = MutableStateFlow<Map<String, Triple<Color, Color, Color>>>(emptyMap())
 
     val uiState: StateFlow<PlayerUiState> = combine(
         musicRepository.currentTrack,
@@ -36,7 +34,14 @@ class PlayerViewModel @Inject constructor(
         musicRepository.currentPosition,
         musicRepository.duration,
         _paletteState
-    ) { track, isPlaying, position, duration, colors ->
+    ) { track, isPlaying, position, duration, paletteMap ->
+
+        val colors = if (track != null) {
+            paletteMap[track.id] ?: Triple(DeepBlack, White, Gray)
+        } else {
+            Triple(DeepBlack, White, Gray)
+        }
+
         PlayerUiState(
             currentTrack = track,
             isPlaying = isPlaying,
@@ -60,7 +65,9 @@ class PlayerViewModel @Inject constructor(
         musicRepository.seekTo(positionMs = positionMs)
     }
 
-    fun updateColorsFromBitmap(bitmap: Bitmap) {
+    fun updateColorsFromBitmap(trackId: String, bitmap: Bitmap) {
+        if (_paletteState.value.containsKey(trackId)) return
+
         viewModelScope.launch(Dispatchers.Default) {
             Palette.from(bitmap).generate { palette ->
                 val swatch = palette?.darkVibrantSwatch
@@ -68,14 +75,16 @@ class PlayerViewModel @Inject constructor(
                     ?: palette?.dominantSwatch
 
                 if (swatch != null) {
-                    _paletteState.value = Triple(
+                    val newColors = Triple(
                         Color(swatch.rgb),
                         Color(swatch.titleTextColor),
                         Color(swatch.bodyTextColor)
                     )
+                    _paletteState.value = _paletteState.value + (trackId to newColors)
                 }
             }
         }
     }
+
 
 }
