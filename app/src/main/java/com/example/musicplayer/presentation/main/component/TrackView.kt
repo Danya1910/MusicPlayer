@@ -1,5 +1,6 @@
 package com.example.musicplayer.presentation.main.component
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
@@ -23,8 +24,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -32,9 +35,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.drawable.toBitmap
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.Track
+import com.example.musicplayer.presentation.player.state.PlayerUiState
 import com.example.musicplayer.ui.theme.Black
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.White
@@ -43,40 +49,67 @@ import com.example.musicplayer.ui.theme.White
 @Composable
 fun TrackView(
     track: Track,
+    onCancelClick: () -> Unit,
+    onPauseClick: () -> Unit,
+    onHeartClick: () -> Unit,
+    playerState: PlayerUiState,
+    onBitmapLoaded: (Bitmap) -> Unit,
 ) {
 
-
-    TODO(
-        //Palette.from(bitmap).generate
+    val bgGradient = Brush.verticalGradient(
+        colors = listOf(
+            playerState.bgColor,
+            DeepBlack,
+        )
     )
+
+    val titleColor = playerState.titleColor
+    val bodyColor = playerState.bodyColor
+
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(
+                brush = bgGradient,
+            )
             .padding(
                 horizontal = 24.dp
             )
-            .background(
-                color = DeepBlack,
-            )
     ) {
         PlayerHead(
-            onCancelClick = {},
+            onCancelClick = {
+                onCancelClick()
+            },
             title = track.title,
         )
 
         Spacer(modifier = Modifier.weight(1f))
 
-        AlbumImage(url = track.imageUrl)
+        TrackImage(
+            url = track.imageUrl,
+            onBitmapLoaded = { bitmap ->
+                onBitmapLoaded(bitmap)
+            },
+        )
 
         Spacer(modifier = Modifier.weight(1f))
 
         TrackInfoAndHeart(
-            title = "Hope",
-            artist = "XXXTENTACION",
-            onHeartClick = {}
+            title = track.title,
+            artist = track.artist,
+            onHeartClick = {},
+            titleColor = titleColor,
+            bodyColor = bodyColor,
         )
 
         Spacer(modifier = Modifier.height(15.dp))
+
+        PlayerControl(
+            onPauseClick = {
+                onPauseClick()
+            },
+        )
+        Spacer(modifier = Modifier.height(60.dp))
 
     }
 
@@ -100,9 +133,10 @@ private fun TopBarPreview() {
         TrackInfoAndHeart(
             title = "Hope",
             artist = "XXXTENTACION",
-            onHeartClick = {}
+            onHeartClick = {},
+            titleColor = Black,
+            bodyColor = White,
         )
-        PlayerControl()
     }
 }
 
@@ -151,19 +185,28 @@ private fun PlayerHead(
 }
 
 @Composable
-private fun AlbumImage(
+private fun TrackImage(
     url: String,
-) {
+    onBitmapLoaded: (Bitmap) -> Unit,
+
+    ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1f)
     ) {
         AsyncImage(
-            model = url,
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(url)
+                .allowHardware(false) // КРИТИЧНО ДЛЯ PALETTE API: разрешает чтение пикселей из памяти
+                .build(),
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            onSuccess = { successResult ->
+                val bitmap = successResult.result.drawable.toBitmap()
+                onBitmapLoaded(bitmap)
+            }
         )
     }
 }
@@ -173,6 +216,8 @@ private fun TrackInfoAndHeart(
     title: String,
     artist: String,
     onHeartClick: () -> Unit,
+    titleColor: Color,
+    bodyColor: Color,
 ) {
 
     Row(
@@ -189,7 +234,7 @@ private fun TrackInfoAndHeart(
                 text = title,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 22.sp,
-                color = Black,
+                color = titleColor,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
@@ -200,7 +245,7 @@ private fun TrackInfoAndHeart(
                 text = artist,
                 fontWeight = FontWeight.Medium,
                 fontSize = 16.sp,
-                color = Color(0xFFB3B3B3),
+                color = bodyColor,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -228,7 +273,9 @@ private fun PlayerSlider(
 }
 
 @Composable
-private fun PlayerControl() {
+private fun PlayerControl(
+    onPauseClick: () -> Unit,
+) {
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -263,6 +310,9 @@ private fun PlayerControl() {
                     .background(
                         color = White
                     )
+                    .clickable {
+                        onPauseClick()
+                    }
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_pause),
