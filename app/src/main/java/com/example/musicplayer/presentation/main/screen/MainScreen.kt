@@ -170,7 +170,8 @@ fun MainScreen(
                             trackId = track.id,
                             bitmap = bitmap,
                         )
-                    }
+                    },
+                    isPlaying = isPlaying,
                 )
 
             }
