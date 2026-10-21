@@ -5,10 +5,19 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -20,11 +29,14 @@ import com.example.musicplayer.presentation.main.MainViewModel
 import com.example.musicplayer.presentation.main.component.BottomBar
 import com.example.musicplayer.presentation.main.component.MainScreenColumn
 import com.example.musicplayer.presentation.main.component.NowPlayingBar
+import com.example.musicplayer.presentation.main.component.TrackView
 import com.example.musicplayer.presentation.main.state.MainUiState
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.White
+import kotlinx.coroutines.launch
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     mainViewModel: MainViewModel,
@@ -35,6 +47,13 @@ fun MainScreen(
 
     val currentTrack by mainViewModel.currentTrack.collectAsStateWithLifecycle()
     val isPlaying by mainViewModel.isPlaying.collectAsStateWithLifecycle()
+
+    var isTrackViewVisible by remember {mutableStateOf(false)}
+
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
+
+    val playerState by mainViewModel.playerState.collectAsStateWithLifecycle()
 
     Scaffold(
         containerColor = DeepBlack,
@@ -111,11 +130,49 @@ fun MainScreen(
                             mainViewModel.togglePlayPause()
                         },
                         onCardClick = {
-                            //navigate to full screen player
+                            isTrackViewVisible = true
                         },
                         isPlaying = isPlaying,
                     )
                 }
+            }
+        }
+    }
+
+    if(isTrackViewVisible) {
+        ModalBottomSheet(
+            onDismissRequest = { isTrackViewVisible = false },
+            sheetState = sheetState,
+            containerColor = DeepBlack,
+            dragHandle = null,
+            scrimColor = DeepBlack.copy(alpha = 0.5f),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            currentTrack?.let { track ->
+                TrackView(
+                    track = track,
+                    onCancelClick = {
+                        scope.launch { sheetState.hide() }.invokeOnCompletion {
+                            if (!sheetState.isVisible) {
+                                isTrackViewVisible = false
+                            }
+                        }
+                    },
+                    onPauseClick = {
+                        mainViewModel.togglePlayPause()
+                    },
+                    onHeartClick = {
+
+                    },
+                    playerState = playerState,
+                    onBitmapLoaded = { bitmap ->
+                        mainViewModel.updateColorsFromBitmap(
+                            trackId = track.id,
+                            bitmap = bitmap,
+                        )
+                    }
+                )
+
             }
         }
     }
