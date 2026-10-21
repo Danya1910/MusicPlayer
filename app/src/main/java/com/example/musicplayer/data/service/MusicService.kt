@@ -33,10 +33,11 @@ class MusicService : MediaSessionService() {
 
     override fun onDestroy() {
         mediaSession?.run {
-            player.release()
+            player?.release() // Обязательно добавляем знак вопроса `player?.`
             release()
-            mediaSession = null
         }
+        mediaSession = null
+        player = null
         super.onDestroy()
     }
 
