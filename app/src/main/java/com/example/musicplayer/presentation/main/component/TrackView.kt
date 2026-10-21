@@ -75,6 +75,7 @@ fun TrackView(
             .padding(
                 horizontal = 24.dp
             )
+            .statusBarsPadding()
     ) {
         PlayerHead(
             onCancelClick = {
@@ -150,17 +151,12 @@ private fun PlayerHead(
         modifier = Modifier
             .height(30.dp)
             .fillMaxWidth()
-            .background(
-                color = DeepBlack
-            )
-            .statusBarsPadding()
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_arrow_down),
+            painter = painterResource(R.drawable.ic_tick_down),
             contentDescription = null,
             tint = White,
             modifier = Modifier
-                .size(21.dp)
                 .clickable {
                     onCancelClick()
                 }
@@ -170,7 +166,7 @@ private fun PlayerHead(
             textAlign = TextAlign.Center,
             text = title,
             fontWeight = FontWeight.SemiBold,
-            fontSize = 14.sp,
+            fontSize = 15.sp,
             color = White,
             modifier = Modifier.weight(1f)
         )
