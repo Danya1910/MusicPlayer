@@ -29,10 +29,5 @@ abstract class RepositoryModule {
         trackRepository: TrackRepositoryImpl
     ) : TrackRepository
 
-    @Binds
-    @Singleton
-    abstract fun bindMusicRepository(
-        musicRepository: MusicRepositoryImpl
-    ): MusicRepository
 
 }
