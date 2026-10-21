@@ -33,6 +33,9 @@ fun MainScreen(
 
     val uiState by mainViewModel.uiState.collectAsStateWithLifecycle()
 
+    val currentTrack by mainViewModel.currentTrack.collectAsStateWithLifecycle()
+    val isPlaying by mainViewModel.isPlaying.collectAsStateWithLifecycle()
+
     Scaffold(
         containerColor = DeepBlack,
         bottomBar = {
@@ -75,22 +78,14 @@ fun MainScreen(
                             MainScreenColumn(
                                 tracks = state.tracks,
                                 albums = state.albums,
-                                onTrackClick = {
-                                    //старт трека
+                                onTrackClick = { track ->
+                                    mainViewModel.playTrack(track = track)
                                 },
                                 onAlbumClick = {
                                     //навигация на страницу альбома
                                 }
                             )
-                            Box(
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .padding(bottom = 5.dp)
-                            ) {
-                                NowPlayingBar(
-                                    track = state.tracks[1],
-                                )
-                            }
+
                         }
                     }
 
@@ -102,6 +97,25 @@ fun MainScreen(
                         color = White,
                         modifier = Modifier.fillMaxSize()
                     )
+            }
+
+            currentTrack?.let { track ->
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 5.dp)
+                ) {
+                    NowPlayingBar(
+                        track = track,
+                        onPlayPauseClick = {
+                            mainViewModel.togglePlayPause()
+                        },
+                        onCardClick = {
+                            //navigate to full screen player
+                        },
+                        isPlaying = isPlaying,
+                    )
+                }
             }
         }
     }
