@@ -1,6 +1,7 @@
 package com.example.musicplayer.presentation.main.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +38,9 @@ import com.example.musicplayer.ui.theme.White
 @Composable
 fun NowPlayingBar(
     track: Track,
+    onPlayPauseClick: () -> Unit,
+    onCardClick: () -> Unit,
+    isPlaying: Boolean,
 ) {
 
     Box(
@@ -50,6 +54,9 @@ fun NowPlayingBar(
             .background(
                 color = Gray.copy(alpha = 0.6f),
             )
+            .clickable{
+                onCardClick()
+            }
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -111,9 +118,13 @@ fun NowPlayingBar(
             )
             Spacer(modifier = Modifier.width(20.dp))
             Icon(
-                painter = painterResource(R.drawable.ic_pause),
+                painter = painterResource(if(isPlaying) R.drawable.ic_pause else R.drawable.ic_apple_logo),
                 contentDescription = null,
                 tint = White,
+                modifier = Modifier
+                    .clickable{
+                        onPlayPauseClick()
+                    }
             )
         }
         Box(
