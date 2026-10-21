@@ -118,10 +118,14 @@ fun NowPlayingBar(
             )
             Spacer(modifier = Modifier.width(20.dp))
             Icon(
-                painter = painterResource(if(isPlaying) R.drawable.ic_pause else R.drawable.ic_apple_logo),
+                painter = painterResource(
+                    if(isPlaying) R.drawable.ic_pause
+                    else R.drawable.ic_play),
                 contentDescription = null,
                 tint = White,
                 modifier = Modifier
+                    .width(16.dp)
+                    .height(22.dp)
                     .clickable{
                         onPlayPauseClick()
                     }

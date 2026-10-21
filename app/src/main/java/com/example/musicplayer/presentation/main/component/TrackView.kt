@@ -54,6 +54,7 @@ fun TrackView(
     onHeartClick: () -> Unit,
     playerState: PlayerUiState,
     onBitmapLoaded: (Bitmap) -> Unit,
+    isPlaying: Boolean,
 ) {
 
     val bgGradient = Brush.verticalGradient(
@@ -110,6 +111,7 @@ fun TrackView(
             onPauseClick = {
                 onPauseClick()
             },
+            isPlaying = isPlaying
         )
         Spacer(modifier = Modifier.height(60.dp))
 
@@ -272,6 +274,7 @@ private fun PlayerSlider(
 @Composable
 private fun PlayerControl(
     onPauseClick: () -> Unit,
+    isPlaying: Boolean,
 ) {
 
     Row(
@@ -312,7 +315,10 @@ private fun PlayerControl(
                     }
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_pause),
+                    painter = painterResource(
+                        if (isPlaying) R.drawable.ic_pause
+                        else R.drawable.ic_play
+                    ),
                     contentDescription = null,
                     tint = DeepBlack,
                     modifier = Modifier
