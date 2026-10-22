@@ -158,6 +158,7 @@ fun NowPlayingBar(
             colors = sliderColors,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
+                .padding(horizontal = 10.dp)
                 .fillMaxWidth()
                 .height(4.dp),
             thumb = {},
