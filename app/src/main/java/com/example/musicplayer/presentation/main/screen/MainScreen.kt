@@ -47,7 +47,7 @@ fun MainScreen(
     val currentTrack by mainViewModel.currentTrack.collectAsStateWithLifecycle()
     val isPlaying by mainViewModel.isPlaying.collectAsStateWithLifecycle()
 
-    var isTrackViewVisible by remember {mutableStateOf(false)}
+    var isTrackViewVisible by remember { mutableStateOf(false) }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
@@ -141,7 +141,7 @@ fun MainScreen(
         }
     }
 
-    if(isTrackViewVisible) {
+    if (isTrackViewVisible) {
         ModalBottomSheet(
             onDismissRequest = { isTrackViewVisible = false },
             sheetState = sheetState,
@@ -176,6 +176,10 @@ fun MainScreen(
                     },
                     isPlaying = isPlaying,
                     onSkipToNext = {
+                        mainViewModel.skipToNext()
+                    },
+                    onSkipToPrevious = {
+                        mainViewModel.skipToPrevious()
                     }
                 )
 
