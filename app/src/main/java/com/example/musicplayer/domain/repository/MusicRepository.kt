@@ -10,10 +10,19 @@ interface MusicRepository {
     val currentPosition: StateFlow<Long>
     val duration: StateFlow<Long>
 
+    val currentQueue: StateFlow<List<Track>>
+
     fun playTrack(track: Track)
+
+    fun playTrackWithQueue(track: Track, queue: List<Track>)
 
     fun togglePlayPause()
 
     fun seekTo(positionMs: Long)
+
+    fun skipToNext()
+
+    fun skipToPrevious()
+
 
 }
