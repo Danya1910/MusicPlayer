@@ -181,6 +181,7 @@ class MusicRepositoryImpl @Inject constructor(
         mediaController?.let { controller ->
             if (controller.hasNextMediaItem()) {
                 controller.seekToNextMediaItem()
+                controller.play()
             }
         }
     }
@@ -189,6 +190,7 @@ class MusicRepositoryImpl @Inject constructor(
         mediaController?.let { controller ->
             if (controller.hasPreviousMediaItem()) {
                 controller.seekToPreviousMediaItem()
+                controller.play()
             }
         }
     }
