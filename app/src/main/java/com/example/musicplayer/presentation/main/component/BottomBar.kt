@@ -65,7 +65,7 @@ fun BottomBar(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .height(70.dp)
+            .height(85.dp)
             .navigationBarsPadding()
     ) {
         bottomBarItems.forEach { item ->
