@@ -97,7 +97,10 @@ fun MainScreen(
                                 tracks = state.tracks,
                                 albums = state.albums,
                                 onTrackClick = { track ->
-                                    mainViewModel.playTrack(track = track)
+                                    mainViewModel.playTrackWithQueue(
+                                        track = track,
+                                        queue = state.tracks,
+                                    )
                                 },
                                 onAlbumClick = {
                                     //навигация на страницу альбома
@@ -172,6 +175,8 @@ fun MainScreen(
                         )
                     },
                     isPlaying = isPlaying,
+                    onSkipToNext = {
+                    }
                 )
 
             }
