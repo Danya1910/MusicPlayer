@@ -135,6 +135,8 @@ fun MainScreen(
                             isTrackViewVisible = true
                         },
                         isPlaying = isPlaying,
+                        currentPosition = playerState.currentPosition,
+                        duration = track.duration,
                     )
                 }
             }
