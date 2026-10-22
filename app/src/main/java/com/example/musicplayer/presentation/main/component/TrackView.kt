@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,9 +19,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
@@ -40,9 +46,11 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.Track
+import com.example.musicplayer.presentation.main.util.formatDuration
 import com.example.musicplayer.presentation.player.state.PlayerUiState
 import com.example.musicplayer.ui.theme.Black
 import com.example.musicplayer.ui.theme.DeepBlack
+import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.White
 
 
@@ -57,6 +65,7 @@ fun TrackView(
     isPlaying: Boolean,
     onSkipToPrevious: () -> Unit,
     onSkipToNext: () -> Unit,
+    onSeekTo: (Long) -> Unit,
 ) {
 
     val bgGradient = Brush.verticalGradient(
@@ -108,6 +117,18 @@ fun TrackView(
         )
 
         Spacer(modifier = Modifier.height(15.dp))
+
+
+        PlayerSlider(
+            currentPosition = playerState.currentPosition,
+            duration = playerState.duration,
+            onSeekFinished = { ms ->
+                onSeekTo(ms)
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
 
         PlayerControl(
             onPauseClick = {
@@ -267,10 +288,73 @@ private fun TrackInfoAndHeart(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PlayerSlider(
-
+    currentPosition: Long,
+    duration: Long,
+    onSeekFinished: (Long) -> Unit,
+    modifier: Modifier,
 ) {
+
+    val totalDuration = duration.coerceAtLeast(0)
+    val currentPos = currentPosition.coerceAtLeast(0)
+
+    val sliderValue = if (totalDuration > 0)
+        currentPos.toFloat() / totalDuration.toFloat()
+    else
+        0f
+
+    Column(
+        modifier = modifier
+    ) {
+        Slider(
+            value = sliderValue,
+            onValueChange = { percentage ->
+                val newPosition = (percentage * totalDuration).toLong()
+                onSeekFinished(newPosition)
+            },
+            colors = SliderDefaults.colors(
+                activeTrackColor = White,
+                inactiveTickColor = Gray,
+                thumbColor = White,
+            ),
+            thumb = {
+                SliderDefaults.Thumb(
+                    interactionSource = remember { MutableInteractionSource() },
+                    colors = SliderDefaults.colors(thumbColor = White),
+                    thumbSize = DpSize(width = 13.dp, height = 13.dp)
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(4.dp)
+        )
+        Spacer(modifier = Modifier.height(3.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Text(
+                text = formatDuration(ms = currentPosition),
+                fontWeight = FontWeight.Medium,
+                fontSize = 10.sp,
+                color = Gray,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = formatDuration(ms = totalDuration),
+                fontWeight = FontWeight.Medium,
+                fontSize = 10.sp,
+                color = Gray,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
 
 
 }
@@ -306,7 +390,7 @@ private fun PlayerControl(
                 contentDescription = null,
                 tint = White,
                 modifier = Modifier
-                    .clickable{
+                    .clickable {
                         onSkipToPrevious()
                     }
             )
@@ -341,7 +425,7 @@ private fun PlayerControl(
                 contentDescription = null,
                 tint = White,
                 modifier = Modifier
-                    .clickable{
+                    .clickable {
                         onSkipToNext()
                     }
             )

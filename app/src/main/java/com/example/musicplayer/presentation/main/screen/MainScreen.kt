@@ -180,6 +180,9 @@ fun MainScreen(
                     },
                     onSkipToPrevious = {
                         mainViewModel.skipToPrevious()
+                    },
+                    onSeekTo = { ms ->
+                        mainViewModel.seekTo( positionMs = ms)
                     }
                 )
 
