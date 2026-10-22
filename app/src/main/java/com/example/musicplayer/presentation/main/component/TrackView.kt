@@ -55,6 +55,8 @@ fun TrackView(
     playerState: PlayerUiState,
     onBitmapLoaded: (Bitmap) -> Unit,
     isPlaying: Boolean,
+    onSkipToPrevious: () -> Unit,
+    onSkipToNext: () -> Unit,
 ) {
 
     val bgGradient = Brush.verticalGradient(
@@ -111,7 +113,9 @@ fun TrackView(
             onPauseClick = {
                 onPauseClick()
             },
-            isPlaying = isPlaying
+            isPlaying = isPlaying,
+            onSkipToPrevious = onSkipToPrevious,
+            onSkipToNext = onSkipToNext,
         )
         Spacer(modifier = Modifier.height(60.dp))
 
@@ -275,6 +279,8 @@ private fun PlayerSlider(
 private fun PlayerControl(
     onPauseClick: () -> Unit,
     isPlaying: Boolean,
+    onSkipToPrevious: () -> Unit,
+    onSkipToNext: () -> Unit,
 ) {
 
     Row(
@@ -299,6 +305,10 @@ private fun PlayerControl(
                 painter = painterResource(R.drawable.ic_track_back),
                 contentDescription = null,
                 tint = White,
+                modifier = Modifier
+                    .clickable{
+                        onSkipToPrevious()
+                    }
             )
             Box(
                 contentAlignment = Alignment.Center,
@@ -330,6 +340,10 @@ private fun PlayerControl(
                 painter = painterResource(R.drawable.ic_track_next),
                 contentDescription = null,
                 tint = White,
+                modifier = Modifier
+                    .clickable{
+                        onSkipToNext()
+                    }
             )
         }
 
