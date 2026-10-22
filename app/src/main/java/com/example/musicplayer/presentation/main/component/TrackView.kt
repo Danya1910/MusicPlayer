@@ -1,6 +1,8 @@
 package com.example.musicplayer.presentation.main.component
 
 import android.graphics.Bitmap
+import android.util.Log
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
@@ -24,8 +26,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -121,7 +130,7 @@ fun TrackView(
 
         PlayerSlider(
             currentPosition = playerState.currentPosition,
-            duration = playerState.duration,
+            duration = track.duration,
             onSeekFinished = { ms ->
                 onSeekTo(ms)
             },
@@ -297,38 +306,88 @@ private fun PlayerSlider(
     modifier: Modifier,
 ) {
 
-    val totalDuration = duration.coerceAtLeast(0)
-    val currentPos = currentPosition.coerceAtLeast(0)
+    Log.d("PLAYER_DEBUG", "Pos: $currentPosition, Dur: $duration")
 
-    val sliderValue = if (totalDuration > 0)
-        currentPos.toFloat() / totalDuration.toFloat()
-    else
-        0f
+    val totalDurationSeconds = (duration / 1000).coerceAtLeast(0)
+    val currentPosSeconds = (currentPosition / 1000).coerceAtLeast(0)
+
+    var sliderPosition by remember { mutableFloatStateOf(0f) }
+    var isUserDragging by remember { mutableStateOf(false) }
+
+    LaunchedEffect(currentPosSeconds, isUserDragging) {
+        if (!isUserDragging) {
+            sliderPosition = currentPosSeconds.toFloat()
+        }
+    }
+
+    val sliderColors = SliderDefaults.colors(
+        thumbColor = Color.White,
+        activeTrackColor = White,
+        inactiveTrackColor = Gray
+    )
 
     Column(
         modifier = modifier
     ) {
         Slider(
-            value = sliderValue,
-            onValueChange = { percentage ->
-                val newPosition = (percentage * totalDuration).toLong()
-                onSeekFinished(newPosition)
+            value = sliderPosition,
+            onValueChange = { newValue ->
+                isUserDragging = true
+                sliderPosition = newValue
             },
-            colors = SliderDefaults.colors(
-                activeTrackColor = White,
-                inactiveTickColor = Gray,
-                thumbColor = White,
-            ),
+            onValueChangeFinished = {
+                isUserDragging = false
+                onSeekFinished(sliderPosition.toLong() * 1000L)
+            },
+            valueRange = 0f..if (totalDurationSeconds > 0) totalDurationSeconds.toFloat() else 1f,
+            colors = sliderColors,
+            modifier = Modifier.fillMaxWidth(),
             thumb = {
-                SliderDefaults.Thumb(
-                    interactionSource = remember { MutableInteractionSource() },
-                    colors = SliderDefaults.colors(thumbColor = White),
-                    thumbSize = DpSize(width = 13.dp, height = 13.dp)
-                )
+                if (totalDurationSeconds > 0) {
+                    SliderDefaults.Thumb(
+                        interactionSource = remember { MutableInteractionSource() },
+                        colors = sliderColors,
+                        modifier = Modifier
+                            .padding(top = 1.5.dp)
+                            .size(12.dp)
+                            .minimumInteractiveComponentSize()
+                    )
+                }
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(4.dp)
+            track = { sliderState ->
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(20.dp)
+                ) {
+                    val progress = (sliderState.value - sliderState.valueRange.start) /
+                            (sliderState.valueRange.endInclusive - sliderState.valueRange.start)
+
+                    val width = size.width
+                    val height = size.height
+
+                    val strokeWidthPx = 4.dp.toPx()
+
+                    val progressX = width * progress
+                    val centerY = height / 2
+
+                    drawLine(
+                        color = sliderColors.inactiveTrackColor,
+                        start = androidx.compose.ui.geometry.Offset(0f, centerY),
+                        end = androidx.compose.ui.geometry.Offset(width, centerY),
+                        strokeWidth = strokeWidthPx,
+                        cap = androidx.compose.ui.graphics.StrokeCap.Round
+                    )
+
+                    drawLine(
+                        color = sliderColors.activeTrackColor,
+                        start = androidx.compose.ui.geometry.Offset(0f, centerY),
+                        end = androidx.compose.ui.geometry.Offset(progressX, centerY),
+                        strokeWidth = strokeWidthPx,
+                        cap = androidx.compose.ui.graphics.StrokeCap.Round
+                    )
+                }
+            }
         )
         Spacer(modifier = Modifier.height(3.dp))
         Row(
@@ -346,7 +405,7 @@ private fun PlayerSlider(
             )
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = formatDuration(ms = totalDuration),
+                text = formatDuration(ms = duration),
                 fontWeight = FontWeight.Medium,
                 fontSize = 10.sp,
                 color = Gray,
@@ -355,8 +414,6 @@ private fun PlayerSlider(
             )
         }
     }
-
-
 }
 
 @Composable
