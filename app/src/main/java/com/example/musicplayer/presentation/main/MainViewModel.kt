@@ -127,4 +127,12 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun skipToNext() {
+        musicRepository.skipToNext()
+    }
+
+    fun skipToPrevious() {
+        musicRepository.skipToPrevious()
+    }
+
 }
