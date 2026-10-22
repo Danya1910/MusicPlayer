@@ -1,7 +1,6 @@
 package com.example.musicplayer.presentation.main.component
 
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -302,7 +301,8 @@ private fun PlayerSlider(
     modifier: Modifier,
 ) {
 
-    Log.d("PLAYER_DEBUG", "Pos: $currentPosition, Dur: $duration")
+    var showTotalDuration by remember { mutableStateOf(true) }
+
 
     val totalDurationSeconds = (duration / 1000).coerceAtLeast(0)
     val currentPosSeconds = (currentPosition / 1000).coerceAtLeast(0)
@@ -337,7 +337,9 @@ private fun PlayerSlider(
             },
             valueRange = 0f..if (totalDurationSeconds > 0) totalDurationSeconds.toFloat() else 1f,
             colors = sliderColors,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(16.dp),
             thumb = {
                 if (totalDurationSeconds > 0) {
                     SliderDefaults.Thumb(
@@ -354,7 +356,6 @@ private fun PlayerSlider(
                 Canvas(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(20.dp)
                 ) {
                     val progress = (sliderState.value - sliderState.valueRange.start) /
                             (sliderState.valueRange.endInclusive - sliderState.valueRange.start)
@@ -385,7 +386,7 @@ private fun PlayerSlider(
                 }
             }
         )
-        Spacer(modifier = Modifier.height(3.dp))
+        Spacer(modifier = Modifier.height(5.dp))
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -401,12 +402,24 @@ private fun PlayerSlider(
             )
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = formatDuration(ms = duration),
+                text = if(showTotalDuration)
+                    formatDuration(ms = currentPosition)
+                else {
+                    val remainingTime = duration - currentPosition
+                    "-${formatDuration(ms = remainingTime)}"
+                },
                 fontWeight = FontWeight.Medium,
                 fontSize = 10.sp,
                 color = Gray,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ){
+                        showTotalDuration = !showTotalDuration
+                    }
             )
         }
     }
