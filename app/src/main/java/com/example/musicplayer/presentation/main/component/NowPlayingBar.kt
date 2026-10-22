@@ -1,5 +1,6 @@
 package com.example.musicplayer.presentation.main.component
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,12 +15,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -29,19 +34,33 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.Track
-import com.example.musicplayer.ui.theme.DarkGray
 import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.SpotifyGreen
 import com.example.musicplayer.ui.theme.White
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NowPlayingBar(
     track: Track,
     onPlayPauseClick: () -> Unit,
     onCardClick: () -> Unit,
     isPlaying: Boolean,
+    currentPosition: Long,
+    duration: Long,
 ) {
+
+    val totalDurationSeconds = (duration / 1000).coerceAtLeast(0)
+    val currentPosSeconds = (currentPosition / 1000).coerceAtLeast(0)
+
+    val progressValue = currentPosSeconds.toFloat()
+
+
+    val sliderColors = SliderDefaults.colors(
+        disabledThumbColor = Color.Transparent,
+        disabledActiveTrackColor = White,
+        disabledInactiveTrackColor = Gray
+    )
 
     Box(
         modifier = Modifier
@@ -131,36 +150,44 @@ fun NowPlayingBar(
                     }
             )
         }
-        Box(
+        Slider(
+            value = progressValue,
+            onValueChange = {},
+            enabled = false,
+            valueRange = 0f..if (totalDurationSeconds > 0) totalDurationSeconds.toFloat() else 1f,
+            colors = sliderColors,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 4.dp)
-        ) {
-            TrackProgress()
-        }
-    }
-}
+                .fillMaxWidth()
+                .height(4.dp),
+            thumb = {},
+            track = { sliderState ->
+                Canvas(modifier = Modifier.fillMaxWidth()) {
+                    val progress = (sliderState.value - sliderState.valueRange.start) /
+                            (sliderState.valueRange.endInclusive - sliderState.valueRange.start)
 
-@Composable
-private fun TrackProgress() {
+                    val width = size.width
+                    val strokeWidthPx = 3.dp.toPx()
+                    val progressX = width * progress
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(3.dp)
-            .padding(horizontal = 10.dp)
-            .background(
-                color = DarkGray,
-            )
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(0.65f)
-                .height(3.dp)
-                .background(
-                    color = Gray,
-                )
+                    val bottomY = size.height
+
+                    drawLine(
+                        color = sliderColors.disabledInactiveTrackColor,
+                        start = androidx.compose.ui.geometry.Offset(0f, bottomY),
+                        end = androidx.compose.ui.geometry.Offset(width, bottomY),
+                        strokeWidth = strokeWidthPx
+                    )
+
+                    drawLine(
+                        color = sliderColors.disabledActiveTrackColor,
+                        start = androidx.compose.ui.geometry.Offset(0f, bottomY),
+                        end = androidx.compose.ui.geometry.Offset(progressX, bottomY),
+                        strokeWidth = strokeWidthPx
+                    )
+                }
+
+            }
         )
     }
-
 }
