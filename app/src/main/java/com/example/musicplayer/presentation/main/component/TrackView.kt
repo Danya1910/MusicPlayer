@@ -82,8 +82,6 @@ fun TrackView(
         )
     )
 
-    val titleColor = playerState.titleColor
-    val bodyColor = playerState.bodyColor
 
     Column(
         modifier = Modifier
@@ -119,8 +117,8 @@ fun TrackView(
             title = track.title,
             artist = track.artist,
             onHeartClick = {},
-            titleColor = titleColor,
-            bodyColor = bodyColor,
+            titleColor = White,
+            bodyColor = White,
         )
 
         Spacer(modifier = Modifier.height(15.dp))
@@ -263,7 +261,7 @@ private fun TrackInfoAndHeart(
         ) {
             Text(
                 text = title,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Bold,
                 fontSize = 22.sp,
                 color = titleColor,
                 maxLines = 1,
@@ -271,7 +269,7 @@ private fun TrackInfoAndHeart(
                 modifier = Modifier
                     .basicMarquee()
             )
-            Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = artist,
                 fontWeight = FontWeight.Medium,
