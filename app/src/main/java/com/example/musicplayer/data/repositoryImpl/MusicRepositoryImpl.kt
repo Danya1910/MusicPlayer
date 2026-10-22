@@ -2,6 +2,7 @@ package com.example.musicplayer.data.repositoryImpl
 
 import android.content.ComponentName
 import android.content.Context
+import android.net.Uri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
@@ -44,9 +46,13 @@ class MusicRepositoryImpl @Inject constructor(
     private val _currentPosition = MutableStateFlow(0L)
     override val currentPosition = _currentPosition.asStateFlow()
 
-    override val duration: StateFlow<Long> get() = MutableStateFlow(
-        mediaController?.duration?.coerceAtLeast(0L) ?: 0L
-    )
+    override val duration: StateFlow<Long>
+        get() = MutableStateFlow(
+            mediaController?.duration?.coerceAtLeast(0L) ?: 0L
+        )
+
+    private val _currentQueue = MutableStateFlow<List<Track>>(emptyList())
+    override val currentQueue = _currentQueue.asStateFlow()
 
     init {
         val sessionToken = SessionToken(
@@ -125,6 +131,42 @@ class MusicRepositoryImpl @Inject constructor(
         mediaController?.play()
     }
 
+
+    override fun playTrackWithQueue(track: Track, queue: List<Track>) {
+        _currentQueue.value = queue
+
+        repositoryScope.launch(Dispatchers.Default) {
+            val mediaItems = queue.map { qTrack ->
+                val metadata = MediaMetadata.Builder()
+                    .setTitle(qTrack.title)
+                    .setArtist(qTrack.artist)
+                    .setArtworkUri(Uri.parse(qTrack.imageUrl))
+                    .build()
+
+                MediaItem.Builder()
+                    .setMediaId(qTrack.id)
+                    .setUri(qTrack.audioUrl)
+                    .setMediaMetadata(metadata)
+                    .build()
+            }
+
+            withContext(Dispatchers.Main) {
+                mediaController?.let { controller ->
+                    controller.setMediaItems(mediaItems)
+
+                    val startingIndex = queue.indexOfFirst { it.id == track.id }.coerceAtLeast(0)
+
+                    controller.seekTo(startingIndex, 0L)
+                    controller.prepare()
+                    controller.play()
+                }
+            }
+
+        }
+
+    }
+
+
     override fun togglePlayPause() {
         mediaController?.let {
             if (it.isPlaying) it.pause() else it.play()
@@ -133,6 +175,22 @@ class MusicRepositoryImpl @Inject constructor(
 
     override fun seekTo(positionMs: Long) {
         mediaController?.seekTo(positionMs)
+    }
+
+    override fun skipToNext() {
+        mediaController?.let { controller ->
+            if (controller.hasNextMediaItem()) {
+                controller.seekToNextMediaItem()
+            }
+        }
+    }
+
+    override fun skipToPrevious() {
+        mediaController?.let { controller ->
+            if (controller.hasPreviousMediaItem()) {
+                controller.seekToPreviousMediaItem()
+            }
+        }
     }
 
 
