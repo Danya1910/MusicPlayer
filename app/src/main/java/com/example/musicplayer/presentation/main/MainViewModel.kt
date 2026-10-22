@@ -86,6 +86,16 @@ class MainViewModel @Inject constructor(
         musicRepository.playTrack(track)
     }
 
+    fun playTrackWithQueue(
+        track: Track,
+        queue: List<Track>
+    ) {
+        musicRepository.playTrackWithQueue(
+            track = track,
+            queue = queue,
+        )
+    }
+
     fun togglePlayPause() {
         musicRepository.togglePlayPause()
     }
