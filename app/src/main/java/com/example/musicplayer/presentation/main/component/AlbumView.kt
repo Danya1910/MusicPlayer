@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -60,15 +61,21 @@ fun AlbumView(
             .background(
                 color = DeepBlack,
             )
-            .statusBarsPadding()
     ) {
 
         LazyColumn(
-            modifier = Modifier.padding(top = 30.dp)
+            verticalArrangement = Arrangement.Top,
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(
+                top = 70.dp,
+                bottom = 20.dp,
+                start = 16.dp,
+                end = 16.dp
+            )
         ) {
             item {
                 AlbumImage(
-                    url = ""
+                    url = album.imageUrl,
                 )
             }
             item {
@@ -94,10 +101,18 @@ fun AlbumView(
 
         }
 
-        TopBar(
-            title = "Moonlight",
-            onBackClick = {}
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(DeepBlack.copy(alpha = 0.9f)) // Легкая подложка, чтобы текст под ним скрывался
+                .statusBarsPadding() // Отступ под системное время/батарею телефона только здесь!
+                .align(Alignment.TopCenter)
+        ) {
+            TopBar(
+                title = album.title,
+                onBackClick = onCancelClick,
+            )
+        }
     }
 }
 
@@ -142,14 +157,18 @@ private fun AlbumImage(
     url: String,
 ) {
     Box(
+        contentAlignment = Alignment.Center,
         modifier = Modifier
-            .fillMaxWidth(0.5f)
-            .aspectRatio(1f)
+            .fillMaxWidth()
+            .padding(vertical = 10.dp)
     ) {
         AsyncImage(
             model = url,
             contentDescription = null,
             contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth(0.6f)
+                .aspectRatio(1f)
         )
     }
 }
