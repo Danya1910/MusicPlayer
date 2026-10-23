@@ -15,4 +15,6 @@ data class PlayerUiState (
     val bgColor: Color = DeepBlack,
     val titleColor: Color = White,
     val bodyColor: Color = Gray,
+
+    val paletteState: Map<String, Triple<Color, Color, Color>> = emptyMap()
 )
