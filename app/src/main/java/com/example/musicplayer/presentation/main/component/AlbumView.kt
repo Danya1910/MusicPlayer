@@ -47,6 +47,7 @@ import com.example.musicplayer.ui.theme.White
 @Composable
 fun AlbumView(
     album: Album,
+    onHeartClick: () -> Unit,
     onCancelClick: () -> Unit,
     onPlayPauseClick: () -> Unit,
     isPlaying: Boolean,
@@ -76,10 +77,14 @@ fun AlbumView(
             item {
                 AlbumInfo(
                     album = album,
+                    onHeartClick = onHeartClick,
+                    onPlayPauseClick = onPlayPauseClick,
+                    isPlaying = isPlaying,
+                    onDownloadAlbumClick = onDownloadAlbumClick,
                 )
             }
 
-            items(album.tracks) { track->
+            items(album.tracks) { track ->
                 AlbumTrackItem(track = track)
             }
 
@@ -148,6 +153,10 @@ private fun AlbumImage(
 @Composable
 private fun AlbumInfo(
     album: Album,
+    onHeartClick: () -> Unit,
+    onPlayPauseClick: () -> Unit,
+    isPlaying: Boolean,
+    onDownloadAlbumClick: () -> Unit,
 ) {
 
     Box(
@@ -206,6 +215,10 @@ private fun AlbumInfo(
                     painter = painterResource(R.drawable.ic_heart),
                     contentDescription = null,
                     tint = Color.White,
+                    modifier = Modifier
+                        .clickable{
+                            onHeartClick()
+                        }
                 )
                 Spacer(modifier = Modifier.width(30.dp))
                 Box(
@@ -215,6 +228,9 @@ private fun AlbumInfo(
                         .clip(
                             shape = CircleShape,
                         )
+                        .clickable{
+                            onDownloadAlbumClick()
+                        }
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_arrow_down),
@@ -250,9 +266,15 @@ private fun AlbumInfo(
                     .background(
                         color = SpotifyGreen
                     )
+                    .clickable {
+                        onPlayPauseClick()
+                    }
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_pause),
+                    painter = painterResource(
+                        if (isPlaying) R.drawable.ic_pause
+                        else R.drawable.ic_play
+                    ),
                     contentDescription = null,
                     tint = Black,
                     modifier = Modifier
