@@ -340,7 +340,6 @@ private fun AlbumTrackItem(
         modifier = Modifier
             .height(58.dp)
             .fillMaxWidth()
-            .padding(horizontal = 10.dp)
     ) {
         Column(
             verticalArrangement = Arrangement.SpaceBetween,
