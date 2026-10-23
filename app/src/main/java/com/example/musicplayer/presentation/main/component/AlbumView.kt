@@ -1,6 +1,6 @@
 package com.example.musicplayer.presentation.main.component
 
-import android.util.Log
+import android.graphics.Bitmap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
@@ -29,16 +29,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.drawable.toBitmap
 import coil.compose.AsyncImage
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.Album
 import com.example.musicplayer.domain.model.Track
+import com.example.musicplayer.presentation.player.state.PlayerUiState
 import com.example.musicplayer.ui.theme.Black
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
@@ -52,24 +55,33 @@ fun AlbumView(
     onHeartClick: () -> Unit,
     onCancelClick: () -> Unit,
     onPlayPauseClick: (List<Track>) -> Unit,
-    isPlaying: Boolean,
     onDownloadAlbumClick: () -> Unit,
+    onBitmapLoaded: (Bitmap) -> Unit,
+    playerState: PlayerUiState,
 ) {
+
+    val albumColors = playerState.paletteState[album.id]
+
+    val currentBgColor = albumColors?.first ?: DeepBlack
+
+    val bgGradient = Brush.verticalGradient(
+        colors = listOf(
+            currentBgColor,
+            DeepBlack,
+        )
+    )
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                color = DeepBlack,
+                brush = bgGradient,
             )
     ) {
 
         LazyColumn(
             verticalArrangement = Arrangement.Top,
             modifier = Modifier.fillMaxWidth(),
-            // ИСПРАВЛЕНИЕ 1: Убрали .statusBarsPadding() и паддинги отсюда.
-            // Вместо этого сдвигаем контент списка ВНУТРИ с помощью contentPadding,
-            // чтобы первая обложка началась ниже шапки (44dp высота + отступы)
             contentPadding = PaddingValues(
                 top = 80.dp,
                 bottom = 20.dp,
@@ -81,6 +93,9 @@ fun AlbumView(
             item {
                 AlbumImage(
                     url = album.imageUrl,
+                    onBitmapLoaded = {
+                        onBitmapLoaded(it)
+                    }
                 )
             }
             item {
@@ -95,8 +110,8 @@ fun AlbumView(
                             album.tracks
                         )
                     },
-                    isPlaying = isPlaying,
                     onDownloadAlbumClick = onDownloadAlbumClick,
+                    isPlaying = playerState.isPlaying,
                 )
             }
 
@@ -154,6 +169,7 @@ private fun TopBar(
 @Composable
 private fun AlbumImage(
     url: String,
+    onBitmapLoaded: (Bitmap) -> Unit,
 ) {
     Box(
         contentAlignment = Alignment.Center,
@@ -165,6 +181,10 @@ private fun AlbumImage(
             model = url,
             contentDescription = null,
             contentScale = ContentScale.Crop,
+            onSuccess = {successResult ->
+                val bitmap = successResult.result.drawable.toBitmap()
+                onBitmapLoaded(bitmap)
+            },
             modifier = Modifier
                 .fillMaxWidth(0.6f)
                 .aspectRatio(1f)
