@@ -76,61 +76,61 @@ fun MainScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(color = DeepBlack)
-                .padding(bottom = paddingValues.calculateBottomPadding()) // <--- Магия тут!
+                .padding(bottom = paddingValues.calculateBottomPadding())
         ) {
-                when (val state = uiState) {
-                    is MainUiState.Loading ->
+            when (val state = uiState) {
+                is MainUiState.Loading ->
+                    Text(
+                        textAlign = TextAlign.Center,
+                        text = "Загрузка нах...",
+                        fontSize = 23.sp,
+                        color = White,
+                        modifier = Modifier.fillMaxSize()
+                    )
+
+                is MainUiState.Success ->
+                    if (state.tracks.isEmpty() && state.albums.isEmpty()) {
                         Text(
                             textAlign = TextAlign.Center,
-                            text = "Загрузка нах...",
-                            fontSize = 23.sp,
+                            text = "Списки пустые. В базе данных ничего нет!",
+                            fontSize = 18.sp,
                             color = White,
                             modifier = Modifier.fillMaxSize()
                         )
-
-                    is MainUiState.Success ->
-                        if (state.tracks.isEmpty() && state.albums.isEmpty()) {
-                            Text(
-                                textAlign = TextAlign.Center,
-                                text = "Списки пустые. В базе данных ничего нет!",
-                                fontSize = 18.sp,
-                                color = White,
-                                modifier = Modifier.fillMaxSize()
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .statusBarsPadding()
+                        ) {
+                            MainScreenColumn(
+                                tracks = state.tracks,
+                                albums = state.albums,
+                                onTrackClick = { track ->
+                                    mainViewModel.playTrackWithQueue(
+                                        track = track,
+                                        queue = state.tracks,
+                                    )
+                                },
+                                onAlbumClick = { album ->
+                                    clickedAlbum = album
+                                    isAlbumViewVisible = true
+                                },
+                                playerState = playerState,
                             )
-                        } else {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .statusBarsPadding()
-                            ) {
-                                MainScreenColumn(
-                                    tracks = state.tracks,
-                                    albums = state.albums,
-                                    onTrackClick = { track ->
-                                        mainViewModel.playTrackWithQueue(
-                                            track = track,
-                                            queue = state.tracks,
-                                        )
-                                    },
-                                    onAlbumClick = { album ->
-                                        clickedAlbum = album
-                                        isAlbumViewVisible = true
-                                    },
-                                    playerState = playerState,
-                                )
 
-                            }
                         }
+                    }
 
-                    is MainUiState.Error ->
-                        Text(
-                            textAlign = TextAlign.Center,
-                            text = "Ошибочка: ${state.message}",
-                            fontSize = 23.sp,
-                            color = White,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                }
+                is MainUiState.Error ->
+                    Text(
+                        textAlign = TextAlign.Center,
+                        text = "Ошибочка: ${state.message}",
+                        fontSize = 23.sp,
+                        color = White,
+                        modifier = Modifier.fillMaxSize()
+                    )
+            }
             if (isAlbumViewVisible) {
                 ModalRightSheet(
                     onDismissRequest = {
@@ -156,10 +156,16 @@ fun MainScreen(
                                         )
                                     }
                                 },
-                                isPlaying = false,
                                 onDownloadAlbumClick = {
 
-                                }
+                                },
+                                onBitmapLoaded = { bitmap ->
+                                    mainViewModel.updateColorsFromBitmap(
+                                        id = album.id,
+                                        bitmap = bitmap,
+                                    )
+                                },
+                                playerState = playerState,
                             )
                         }
                     }
@@ -218,7 +224,7 @@ fun MainScreen(
                     playerState = playerState,
                     onBitmapLoaded = { bitmap ->
                         mainViewModel.updateColorsFromBitmap(
-                            trackId = track.id,
+                            id = track.id,
                             bitmap = bitmap,
                         )
                     },
