@@ -14,7 +14,7 @@ import com.example.musicplayer.domain.model.Album
 @Composable
 fun AlbumsList(
     albums: List<Album>,
-    onAlbumClick: (String) -> Unit,
+    onAlbumClick: (Album) -> Unit,
 ) {
 
     LazyRow(
@@ -26,7 +26,7 @@ fun AlbumsList(
             AlbumItem(
                 album = album,
                 onClick = {
-                    onAlbumClick(album.id)
+                    onAlbumClick(album)
                 }
             )
         }

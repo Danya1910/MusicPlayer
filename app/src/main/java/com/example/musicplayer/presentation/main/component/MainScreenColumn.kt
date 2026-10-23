@@ -21,7 +21,7 @@ fun MainScreenColumn(
     tracks: List<Track>,
     albums: List<Album>,
     onTrackClick: (Track) -> Unit,
-    onAlbumClick: (String) -> Unit,
+    onAlbumClick: (Album) -> Unit,
 ) {
 
     LazyColumn(
@@ -42,8 +42,8 @@ fun MainScreenColumn(
         item {
             AlbumsList(
                 albums = albums,
-                onAlbumClick = { albumId ->
-                    onAlbumClick(albumId)
+                onAlbumClick = { album ->
+                    onAlbumClick(album)
                 }
             )
         }

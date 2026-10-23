@@ -24,9 +24,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.example.musicplayer.domain.model.Album
 import com.example.musicplayer.presentation.main.MainViewModel
+import com.example.musicplayer.presentation.main.component.AlbumView
 import com.example.musicplayer.presentation.main.component.BottomBar
 import com.example.musicplayer.presentation.main.component.MainScreenColumn
+import com.example.musicplayer.presentation.main.component.ModalRightSheet
 import com.example.musicplayer.presentation.main.component.NowPlayingBar
 import com.example.musicplayer.presentation.main.component.TrackView
 import com.example.musicplayer.presentation.main.state.MainUiState
@@ -47,7 +50,10 @@ fun MainScreen(
     val currentTrack by mainViewModel.currentTrack.collectAsStateWithLifecycle()
     val isPlaying by mainViewModel.isPlaying.collectAsStateWithLifecycle()
 
+    var isAlbumViewVisible by remember { mutableStateOf(false) }
     var isTrackViewVisible by remember { mutableStateOf(false) }
+
+    var clickedAlbum by remember { mutableStateOf<Album?>(null) }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
@@ -102,8 +108,9 @@ fun MainScreen(
                                         queue = state.tracks,
                                     )
                                 },
-                                onAlbumClick = {
-                                    //навигация на страницу альбома
+                                onAlbumClick = {album ->
+                                    clickedAlbum = album
+                                    isAlbumViewVisible = true
                                 }
                             )
 
@@ -141,6 +148,34 @@ fun MainScreen(
                 }
             }
         }
+    }
+
+    if(isAlbumViewVisible) {
+        ModalRightSheet(
+            onDismissRequest = {
+                isAlbumViewVisible = false
+                clickedAlbum = null
+            },
+            content = {
+                clickedAlbum?.let {album ->
+                    AlbumView(
+                        album = album,
+                        onHeartClick = {
+
+                        },
+                        onCancelClick = {
+                            isAlbumViewVisible = false
+                            clickedAlbum = null
+                        },
+                        onPlayPauseClick = {},
+                        isPlaying = false,
+                        onDownloadAlbumClick = {
+
+                        }
+                    )
+                }
+            }
+        )
     }
 
     if (isTrackViewVisible) {
