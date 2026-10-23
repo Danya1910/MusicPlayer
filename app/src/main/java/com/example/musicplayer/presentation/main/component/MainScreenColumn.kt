@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.musicplayer.domain.model.Album
 import com.example.musicplayer.domain.model.Track
+import com.example.musicplayer.presentation.player.state.PlayerUiState
 import com.example.musicplayer.ui.theme.White
 
 
@@ -22,6 +23,7 @@ fun MainScreenColumn(
     albums: List<Album>,
     onTrackClick: (Track) -> Unit,
     onAlbumClick: (Album) -> Unit,
+    playerState: PlayerUiState,
 ) {
 
     LazyColumn(
