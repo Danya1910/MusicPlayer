@@ -111,10 +111,11 @@ fun MainScreen(
                                         queue = state.tracks,
                                     )
                                 },
-                                onAlbumClick = {album ->
+                                onAlbumClick = { album ->
                                     clickedAlbum = album
                                     isAlbumViewVisible = true
-                                }
+                                },
+                                playerState = playerState,
                             )
 
                         }
@@ -128,6 +129,41 @@ fun MainScreen(
                         color = White,
                         modifier = Modifier.fillMaxSize()
                     )
+            }
+
+            if (isAlbumViewVisible) {
+                ModalRightSheet(
+                    onDismissRequest = {
+                        isAlbumViewVisible = false
+                        clickedAlbum = null
+                    },
+                    content = {
+                        clickedAlbum?.let { album ->
+                            AlbumView(
+                                album = album,
+                                onHeartClick = {
+
+                                },
+                                onCancelClick = {
+                                    isAlbumViewVisible = false
+                                    clickedAlbum = null
+                                },
+                                onPlayPauseClick = { tracks ->
+                                    tracks.firstOrNull()?.let { firstTrack ->
+                                        mainViewModel.playTrackWithQueue(
+                                            track = firstTrack,
+                                            queue = tracks,
+                                        )
+                                    }
+                                },
+                                isPlaying = false,
+                                onDownloadAlbumClick = {
+
+                                }
+                            )
+                        }
+                    }
+                )
             }
 
             currentTrack?.let { track ->
@@ -151,34 +187,6 @@ fun MainScreen(
                 }
             }
         }
-    }
-
-    if(isAlbumViewVisible) {
-        ModalRightSheet(
-            onDismissRequest = {
-                isAlbumViewVisible = false
-                clickedAlbum = null
-            },
-            content = {
-                clickedAlbum?.let {album ->
-                    AlbumView(
-                        album = album,
-                        onHeartClick = {
-
-                        },
-                        onCancelClick = {
-                            isAlbumViewVisible = false
-                            clickedAlbum = null
-                        },
-                        onPlayPauseClick = {},
-                        isPlaying = false,
-                        onDownloadAlbumClick = {
-
-                        }
-                    )
-                }
-            }
-        )
     }
 
     if (isTrackViewVisible) {
@@ -222,7 +230,7 @@ fun MainScreen(
                         mainViewModel.skipToPrevious()
                     },
                     onSeekTo = { ms ->
-                        mainViewModel.seekTo( positionMs = ms)
+                        mainViewModel.seekTo(positionMs = ms)
                     }
                 )
 
