@@ -47,6 +47,10 @@ import com.example.musicplayer.ui.theme.White
 @Composable
 fun AlbumView(
     album: Album,
+    onCancelClick: () -> Unit,
+    onPlayPauseClick: () -> Unit,
+    isPlaying: Boolean,
+    onDownloadAlbumClick: () -> Unit,
 ) {
 
     Box(
