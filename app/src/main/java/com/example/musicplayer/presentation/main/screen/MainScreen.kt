@@ -1,5 +1,6 @@
 package com.example.musicplayer.presentation.main.screen
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -44,6 +45,8 @@ fun MainScreen(
     mainViewModel: MainViewModel,
     navController: NavController,
 ) {
+
+    BackHandler(enabled = true) {}
 
     val uiState by mainViewModel.uiState.collectAsStateWithLifecycle()
 
