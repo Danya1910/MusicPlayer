@@ -49,7 +49,7 @@ fun AlbumView(
     album: Album,
     onHeartClick: () -> Unit,
     onCancelClick: () -> Unit,
-    onPlayPauseClick: () -> Unit,
+    onPlayPauseClick: (List<Track>) -> Unit,
     isPlaying: Boolean,
     onDownloadAlbumClick: () -> Unit,
 ) {
@@ -78,7 +78,11 @@ fun AlbumView(
                 AlbumInfo(
                     album = album,
                     onHeartClick = onHeartClick,
-                    onPlayPauseClick = onPlayPauseClick,
+                    onPlayPauseClick = {
+                        onPlayPauseClick(
+                            album.tracks
+                        )
+                    },
                     isPlaying = isPlaying,
                     onDownloadAlbumClick = onDownloadAlbumClick,
                 )
