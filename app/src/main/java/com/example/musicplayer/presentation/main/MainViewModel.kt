@@ -1,7 +1,6 @@
 package com.example.musicplayer.presentation.main
 
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,6 +22,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
@@ -74,7 +74,8 @@ class MainViewModel @Inject constructor(
             duration = duration,
             bgColor = colors.first,
             titleColor = colors.second,
-            bodyColor = colors.third
+            bodyColor = colors.third,
+            paletteState = paletteMap,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -104,28 +105,38 @@ class MainViewModel @Inject constructor(
         musicRepository.seekTo(positionMs = positionMs)
     }
 
-    fun updateColorsFromBitmap(trackId: String, bitmap: Bitmap) {
-        if (_paletteState.value.containsKey(trackId)) return
+    fun updateColorsFromBitmap(id: String, bitmap: Bitmap) {
+        if (_paletteState.value.containsKey(id)) return
 
         viewModelScope.launch(Dispatchers.Default) {
-            Palette.from(bitmap).generate { palette ->
-                val swatch = palette?.darkVibrantSwatch
-                    ?: palette?.darkMutedSwatch
-                    ?: palette?.dominantSwatch
+            val configBitmap = if (bitmap.config == Bitmap.Config.HARDWARE) {
+                bitmap.copy(Bitmap.Config.ARGB_8888, false)
+            } else {
+                bitmap
+            }
 
-                Log.d("Palette", "Swatch: $swatch")
+            val finalBitmap = configBitmap ?: bitmap
 
-                if (swatch != null) {
-                    val newColors = Triple(
-                        Color(swatch.rgb),
-                        Color(swatch.titleTextColor),
-                        Color(swatch.bodyTextColor)
-                    )
-                    _paletteState.value = _paletteState.value + (trackId to newColors)
+            val palette = Palette.from(finalBitmap).generate()
+
+            val swatch = palette.darkVibrantSwatch
+                ?: palette.darkMutedSwatch
+                ?: palette.dominantSwatch
+
+            if (swatch != null) {
+                val newColors = Triple(
+                    Color(swatch.rgb),
+                    Color(swatch.titleTextColor),
+                    Color(swatch.bodyTextColor)
+                )
+
+                withContext(Dispatchers.Main) {
+                    _paletteState.value = _paletteState.value + (id to newColors)
                 }
             }
         }
     }
+
 
     fun skipToNext() {
         musicRepository.skipToNext()
