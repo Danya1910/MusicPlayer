@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -75,12 +76,8 @@ fun MainScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(color = DeepBlack)
+                .padding(bottom = paddingValues.calculateBottomPadding()) // <--- Магия тут!
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
                 when (val state = uiState) {
                     is MainUiState.Loading ->
                         Text(
@@ -102,7 +99,9 @@ fun MainScreen(
                             )
                         } else {
                             Box(
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .statusBarsPadding()
                             ) {
                                 MainScreenColumn(
                                     tracks = state.tracks,
@@ -132,7 +131,6 @@ fun MainScreen(
                             modifier = Modifier.fillMaxSize()
                         )
                 }
-            }
             if (isAlbumViewVisible) {
                 ModalRightSheet(
                     onDismissRequest = {
