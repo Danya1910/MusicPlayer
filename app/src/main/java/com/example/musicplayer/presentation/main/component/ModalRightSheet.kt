@@ -1,5 +1,6 @@
 package com.example.musicplayer.presentation.main.component
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.rememberSplineBasedDecay
@@ -17,9 +18,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,6 +30,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 enum class DragValue { Open, Closed }
@@ -40,6 +44,8 @@ fun ModalRightSheet(
     val configuration = LocalConfiguration.current
     val density = LocalDensity.current
     val screenWidthPx = with(density) { configuration.screenWidthDp.dp.toPx() }
+    val scope = rememberCoroutineScope()
+
 
     val decayAnimationSpec = rememberSplineBasedDecay<Float>()
     val snapAnimationSpec: AnimationSpec<Float> = tween(durationMillis = 300)
@@ -60,6 +66,14 @@ fun ModalRightSheet(
             snapAnimationSpec = snapAnimationSpec,
             decayAnimationSpec = decayAnimationSpec
         )
+    }
+
+    val isSheetOpen = draggableState.offset < screenWidthPx
+
+    BackHandler(enabled = isSheetOpen) {
+        scope.launch {
+            draggableState.animateTo(DragValue.Closed)
+        }
     }
 
     LaunchedEffect(draggableState) {
@@ -88,7 +102,6 @@ fun ModalRightSheet(
                 }
         )
 
-        // Контентый контейнер (теперь БЕЗ .anchoredDraggable)
         Box(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
@@ -97,15 +110,14 @@ fun ModalRightSheet(
                 .offset { IntOffset(x = offsetValue.roundToInt(), y = 0) }
                 .background(Color(0xFF121212))
         ) {
-            // Отображаем переданный экран (Ваш AlbumView)
             content()
 
-            // Невидимая сенсорная полоса СЛЕВА шириной 30.dp
             Box(
                 modifier = Modifier
                     .align(Alignment.CenterStart)
                     .fillMaxHeight()
-                    .width(30.dp) // Зона перехвата жеста (можно сделать 40.dp, если неудобно попадать)
+                    .width(30.dp)
+                    .systemGestureExclusion()
                     .anchoredDraggable(
                         state = draggableState,
                         orientation = Orientation.Horizontal
