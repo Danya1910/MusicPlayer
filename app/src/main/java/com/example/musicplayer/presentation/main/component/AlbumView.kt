@@ -1,8 +1,10 @@
 package com.example.musicplayer.presentation.main.component
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,8 +33,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -66,12 +67,16 @@ fun AlbumView(
         LazyColumn(
             verticalArrangement = Arrangement.Top,
             modifier = Modifier.fillMaxWidth(),
+            // ИСПРАВЛЕНИЕ 1: Убрали .statusBarsPadding() и паддинги отсюда.
+            // Вместо этого сдвигаем контент списка ВНУТРИ с помощью contentPadding,
+            // чтобы первая обложка началась ниже шапки (44dp высота + отступы)
             contentPadding = PaddingValues(
-                top = 70.dp,
+                top = 80.dp,
                 bottom = 20.dp,
                 start = 16.dp,
                 end = 16.dp
             )
+
         ) {
             item {
                 AlbumImage(
@@ -104,13 +109,12 @@ fun AlbumView(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(DeepBlack.copy(alpha = 0.9f)) // Легкая подложка, чтобы текст под ним скрывался
-                .statusBarsPadding() // Отступ под системное время/батарею телефона только здесь!
+                .statusBarsPadding()
                 .align(Alignment.TopCenter)
         ) {
             TopBar(
                 title = album.title,
-                onBackClick = onCancelClick,
+                onBackClick = { onCancelClick() },
             )
         }
     }
@@ -125,7 +129,9 @@ private fun TopBar(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .height(30.dp)
+            .fillMaxWidth()
+            .height(44.dp)
+            .padding(horizontal = 16.dp)
     ) {
         Icon(
             painter = painterResource(R.drawable.ic_arrow_left),
@@ -133,21 +139,14 @@ private fun TopBar(
             tint = White,
             modifier = Modifier
                 .size(16.dp)
-                .clickable {
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
                     onBackClick()
                 }
         )
-        Text(
-            textAlign = TextAlign.Center,
-            text = title,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 16.sp,
-            color = White,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f)
-        )
-        Spacer(modifier = Modifier.width(16.dp))
+
     }
 
 }
@@ -239,7 +238,7 @@ private fun AlbumInfo(
                     contentDescription = null,
                     tint = Color.White,
                     modifier = Modifier
-                        .clickable{
+                        .clickable {
                             onHeartClick()
                         }
                 )
@@ -251,7 +250,10 @@ private fun AlbumInfo(
                         .clip(
                             shape = CircleShape,
                         )
-                        .clickable{
+                        .background(
+                            color = SpotifyGreen,
+                        )
+                        .clickable {
                             onDownloadAlbumClick()
                         }
                 ) {
@@ -338,27 +340,29 @@ private fun AlbumTrackItem(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .size(21.dp)
-                        .clip(
-                            shape = CircleShape
-                        )
-                        .background(
-                            color = SpotifyGreen
-                        )
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_arrow_down),
-                        contentDescription = null,
-                        tint = Black,
+                if (track.localAudioPath != null) {
+                    Box(
+                        contentAlignment = Alignment.Center,
                         modifier = Modifier
-                            .width(5.dp)
-                            .height(3.dp)
-                    )
+                            .size(21.dp)
+                            .clip(
+                                shape = CircleShape
+                            )
+                            .background(
+                                color = SpotifyGreen
+                            )
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_arrow_down),
+                            contentDescription = null,
+                            tint = Black,
+                            modifier = Modifier
+                                .width(5.dp)
+                                .height(3.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(6.dp))
                 }
-                Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = track.artist,
                     fontWeight = FontWeight.Medium,

@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.runtime.Composable
@@ -116,6 +118,8 @@ fun ModalRightSheet(
                 modifier = Modifier
                     .align(Alignment.CenterStart)
                     .fillMaxHeight()
+                    .statusBarsPadding()
+                    .padding(top = 44.dp)
                     .width(30.dp)
                     .systemGestureExclusion()
                     .anchoredDraggable(
