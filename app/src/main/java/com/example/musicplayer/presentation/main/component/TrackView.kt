@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.inspectable
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -448,98 +449,103 @@ private fun PlayerControl(
     repeatMode: Int,
 ) {
 
+
+    val icon = when (repeatMode) {
+        1 -> R.drawable.ic_repeat_track
+        2 -> R.drawable.ic_repeat_list
+        else -> R.drawable.ic_repeat_default
+    }
+
+    val repeatColor = if (repeatMode == 0) White else SpotifyGreen
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 21.dp)
     ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_random),
-            contentDescription = null,
-            tint = if (isShuffled) SpotifyGreen else White,
+        Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(22.dp)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) {
-                    onShuffleClick()
-                }
-        )
-        Spacer(modifier = Modifier.width(7.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceAround,
-            modifier = Modifier.weight(1f)
+                .size(44.dp)
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_track_back),
+                painter = painterResource(R.drawable.ic_random),
                 contentDescription = null,
-                tint = White,
+                tint = if (isShuffled) SpotifyGreen else White,
                 modifier = Modifier
-                    .clickable {
-                        onSkipToPrevious()
-                    }
-            )
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(67.dp)
-                    .clip(
-                        shape = CircleShape
-                    )
-                    .background(
-                        color = White
-                    )
-                    .clickable {
-                        onPauseClick()
-                    }
-            ) {
-                Icon(
-                    painter = painterResource(
-                        if (isPlaying) R.drawable.ic_pause
-                        else R.drawable.ic_play
-                    ),
-                    contentDescription = null,
-                    tint = DeepBlack,
-                    modifier = Modifier
-                        .width(21.dp)
-                        .height(26.dp)
-                )
-            }
-            Icon(
-                painter = painterResource(R.drawable.ic_track_next),
-                contentDescription = null,
-                tint = White,
-                modifier = Modifier
-                    .clickable {
-                        onSkipToNext()
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        onShuffleClick()
                     }
             )
         }
-
-        val icon = when(repeatMode) {
-            1 -> R.drawable.ic_repeat_track
-            2 -> R.drawable.ic_repeat_list
-            else -> R.drawable.ic_repeat_default
-        }
-
-        val repeatColor = if(repeatMode == 0) White else SpotifyGreen
-
 
         Icon(
-            painter = painterResource(icon),
+            painter = painterResource(R.drawable.ic_track_back),
             contentDescription = null,
-            tint = repeatColor,
+            tint = White,
             modifier = Modifier
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) {
-                    onRepeatClick()
+                .clickable {
+                    onSkipToPrevious()
                 }
         )
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(67.dp)
+                .clip(
+                    shape = CircleShape
+                )
+                .background(
+                    color = White
+                )
+                .clickable {
+                    onPauseClick()
+                }
+        ) {
+            Icon(
+                painter = painterResource(
+                    if (isPlaying) R.drawable.ic_pause
+                    else R.drawable.ic_play
+                ),
+                contentDescription = null,
+                tint = DeepBlack,
+                modifier = Modifier
+                    .width(21.dp)
+                    .height(26.dp)
+            )
+        }
+        Icon(
+            painter = painterResource(R.drawable.ic_track_next),
+            contentDescription = null,
+            tint = White,
+            modifier = Modifier
+                .clickable {
+                    onSkipToNext()
+                }
+        )
+
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(44.dp)
+        ) {
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                tint = repeatColor,
+                modifier = Modifier
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        onRepeatClick()
+                    }
+            )
+        }
     }
 
 }
