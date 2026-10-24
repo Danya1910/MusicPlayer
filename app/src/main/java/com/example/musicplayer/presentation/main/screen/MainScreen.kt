@@ -237,7 +237,11 @@ fun MainScreen(
                     },
                     onSeekTo = { ms ->
                         mainViewModel.seekTo(positionMs = ms)
-                    }
+                    },
+                    onShuffleClick = {
+                        mainViewModel.toggleShuffleMode()
+                    },
+                    isShuffled = playerState.isShuffleEnabled,
                 )
 
             }
