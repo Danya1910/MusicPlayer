@@ -16,5 +16,7 @@ data class PlayerUiState (
     val titleColor: Color = White,
     val bodyColor: Color = Gray,
 
-    val paletteState: Map<String, Triple<Color, Color, Color>> = emptyMap()
+    val paletteState: Map<String, Triple<Color, Color, Color>> = emptyMap(),
+
+    val isShuffleEnabled: Boolean = false,
 )
