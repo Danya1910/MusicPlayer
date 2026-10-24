@@ -14,6 +14,8 @@ interface MusicRepository {
 
     val currentQueue: StateFlow<List<Track>>
 
+    val repeatMode: StateFlow<Int>
+
     fun playTrack(track: Track)
 
     fun playTrackWithQueue(track: Track, queue: List<Track>)
@@ -27,5 +29,7 @@ interface MusicRepository {
     fun skipToPrevious()
 
     fun toggleShuffleMode()
+
+    fun toggleRepeatMode()
 
 }
