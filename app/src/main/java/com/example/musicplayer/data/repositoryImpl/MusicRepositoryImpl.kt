@@ -39,6 +39,10 @@ class MusicRepositoryImpl @Inject constructor(
     private val _currentTrack = MutableStateFlow<Track?>(null)
     override val currentTrack = _currentTrack.asStateFlow()
 
+    private val _isShuffleModeEnabled = MutableStateFlow(false)
+    override val  isShuffleModeEnabled: StateFlow<Boolean> = _isShuffleModeEnabled.asStateFlow()
+
+
 
     private val _isPlaying = MutableStateFlow(false)
     override val isPlaying = _isPlaying.asStateFlow()
@@ -69,8 +73,13 @@ class MusicRepositoryImpl @Inject constructor(
 
     private fun setupPlayerListener() {
         mediaController?.addListener(object : Player.Listener {
+
             override fun onIsPlayingChanged(playing: Boolean) {
                 _isPlaying.value = playing
+            }
+
+            override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
+                _isShuffleModeEnabled.value = shuffleModeEnabled
             }
 
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
@@ -192,6 +201,12 @@ class MusicRepositoryImpl @Inject constructor(
                 controller.seekToPreviousMediaItem()
                 controller.play()
             }
+        }
+    }
+
+    override fun toggleShuffleMode() {
+        mediaController?.let { player ->
+            player.shuffleModeEnabled = !player.shuffleModeEnabled
         }
     }
 
