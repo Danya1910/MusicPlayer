@@ -19,4 +19,5 @@ data class PlayerUiState (
     val paletteState: Map<String, Triple<Color, Color, Color>> = emptyMap(),
 
     val isShuffleEnabled: Boolean = false,
+    val repeatMode: Int = 0,
 )
