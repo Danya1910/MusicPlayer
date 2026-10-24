@@ -241,7 +241,11 @@ fun MainScreen(
                     onShuffleClick = {
                         mainViewModel.toggleShuffleMode()
                     },
+                    onRepeatClick = {
+                        mainViewModel.toggleRepeatMode()
+                    },
                     isShuffled = playerState.isShuffleEnabled,
+                    repeatMode = playerState.repeatMode,
                 )
 
             }
