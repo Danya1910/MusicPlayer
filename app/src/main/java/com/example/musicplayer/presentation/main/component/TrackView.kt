@@ -36,8 +36,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -74,7 +76,9 @@ fun TrackView(
     onSkipToNext: () -> Unit,
     onSeekTo: (Long) -> Unit,
     onShuffleClick: () -> Unit,
+    onRepeatClick: () -> Unit,
     isShuffled: Boolean,
+    repeatMode: Int,
 ) {
 
     val bgGradient = Brush.verticalGradient(
@@ -145,7 +149,9 @@ fun TrackView(
             onSkipToPrevious = onSkipToPrevious,
             onSkipToNext = onSkipToNext,
             onShuffleClick = onShuffleClick,
+            onRepeatClick = onRepeatClick,
             isShuffled = isShuffled,
+            repeatMode = repeatMode,
         )
         Spacer(modifier = Modifier.height(60.dp))
 
@@ -375,18 +381,18 @@ private fun PlayerSlider(
 
                     drawLine(
                         color = sliderColors.inactiveTrackColor,
-                        start = androidx.compose.ui.geometry.Offset(0f, centerY),
-                        end = androidx.compose.ui.geometry.Offset(width, centerY),
+                        start = Offset(0f, centerY),
+                        end = Offset(width, centerY),
                         strokeWidth = strokeWidthPx,
-                        cap = androidx.compose.ui.graphics.StrokeCap.Round
+                        cap = StrokeCap.Round
                     )
 
                     drawLine(
                         color = sliderColors.activeTrackColor,
-                        start = androidx.compose.ui.geometry.Offset(0f, centerY),
-                        end = androidx.compose.ui.geometry.Offset(progressX, centerY),
+                        start = Offset(0f, centerY),
+                        end = Offset(progressX, centerY),
                         strokeWidth = strokeWidthPx,
-                        cap = androidx.compose.ui.graphics.StrokeCap.Round
+                        cap = StrokeCap.Round
                     )
                 }
             }
@@ -407,7 +413,7 @@ private fun PlayerSlider(
             )
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = if(showTotalDuration)
+                text = if (showTotalDuration)
                     formatDuration(ms = currentPosition)
                 else {
                     val remainingTime = duration - currentPosition
@@ -422,7 +428,7 @@ private fun PlayerSlider(
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
-                    ){
+                    ) {
                         showTotalDuration = !showTotalDuration
                     }
             )
@@ -437,7 +443,9 @@ private fun PlayerControl(
     onSkipToPrevious: () -> Unit,
     onSkipToNext: () -> Unit,
     onShuffleClick: () -> Unit,
+    onRepeatClick: () -> Unit,
     isShuffled: Boolean,
+    repeatMode: Int,
 ) {
 
     Row(
@@ -449,10 +457,13 @@ private fun PlayerControl(
         Icon(
             painter = painterResource(R.drawable.ic_random),
             contentDescription = null,
-            tint = if(isShuffled) SpotifyGreen else White,
+            tint = if (isShuffled) SpotifyGreen else White,
             modifier = Modifier
                 .size(22.dp)
-                .clickable{
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
                     onShuffleClick()
                 }
         )
@@ -508,11 +519,26 @@ private fun PlayerControl(
             )
         }
 
+        val icon = when(repeatMode) {
+            1 -> R.drawable.ic_repeat_track
+            2 -> R.drawable.ic_repeat_list
+            else -> R.drawable.ic_repeat_default
+        }
+
+        val repeatColor = if(repeatMode == 0) White else SpotifyGreen
+
+
         Icon(
-            painter = painterResource(R.drawable.ic_repeat),
+            painter = painterResource(icon),
             contentDescription = null,
-            tint = White,
-            modifier = Modifier.size(29.dp)
+            tint = repeatColor,
+            modifier = Modifier
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    onRepeatClick()
+                }
         )
     }
 
