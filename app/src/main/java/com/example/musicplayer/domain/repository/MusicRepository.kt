@@ -10,6 +10,8 @@ interface MusicRepository {
     val currentPosition: StateFlow<Long>
     val duration: StateFlow<Long>
 
+    val isShuffleModeEnabled: StateFlow<Boolean>
+
     val currentQueue: StateFlow<List<Track>>
 
     fun playTrack(track: Track)
@@ -24,5 +26,6 @@ interface MusicRepository {
 
     fun skipToPrevious()
 
+    fun toggleShuffleMode()
 
 }
