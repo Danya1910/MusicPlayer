@@ -58,8 +58,15 @@ class MainViewModel @Inject constructor(
         musicRepository.isPlaying,
         musicRepository.currentPosition,
         musicRepository.duration,
+        musicRepository.isShuffleModeEnabled,
         _paletteState
-    ) { track, isPlaying, position, duration, paletteMap ->
+    ) { flowsArray ->
+        val track = flowsArray[0] as Track?
+        val isPlaying = flowsArray[1] as Boolean
+        val position = flowsArray[2] as Long
+        val duration = flowsArray[3] as Long
+        val isShuffle = flowsArray[4] as Boolean
+        val paletteMap = flowsArray[5] as Map<String, Triple<Color, Color, Color>>
 
         val colors = if (track != null) {
             paletteMap[track.id] ?: Triple(DeepBlack, White, Gray)
@@ -76,6 +83,7 @@ class MainViewModel @Inject constructor(
             titleColor = colors.second,
             bodyColor = colors.third,
             paletteState = paletteMap,
+            isShuffleEnabled = isShuffle,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -144,6 +152,10 @@ class MainViewModel @Inject constructor(
 
     fun skipToPrevious() {
         musicRepository.skipToPrevious()
+    }
+
+    fun toggleShuffleMode() {
+        musicRepository.toggleShuffleMode()
     }
 
 }
