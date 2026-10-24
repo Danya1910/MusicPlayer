@@ -40,7 +40,10 @@ class MusicRepositoryImpl @Inject constructor(
     override val currentTrack = _currentTrack.asStateFlow()
 
     private val _isShuffleModeEnabled = MutableStateFlow(false)
-    override val  isShuffleModeEnabled: StateFlow<Boolean> = _isShuffleModeEnabled.asStateFlow()
+    override val  isShuffleModeEnabled = _isShuffleModeEnabled.asStateFlow()
+
+    private val _repeatMode = MutableStateFlow(0)
+    override val repeatMode = _repeatMode.asStateFlow()
 
 
 
@@ -80,6 +83,10 @@ class MusicRepositoryImpl @Inject constructor(
 
             override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
                 _isShuffleModeEnabled.value = shuffleModeEnabled
+            }
+
+            override fun onRepeatModeChanged(repeatMode: Int) {
+                _repeatMode.value = repeatMode
             }
 
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
@@ -210,5 +217,15 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun toggleRepeatMode() {
+        mediaController?.let { player ->
+            val nextRepeatMode = when(player.repeatMode) {
+                Player.REPEAT_MODE_OFF -> Player.REPEAT_MODE_ALL
+                Player.REPEAT_MODE_ALL -> Player.REPEAT_MODE_ONE
+                else -> Player.REPEAT_MODE_OFF
+            }
+            player.repeatMode = nextRepeatMode
+        }
+    }
 
 }
