@@ -57,6 +57,7 @@ import com.example.musicplayer.presentation.player.state.PlayerUiState
 import com.example.musicplayer.ui.theme.Black
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
+import com.example.musicplayer.ui.theme.SpotifyGreen
 import com.example.musicplayer.ui.theme.White
 
 
@@ -72,6 +73,8 @@ fun TrackView(
     onSkipToPrevious: () -> Unit,
     onSkipToNext: () -> Unit,
     onSeekTo: (Long) -> Unit,
+    onShuffleClick: () -> Unit,
+    isShuffled: Boolean,
 ) {
 
     val bgGradient = Brush.verticalGradient(
@@ -141,6 +144,8 @@ fun TrackView(
             isPlaying = isPlaying,
             onSkipToPrevious = onSkipToPrevious,
             onSkipToNext = onSkipToNext,
+            onShuffleClick = onShuffleClick,
+            isShuffled = isShuffled,
         )
         Spacer(modifier = Modifier.height(60.dp))
 
@@ -431,6 +436,8 @@ private fun PlayerControl(
     isPlaying: Boolean,
     onSkipToPrevious: () -> Unit,
     onSkipToNext: () -> Unit,
+    onShuffleClick: () -> Unit,
+    isShuffled: Boolean,
 ) {
 
     Row(
@@ -442,8 +449,12 @@ private fun PlayerControl(
         Icon(
             painter = painterResource(R.drawable.ic_random),
             contentDescription = null,
-            tint = White,
-            modifier = Modifier.size(22.dp)
+            tint = if(isShuffled) SpotifyGreen else White,
+            modifier = Modifier
+                .size(22.dp)
+                .clickable{
+                    onShuffleClick()
+                }
         )
         Spacer(modifier = Modifier.width(7.dp))
         Row(
