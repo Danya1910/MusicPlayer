@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import kotlin.collections.emptyList
 
 
 @Suppress("UNCHECKED_CAST")
@@ -144,6 +143,11 @@ class MainViewModel @Inject constructor(
     fun seekTo(positionMs: Long) {
         musicRepository.seekTo(positionMs = positionMs)
     }
+
+    fun moveTrack(fromIndex: Int, toIndex: Int) {
+        musicRepository.moveTrackInQueue(fromIndex, toIndex)
+    }
+
 
     fun updateColorsFromBitmap(id: String, bitmap: Bitmap) {
         if (_paletteState.value.containsKey(id)) return
