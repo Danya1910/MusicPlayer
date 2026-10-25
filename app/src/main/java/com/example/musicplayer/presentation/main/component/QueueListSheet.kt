@@ -26,11 +26,10 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -39,7 +38,6 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.Track
-import com.example.musicplayer.presentation.main.util.glassEffect
 import com.example.musicplayer.ui.theme.Black
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
@@ -60,25 +58,30 @@ fun QueueListSheet(
         skipPartiallyExpanded = false
     )
 
+
+
+    LaunchedEffect(Unit) {
+        sheetState.partialExpand()
+    }
+
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
-        containerColor = DeepBlack.copy(alpha = 0.9f),
+        containerColor = DeepBlack,
+        shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp),
         dragHandle = {
             BottomSheetDefaults.DragHandle(
                 color = Gray
             )
         },
         modifier = Modifier
-            .padding(10.dp)
-            .clip(
-                shape = RoundedCornerShape(40.dp)
-            )
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.8f)
+                .fillMaxHeight(0.5f)
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 16.dp)
         ) {
             LazyColumn(
                 modifier = Modifier
@@ -90,7 +93,7 @@ fun QueueListSheet(
                         Text(
                             text = "Queue",
                             fontWeight = FontWeight.Bold,
-                            fontSize = 25.sp,
+                            fontSize = 21.sp,
                             color = White,
                         )
                         Spacer(modifier = Modifier.height(5.dp))

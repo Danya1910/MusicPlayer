@@ -167,15 +167,22 @@ fun TrackView(
         Spacer(modifier = Modifier.height(30.dp))
     }
 
-    if (showQueue) {
-        QueueListSheet(
-            currentTrack = playerState.currentTrack,
-            upcomingTracks = upcomingTracks,
-            onDismissRequest = {
-                showQueue = false
-            },
-            onTrackClick = {}
-        )
+
+    Box(
+        contentAlignment = Alignment.BottomCenter,
+        modifier = Modifier
+        .fillMaxSize()
+    ) {
+        if (showQueue) {
+            QueueListSheet(
+                currentTrack = playerState.currentTrack,
+                upcomingTracks = upcomingTracks,
+                onDismissRequest = {
+                    showQueue = false
+                },
+                onTrackClick = {}
+            )
+        }
     }
 
 }
