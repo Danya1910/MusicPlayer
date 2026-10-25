@@ -82,6 +82,7 @@ fun TrackView(
     isShuffled: Boolean,
     repeatMode: Int,
     upcomingTracks: List<Track>,
+    onTrackInQueueClick: (Track) -> Unit,
 ) {
 
     val bgGradient = Brush.verticalGradient(
@@ -171,7 +172,7 @@ fun TrackView(
     Box(
         contentAlignment = Alignment.BottomCenter,
         modifier = Modifier
-        .fillMaxSize()
+            .fillMaxSize()
     ) {
         if (showQueue) {
             QueueListSheet(
@@ -180,7 +181,11 @@ fun TrackView(
                 onDismissRequest = {
                     showQueue = false
                 },
-                onTrackClick = {}
+                onTrackClick = { track ->
+                    onTrackInQueueClick(track)
+                },
+                isPlaying = isPlaying,
+                onPlayPauseClick = onPauseClick,
             )
         }
     }
@@ -592,7 +597,7 @@ private fun TrackUtilityBar(
             contentDescription = null,
             tint = White,
             modifier = Modifier
-                .clickable{
+                .clickable {
                     onQueueClick()
                 }
         )
