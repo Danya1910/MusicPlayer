@@ -1,15 +1,14 @@
 package com.example.musicplayer.presentation.main.component
 
-import android.widget.Space
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,9 +28,9 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.paint
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -40,7 +39,9 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.Track
+import com.example.musicplayer.presentation.main.util.glassEffect
 import com.example.musicplayer.ui.theme.Black
+import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.SpotifyGreen
 import com.example.musicplayer.ui.theme.White
@@ -62,55 +63,66 @@ fun QueueListSheet(
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
+        containerColor = DeepBlack.copy(alpha = 0.9f),
         dragHandle = {
             BottomSheetDefaults.DragHandle(
                 color = Gray
             )
-        }
+        },
+        modifier = Modifier
+            .padding(10.dp)
+            .clip(
+                shape = RoundedCornerShape(40.dp)
+            )
     ) {
-        LazyColumn(
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 12.dp)
+                .fillMaxWidth()
+                .fillMaxHeight(0.8f)
         ) {
-            item {
-                Column() {
-                    Text(
-                        text = "Queue",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 25.sp,
-                        color = White,
-                    )
-                    Spacer(modifier = Modifier.height(5.dp))
-                    Text(
-                        text = "Playing + ${currentTrack?.title}",
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 15.sp,
-                        color = Gray,
-                    )
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 12.dp)
+            ) {
+                item {
+                    Column() {
+                        Text(
+                            text = "Queue",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 25.sp,
+                            color = White,
+                        )
+                        Spacer(modifier = Modifier.height(5.dp))
+                        Text(
+                            text = "Playing + ${currentTrack?.title}",
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 15.sp,
+                            color = Gray,
+                        )
+                    }
                 }
-            }
-            item {
-                Spacer(modifier = Modifier.height(20.dp))
-            }
-            item {
-                currentTrack?.let {
-                    CurrentPlayingTrack(
-                        track = currentTrack,
-                        onPlayPauseClick = {},
-                        isPlaying = true,
-                    )
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
                 }
-            }
+                item {
+                    currentTrack?.let {
+                        CurrentPlayingTrack(
+                            track = currentTrack,
+                            onPlayPauseClick = {},
+                            isPlaying = true,
+                        )
+                    }
+                }
 
-            if(!upcomingTracks.isEmpty()) {
-                items(upcomingTracks) {track ->
-                    TrackInQueue(
-                        track = track,
-                    )
+                if (!upcomingTracks.isEmpty()) {
+                    items(upcomingTracks) { track ->
+                        TrackInQueue(
+                            track = track,
+                        )
+                    }
                 }
             }
-
         }
     }
 }
@@ -140,9 +152,12 @@ private fun CurrentPlayingTrack(
         Spacer(modifier = Modifier.width(15.dp))
         Column(
             verticalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.padding(
-                vertical = 3.dp
-            )
+            modifier = Modifier
+                .weight(1f)
+                .padding(
+                    vertical = 3.dp
+                )
+                .padding(end = 15.dp)
         ) {
             Text(
                 text = track.title,
@@ -167,7 +182,7 @@ private fun CurrentPlayingTrack(
                 .background(
                     color = White,
                 )
-                .clickable{
+                .clickable {
                     onPlayPauseClick()
                 }
         ) {
@@ -209,15 +224,18 @@ private fun TrackInQueue(
         Spacer(modifier = Modifier.width(15.dp))
         Column(
             verticalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.padding(
-                vertical = 3.dp
-            )
+            modifier = Modifier
+                .weight(1f)
+                .padding(
+                    vertical = 3.dp
+                )
+                .padding(end = 15.dp)
         ) {
             Text(
                 text = track.title,
                 fontWeight = FontWeight.Medium,
                 fontSize = 15.sp,
-                color = SpotifyGreen,
+                color = White,
                 maxLines = 1,
                 modifier = Modifier
                     .basicMarquee()
@@ -232,24 +250,11 @@ private fun TrackInQueue(
                     .basicMarquee()
             )
         }
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .size(35.dp)
-                .clip(
-                    shape = CircleShape
-                )
-                .background(
-                    color = White,
-                )
-                .clickable{
-                }
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_lines ),
-                contentDescription = null,
-                tint = Gray,
-            )
-        }
+
+        Icon(
+            painter = painterResource(R.drawable.ic_lines),
+            contentDescription = null,
+            tint = Gray,
+        )
     }
 }
