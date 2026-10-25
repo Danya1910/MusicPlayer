@@ -5,7 +5,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,7 +42,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.inspectable
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -83,6 +81,7 @@ fun TrackView(
     repeatMode: Int,
     upcomingTracks: List<Track>,
     onTrackInQueueClick: (Track) -> Unit,
+    onMoveTrack: (fromIndex: Int, toIndex: Int) -> Unit,
 ) {
 
     val bgGradient = Brush.verticalGradient(
@@ -186,6 +185,9 @@ fun TrackView(
                 },
                 isPlaying = isPlaying,
                 onPlayPauseClick = onPauseClick,
+                onMoveTrack = { fromIndex, toIndex ->
+                    onMoveTrack(fromIndex, toIndex)
+                }
             )
         }
     }
