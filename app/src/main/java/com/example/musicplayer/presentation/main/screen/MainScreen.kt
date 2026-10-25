@@ -65,6 +65,7 @@ fun MainScreen(
     val playerState by mainViewModel.playerState.collectAsStateWithLifecycle()
 
     val upcomingTracks by mainViewModel.upcomingTracks.collectAsStateWithLifecycle()
+    val currentQueue by mainViewModel.currentQueue.collectAsStateWithLifecycle() // <-- Собираем полную очередь
 
     Scaffold(
         containerColor = DeepBlack,
@@ -249,6 +250,12 @@ fun MainScreen(
                     isShuffled = playerState.isShuffleEnabled,
                     repeatMode = playerState.repeatMode,
                     upcomingTracks = upcomingTracks,
+                    onTrackInQueueClick = { track ->
+                        mainViewModel.playTrackWithQueue(
+                            track = track,
+                            queue = currentQueue
+                        )
+                    }
                 )
 
             }
