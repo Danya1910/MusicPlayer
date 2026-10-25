@@ -13,6 +13,7 @@ import com.example.musicplayer.presentation.player.state.PlayerUiState
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.White
+import com.google.protobuf.LazyStringArrayList.emptyList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,8 +25,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.collections.emptyList
 
 
+@Suppress("UNCHECKED_CAST")
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val trackRepository: TrackRepository,
@@ -51,7 +54,8 @@ class MainViewModel @Inject constructor(
     val currentTrack = musicRepository.currentTrack
     val isPlaying = musicRepository.isPlaying
 
-    private val _paletteState = MutableStateFlow<Map<String, Triple<Color, Color, Color>>>(emptyMap())
+    private val _paletteState =
+        MutableStateFlow<Map<String, Triple<Color, Color, Color>>>(emptyMap())
 
     val playerState: StateFlow<PlayerUiState> = combine(
         musicRepository.currentTrack,
@@ -93,6 +97,24 @@ class MainViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = PlayerUiState()
     )
+
+    val upcomingTracks: StateFlow<List<Track>> = combine(
+        musicRepository.currentQueue,
+        musicRepository.currentTrack
+    ) { queue: List<Track>, currentTrack: Track? ->
+        if (currentTrack == null) return@combine emptyList()
+
+        val currentIndex = queue.indexOfFirst { it.id == currentTrack.id }
+        if (currentIndex == -1 || currentIndex == queue.lastIndex) {
+            emptyList()
+        } else {
+            queue.subList(currentIndex + 1, queue.size).toList()
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    ) as StateFlow<List<Track>>
 
     fun playTrack(track: Track) {
         musicRepository.playTrack(track)
