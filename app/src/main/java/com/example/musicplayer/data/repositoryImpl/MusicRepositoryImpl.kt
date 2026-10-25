@@ -228,4 +228,29 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun moveTrackInQueue(fromUpcomingIndex: Int, toUpcomingIndex: Int) {
+        val controller = mediaController ?: return
+        val currentIndex = controller.currentMediaItemIndex
+
+        if (currentIndex == -1) return
+
+        val realFromIndex = currentIndex + 1 + fromUpcomingIndex
+        val realToIndex = currentIndex + 1 + toUpcomingIndex
+
+        val totalItems = controller.mediaItemCount
+
+        if (realFromIndex in 0 until totalItems && realToIndex in 0 until totalItems) {
+
+            controller.moveMediaItem(realFromIndex, realToIndex)
+
+            val updatedQueue = _currentQueue.value.toMutableList().apply {
+                if (realFromIndex in indices && realToIndex in indices) {
+                    add(realToIndex, removeAt(realFromIndex))
+                }
+            }
+            _currentQueue.value = updatedQueue
+        }
+    }
+
+
 }
