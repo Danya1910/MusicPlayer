@@ -64,6 +64,8 @@ fun MainScreen(
 
     val playerState by mainViewModel.playerState.collectAsStateWithLifecycle()
 
+    val upcomingTracks by mainViewModel.upcomingTracks.collectAsStateWithLifecycle()
+
     Scaffold(
         containerColor = DeepBlack,
         bottomBar = {
@@ -246,6 +248,7 @@ fun MainScreen(
                     },
                     isShuffled = playerState.isShuffleEnabled,
                     repeatMode = playerState.repeatMode,
+                    upcomingTracks = upcomingTracks,
                 )
 
             }
