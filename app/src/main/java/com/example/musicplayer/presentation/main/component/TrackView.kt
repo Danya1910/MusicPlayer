@@ -5,6 +5,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -80,6 +81,7 @@ fun TrackView(
     onRepeatClick: () -> Unit,
     isShuffled: Boolean,
     repeatMode: Int,
+    upcomingTracks: List<Track>,
 ) {
 
     val bgGradient = Brush.verticalGradient(
@@ -88,6 +90,8 @@ fun TrackView(
             DeepBlack,
         )
     )
+
+    var showQueue by remember { mutableStateOf(false) }
 
 
     Column(
@@ -154,8 +158,24 @@ fun TrackView(
             isShuffled = isShuffled,
             repeatMode = repeatMode,
         )
-        Spacer(modifier = Modifier.height(60.dp))
+        Spacer(modifier = Modifier.height(15.dp))
+        TrackUtilityBar(
+            onQueueClick = {
+                showQueue = true
+            }
+        )
+        Spacer(modifier = Modifier.height(30.dp))
+    }
 
+    if (showQueue) {
+        QueueListSheet(
+            currentTrack = playerState.currentTrack,
+            upcomingTracks = upcomingTracks,
+            onDismissRequest = {
+                showQueue = false
+            },
+            onTrackClick = {}
+        )
     }
 
 }
@@ -550,3 +570,24 @@ private fun PlayerControl(
 
 }
 
+
+@Composable
+private fun TrackUtilityBar(
+    onQueueClick: () -> Unit,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.End,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_queue),
+            contentDescription = null,
+            tint = White,
+            modifier = Modifier
+                .clickable{
+                    onQueueClick()
+                }
+        )
+    }
+}
