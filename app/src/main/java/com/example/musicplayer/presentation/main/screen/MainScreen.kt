@@ -255,6 +255,12 @@ fun MainScreen(
                             track = track,
                             queue = currentQueue
                         )
+                    },
+                    onMoveTrack = { fromIndex, toIndex ->
+                        mainViewModel.moveTrack(
+                            fromIndex = fromIndex,
+                            toIndex = toIndex,
+                        )
                     }
                 )
 
