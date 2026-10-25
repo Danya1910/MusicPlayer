@@ -98,6 +98,13 @@ class MainViewModel @Inject constructor(
         initialValue = PlayerUiState()
     )
 
+    val currentQueue: StateFlow<List<Track>> = musicRepository.currentQueue
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        ) as StateFlow<List<Track>>
+
     val upcomingTracks: StateFlow<List<Track>> = combine(
         musicRepository.currentQueue,
         musicRepository.currentTrack
