@@ -8,12 +8,13 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.White
 
 fun Modifier.glassEffect(
     blurRadius: Dp = 20.dp,
-    glassColor: Color = White.copy(alpha = 0.1f),
-    borderColor: Color = White.copy(alpha = 0.15f),
+    glassColor: Color = DeepBlack.copy(alpha = 0.1f),
+    borderColor: Color = DeepBlack.copy(alpha = 0.15f),
 ): Modifier = this
     .blur(radius = blurRadius)
     .background(
