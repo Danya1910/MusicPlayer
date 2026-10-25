@@ -51,7 +51,9 @@ fun QueueListSheet(
     currentTrack: Track?,
     upcomingTracks: List<Track>,
     onDismissRequest: () -> Unit,
-    onTrackClick: () -> Unit,
+    onTrackClick: (Track) -> Unit,
+    isPlaying: Boolean,
+    onPlayPauseClick: () -> Unit,
 ) {
 
     val sheetState = rememberModalBottomSheetState(
@@ -75,6 +77,7 @@ fun QueueListSheet(
             )
         },
         modifier = Modifier
+            .padding(horizontal = 12.dp)
     ) {
         Column(
             modifier = Modifier
@@ -89,7 +92,7 @@ fun QueueListSheet(
                     .padding(horizontal = 12.dp)
             ) {
                 item {
-                    Column() {
+                    Column {
                         Text(
                             text = "Queue",
                             fontWeight = FontWeight.Bold,
@@ -106,23 +109,31 @@ fun QueueListSheet(
                     }
                 }
                 item {
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
                 item {
                     currentTrack?.let {
                         CurrentPlayingTrack(
                             track = currentTrack,
-                            onPlayPauseClick = {},
-                            isPlaying = true,
+                            onPlayPauseClick = onPlayPauseClick,
+                            isPlaying = isPlaying,
                         )
+                        Spacer(modifier = Modifier.height(15.dp))
                     }
                 }
 
                 if (!upcomingTracks.isEmpty()) {
-                    items(upcomingTracks) { track ->
+                    items(
+                        items = upcomingTracks,
+                        key = { track -> track.id }
+                    ) { track ->
                         TrackInQueue(
                             track = track,
+                            onTrackClick = {
+                                onTrackClick(track)
+                            }
                         )
+                        Spacer(modifier = Modifier.height(5.dp))
                     }
                 }
             }
@@ -207,12 +218,16 @@ private fun CurrentPlayingTrack(
 @Composable
 private fun TrackInQueue(
     track: Track,
+    onTrackClick: () -> Unit,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp)
+            .clickable {
+                onTrackClick()
+            }
     ) {
         AsyncImage(
             model = track.imageUrl,
