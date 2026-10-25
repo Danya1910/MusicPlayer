@@ -32,4 +32,6 @@ interface MusicRepository {
 
     fun toggleRepeatMode()
 
+    fun moveTrackInQueue(fromUpcomingIndex: Int, toUpcomingIndex: Int)
+
 }
