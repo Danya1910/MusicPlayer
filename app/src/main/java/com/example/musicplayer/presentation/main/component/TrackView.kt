@@ -20,12 +20,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -61,8 +64,11 @@ import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.SpotifyGreen
 import com.example.musicplayer.ui.theme.White
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.haze
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrackView(
     track: Track,
@@ -91,80 +97,101 @@ fun TrackView(
         )
     )
 
+    val hazeState = remember { HazeState() }
+
     var showQueue by remember { mutableStateOf(false) }
 
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = false
+    )
 
-    Column(
+    LaunchedEffect(Unit) {
+        sheetState.partialExpand()
+    }
+
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                brush = bgGradient,
+                color = DeepBlack
             )
-            .padding(
-                horizontal = 24.dp
-            )
-            .statusBarsPadding()
-            .padding(top = 10.dp)
     ) {
-        PlayerHead(
-            onCancelClick = {
-                onCancelClick()
-            },
-            title = track.title,
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .haze(
+                    hazeState
+                )
+                .background(
+                    brush = bgGradient,
+                )
+                .padding(
+                    horizontal = 24.dp
+                )
+                .statusBarsPadding()
+                .padding(top = 10.dp)
+        ) {
+            PlayerHead(
+                onCancelClick = {
+                    onCancelClick()
+                },
+                title = track.title,
+            )
 
-        Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(1f))
 
-        TrackImage(
-            url = track.imageUrl,
-            onBitmapLoaded = { bitmap ->
-                onBitmapLoaded(bitmap)
-            },
-        )
+            TrackImage(
+                url = track.imageUrl,
+                onBitmapLoaded = { bitmap ->
+                    onBitmapLoaded(bitmap)
+                },
+            )
 
-        Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(1f))
 
-        TrackInfoAndHeart(
-            title = track.title,
-            artist = track.artist,
-            onHeartClick = {},
-            titleColor = White,
-            bodyColor = White,
-        )
+            TrackInfoAndHeart(
+                title = track.title,
+                artist = track.artist,
+                onHeartClick = {},
+                titleColor = White,
+                bodyColor = White,
+            )
 
-        Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(15.dp))
 
 
-        PlayerSlider(
-            currentPosition = playerState.currentPosition,
-            duration = track.duration,
-            onSeekFinished = { ms ->
-                onSeekTo(ms)
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
+            PlayerSlider(
+                currentPosition = playerState.currentPosition,
+                duration = track.duration,
+                onSeekFinished = { ms ->
+                    onSeekTo(ms)
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-        PlayerControl(
-            onPauseClick = {
-                onPauseClick()
-            },
-            isPlaying = isPlaying,
-            onSkipToPrevious = onSkipToPrevious,
-            onSkipToNext = onSkipToNext,
-            onShuffleClick = onShuffleClick,
-            onRepeatClick = onRepeatClick,
-            isShuffled = isShuffled,
-            repeatMode = repeatMode,
-        )
-        Spacer(modifier = Modifier.height(15.dp))
-        TrackUtilityBar(
-            onQueueClick = {
-                showQueue = true
-            }
-        )
-        Spacer(modifier = Modifier.height(30.dp))
+            PlayerControl(
+                onPauseClick = {
+                    onPauseClick()
+                },
+                isPlaying = isPlaying,
+                onSkipToPrevious = onSkipToPrevious,
+                onSkipToNext = onSkipToNext,
+                onShuffleClick = onShuffleClick,
+                onRepeatClick = onRepeatClick,
+                isShuffled = isShuffled,
+                repeatMode = repeatMode,
+            )
+            Spacer(modifier = Modifier.height(15.dp))
+            TrackUtilityBar(
+                onQueueClick = {
+                    showQueue = true
+                }
+            )
+            Spacer(modifier = Modifier.height(30.dp))
+        }
     }
 
 
@@ -174,21 +201,32 @@ fun TrackView(
             .fillMaxSize()
     ) {
         if (showQueue) {
-            QueueListSheet(
-                currentTrack = playerState.currentTrack,
-                upcomingTracks = upcomingTracks,
+            ModalBottomSheet(
                 onDismissRequest = {
                     showQueue = false
                 },
-                onTrackClick = { track ->
-                    onTrackInQueueClick(track)
-                },
-                isPlaying = isPlaying,
-                onPlayPauseClick = onPauseClick,
-                onMoveTrack = { fromIndex, toIndex ->
-                    onMoveTrack(fromIndex, toIndex)
-                }
-            )
+                sheetState = sheetState,
+                containerColor = Color.Transparent,
+                scrimColor = DeepBlack.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(40.dp),
+                dragHandle = null,
+                modifier = Modifier
+                    .padding(horizontal = 12.dp)
+            ) {
+                QueueListSheet(
+                    currentTrack = playerState.currentTrack,
+                    upcomingTracks = upcomingTracks,
+                    onTrackClick = { track ->
+                        onTrackInQueueClick(track)
+                    },
+                    isPlaying = isPlaying,
+                    onPlayPauseClick = onPauseClick,
+                    onMoveTrack = { fromIndex, toIndex ->
+                        onMoveTrack(fromIndex, toIndex)
+                    },
+                    hazeState = hazeState,
+                )
+            }
         }
     }
 
