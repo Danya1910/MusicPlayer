@@ -1,11 +1,15 @@
 package com.example.musicplayer.presentation.main.screen
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
@@ -27,16 +31,21 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.musicplayer.domain.model.Album
+import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.presentation.main.MainViewModel
 import com.example.musicplayer.presentation.main.component.AlbumView
 import com.example.musicplayer.presentation.main.component.BottomBar
 import com.example.musicplayer.presentation.main.component.MainScreenColumn
 import com.example.musicplayer.presentation.main.component.ModalRightSheet
 import com.example.musicplayer.presentation.main.component.NowPlayingBar
+import com.example.musicplayer.presentation.main.component.TrackInfo
 import com.example.musicplayer.presentation.main.component.TrackView
 import com.example.musicplayer.presentation.main.state.MainUiState
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.White
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.haze
+import dev.chrisbanes.haze.hazeChild
 import kotlinx.coroutines.launch
 
 
@@ -49,6 +58,8 @@ fun MainScreen(
 
     BackHandler(enabled = true) {}
 
+    val hazeState = remember { HazeState() }
+
     val uiState by mainViewModel.uiState.collectAsStateWithLifecycle()
 
     val currentTrack by mainViewModel.currentTrack.collectAsStateWithLifecycle()
@@ -56,6 +67,7 @@ fun MainScreen(
 
     var isAlbumViewVisible by remember { mutableStateOf(false) }
     var isTrackViewVisible by remember { mutableStateOf(false) }
+    var isTrackInfoVisible by remember { mutableStateOf(false) }
 
     var clickedAlbum by remember { mutableStateOf<Album?>(null) }
 
@@ -65,138 +77,185 @@ fun MainScreen(
     val playerState by mainViewModel.playerState.collectAsStateWithLifecycle()
 
     val upcomingTracks by mainViewModel.upcomingTracks.collectAsStateWithLifecycle()
-    val currentQueue by mainViewModel.currentQueue.collectAsStateWithLifecycle() // <-- Собираем полную очередь
+    val currentQueue by mainViewModel.currentQueue.collectAsStateWithLifecycle()
 
-    Scaffold(
-        containerColor = DeepBlack,
-        bottomBar = {
-            BottomBar(
-                navController = navController
+    val trackInfoSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    var currentInfoToShow by remember { mutableStateOf<Track?>(null) }
+
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                color = DeepBlack
             )
-        }
-    ) { paddingValues ->
-        Box(
+    ) {
+        Scaffold(
+            containerColor = Color.Transparent,
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = DeepBlack)
-                .padding(bottom = paddingValues.calculateBottomPadding())
-        ) {
-            when (val state = uiState) {
-                is MainUiState.Loading ->
-                    Text(
-                        textAlign = TextAlign.Center,
-                        text = "Загрузка нах...",
-                        fontSize = 23.sp,
-                        color = White,
-                        modifier = Modifier.fillMaxSize()
-                    )
-
-                is MainUiState.Success ->
-                    if (state.tracks.isEmpty() && state.albums.isEmpty()) {
+                .haze(hazeState),
+            bottomBar = {
+                BottomBar(
+                    navController = navController
+                )
+            }
+        ) { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = paddingValues.calculateBottomPadding())
+            ) {
+                when (val state = uiState) {
+                    is MainUiState.Loading ->
                         Text(
                             textAlign = TextAlign.Center,
-                            text = "Списки пустые. В базе данных ничего нет!",
-                            fontSize = 18.sp,
+                            text = "Загрузка нах...",
+                            fontSize = 23.sp,
                             color = White,
                             modifier = Modifier.fillMaxSize()
                         )
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .statusBarsPadding()
-                        ) {
-                            MainScreenColumn(
-                                tracks = state.tracks,
-                                albums = state.albums,
-                                onTrackClick = { track ->
-                                    mainViewModel.playTrackWithQueue(
-                                        track = track,
-                                        queue = state.tracks,
-                                    )
-                                },
-                                onAlbumClick = { album ->
-                                    clickedAlbum = album
-                                    isAlbumViewVisible = true
-                                },
-                                playerState = playerState,
+
+                    is MainUiState.Success ->
+                        if (state.tracks.isEmpty() && state.albums.isEmpty()) {
+                            Text(
+                                textAlign = TextAlign.Center,
+                                text = "Списки пустые. В базе данных ничего нет!",
+                                fontSize = 18.sp,
+                                color = White,
+                                modifier = Modifier.fillMaxSize()
                             )
-
-                        }
-                    }
-
-                is MainUiState.Error ->
-                    Text(
-                        textAlign = TextAlign.Center,
-                        text = "Ошибочка: ${state.message}",
-                        fontSize = 23.sp,
-                        color = White,
-                        modifier = Modifier.fillMaxSize()
-                    )
-            }
-            if (isAlbumViewVisible) {
-                ModalRightSheet(
-                    onDismissRequest = {
-                        isAlbumViewVisible = false
-                        clickedAlbum = null
-                    },
-                    content = {
-                        clickedAlbum?.let { album ->
-                            AlbumView(
-                                album = album,
-                                onHeartClick = {
-
-                                },
-                                onCancelClick = {
-                                    isAlbumViewVisible = false
-                                    clickedAlbum = null
-                                },
-                                onPlayPauseClick = { tracks ->
-                                    tracks.firstOrNull()?.let { firstTrack ->
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .statusBarsPadding()
+                            ) {
+                                MainScreenColumn(
+                                    tracks = state.tracks,
+                                    albums = state.albums,
+                                    onTrackClick = { track ->
                                         mainViewModel.playTrackWithQueue(
-                                            track = firstTrack,
-                                            queue = tracks,
+                                            track = track,
+                                            queue = state.tracks,
                                         )
-                                    }
-                                },
-                                onDownloadAlbumClick = {
+                                    },
+                                    onAlbumClick = { album ->
+                                        clickedAlbum = album
+                                        isAlbumViewVisible = true
+                                    },
+                                    playerState = playerState,
+                                    onMoreAboutTrack = { track ->
+                                        currentInfoToShow = track
+                                        isTrackInfoVisible = true
+                                    },
+                                )
 
-                                },
-                                onBitmapLoaded = { bitmap ->
-                                    mainViewModel.updateColorsFromBitmap(
-                                        id = album.id,
-                                        bitmap = bitmap,
-                                    )
-                                },
-                                playerState = playerState,
-                            )
+                            }
                         }
-                    }
-                )
-            }
 
-            currentTrack?.let { track ->
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 5.dp)
-                ) {
-                    NowPlayingBar(
-                        track = track,
-                        onPlayPauseClick = {
-                            mainViewModel.togglePlayPause()
+                    is MainUiState.Error ->
+                        Text(
+                            textAlign = TextAlign.Center,
+                            text = "Ошибочка: ${state.message}",
+                            fontSize = 23.sp,
+                            color = White,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                }
+                if (isAlbumViewVisible) {
+                    ModalRightSheet(
+                        onDismissRequest = {
+                            isAlbumViewVisible = false
+                            clickedAlbum = null
                         },
-                        onCardClick = {
-                            isTrackViewVisible = true
+                        content = {
+                            clickedAlbum?.let { album ->
+                                AlbumView(
+                                    album = album,
+                                    onHeartClick = {
+
+                                    },
+                                    onCancelClick = {
+                                        isAlbumViewVisible = false
+                                        clickedAlbum = null
+                                    },
+                                    onPlayPauseClick = { tracks ->
+                                        tracks.firstOrNull()?.let { firstTrack ->
+                                            mainViewModel.playTrackWithQueue(
+                                                track = firstTrack,
+                                                queue = tracks,
+                                            )
+                                        }
+                                    },
+                                    onDownloadAlbumClick = {
+
+                                    },
+                                    onBitmapLoaded = { bitmap ->
+                                        mainViewModel.updateColorsFromBitmap(
+                                            id = album.id,
+                                            bitmap = bitmap,
+                                        )
+                                    },
+                                    playerState = playerState,
+                                )
+                            }
+                        }
+                    )
+                }
+
+                currentTrack?.let { track ->
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 5.dp)
+                    ) {
+                        NowPlayingBar(
+                            track = track,
+                            onPlayPauseClick = {
+                                mainViewModel.togglePlayPause()
+                            },
+                            onCardClick = {
+                                isTrackViewVisible = true
+                            },
+                            isPlaying = isPlaying,
+                            currentPosition = playerState.currentPosition,
+                            duration = track.duration,
+                        )
+                    }
+                }
+            }
+        }
+        if (isTrackInfoVisible) {
+
+            ModalBottomSheet(
+                onDismissRequest = { isTrackInfoVisible = false },
+                sheetState = trackInfoSheetState,
+                containerColor = Color.Transparent,
+                dragHandle = null, // добавить
+                scrimColor = DeepBlack.copy(alpha = 0.2f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp)
+            ) {
+                currentInfoToShow?.let {
+                    TrackInfo(
+                        track = currentInfoToShow!!,
+                        hazeState = hazeState,
+                        playNext = {
+                            mainViewModel.playNext(
+                                track = currentInfoToShow!!
+                            )
                         },
-                        isPlaying = isPlaying,
-                        currentPosition = playerState.currentPosition,
-                        duration = track.duration,
                     )
                 }
             }
         }
     }
+
+
+
 
     if (isTrackViewVisible) {
         ModalBottomSheet(
