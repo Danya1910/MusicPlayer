@@ -35,7 +35,6 @@ import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.White
-import com.google.android.play.integrity.internal.ac
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
