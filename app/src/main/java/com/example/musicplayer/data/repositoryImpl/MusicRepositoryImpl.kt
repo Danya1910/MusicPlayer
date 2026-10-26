@@ -133,7 +133,7 @@ class MusicRepositoryImpl @Inject constructor(
         val mediaMetadata = MediaMetadata.Builder()
             .setTitle(track.title)
             .setArtist(track.artist)
-            .setArtworkUri(android.net.Uri.parse(track.imageUrl))
+            .setArtworkUri(Uri.parse(track.imageUrl))
             .build()
 
         val mediaItem = MediaItem.Builder()
