@@ -194,6 +194,14 @@ class MainViewModel @Inject constructor(
         musicRepository.toggleShuffleMode()
     }
 
+    fun playNext(
+        track: Track,
+    ) {
+        musicRepository.addTrackToPlayNext(
+            track = track,
+        )
+    }
+
     fun toggleRepeatMode() {
         musicRepository.toggleRepeatMode()
     }
