@@ -228,6 +228,38 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun addTrackToPlayNext(track: Track) {
+
+        val controller = mediaController ?: return
+
+        val currentIndex = mediaController?.currentMediaItemIndex ?: 0
+
+        val metaData = MediaMetadata.Builder()
+            .setTitle(track.title)
+            .setArtist(track.artist)
+            .setArtworkUri(Uri.parse(track.imageUrl))
+            .build()
+
+        val mediaItem = MediaItem.Builder()
+            .setMediaId(track.id)
+            .setUri(track.audioUrl)
+            .setMediaMetadata(metaData)
+            .build()
+
+        val targetIndex = if (currentIndex != -1) currentIndex + 1 else controller.mediaItemCount
+
+        controller.addMediaItem(targetIndex, mediaItem)
+
+        val updatedQueue = _currentQueue.value.toMutableList().apply {
+            if (targetIndex <= size) {
+                add(targetIndex, track)
+            } else {
+                add(track)
+            }
+        }
+        _currentQueue.value = updatedQueue
+    }
+
     override fun moveTrackInQueue(fromUpcomingIndex: Int, toUpcomingIndex: Int) {
         val controller = mediaController ?: return
         val currentIndex = controller.currentMediaItemIndex
