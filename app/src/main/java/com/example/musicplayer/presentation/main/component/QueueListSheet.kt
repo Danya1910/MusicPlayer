@@ -2,6 +2,7 @@ package com.example.musicplayer.presentation.main.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
@@ -20,14 +21,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -52,6 +50,10 @@ import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.SpotifyGreen
 import com.example.musicplayer.ui.theme.White
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.HazeTint
+import dev.chrisbanes.haze.hazeChild
 import kotlin.math.roundToInt
 
 
@@ -60,16 +62,12 @@ import kotlin.math.roundToInt
 fun QueueListSheet(
     currentTrack: Track?,
     upcomingTracks: List<Track>,
-    onDismissRequest: () -> Unit,
     onTrackClick: (Track) -> Unit,
     isPlaying: Boolean,
     onPlayPauseClick: () -> Unit,
     onMoveTrack: (fromIndex: Int, toIndex: Int) -> Unit,
+    hazeState: HazeState,
 ) {
-
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = false
-    )
 
     var localUpcomingTracks by remember(upcomingTracks) { mutableStateOf(upcomingTracks) }
 
@@ -82,134 +80,138 @@ fun QueueListSheet(
 
     val itemHeightPx = remember(density) { with(density) { 58.dp.toPx() } }
 
-    LaunchedEffect(Unit) {
-        sheetState.partialExpand()
-    }
-
-    ModalBottomSheet(
-        onDismissRequest = onDismissRequest,
-        sheetState = sheetState,
-        containerColor = DeepBlack,
-        shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp),
-        dragHandle = {
-            BottomSheetDefaults.DragHandle(
-                color = Gray
-            )
-        },
+    Column(
         modifier = Modifier
-            .padding(horizontal = 12.dp)
+            .fillMaxWidth()
+            .fillMaxHeight(0.5f)
+            .clip(shape = RoundedCornerShape(40.dp))
+            .hazeChild(
+                state = hazeState,
+                style = HazeStyle(
+                    backgroundColor = DeepBlack,
+                    blurRadius = 30.dp,
+                    tint = HazeTint(color = White.copy(alpha = 0.08f)),
+                    noiseFactor = 0.02f
+                ),
+            )
+            .border(
+                width = 1.dp,
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color.White.copy(alpha = 0.15f),
+                        Color.White.copy(alpha = 0.02f)
+                    )
+                ),
+                shape = RoundedCornerShape(40.dp)
+            )
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 16.dp)
     ) {
-        Column(
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.5f)
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 16.dp)
+                .fillMaxSize()
+                .padding(horizontal = 12.dp)
+                .padding(top = 10.dp)
         ) {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 12.dp)
-            ) {
-                item {
-                    Column {
-                        Text(
-                            text = "Queue",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 21.sp,
-                            color = White,
-                        )
-                        Spacer(modifier = Modifier.height(5.dp))
-                        Text(
-                            text = "Playing + ${currentTrack?.title}",
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 15.sp,
-                            color = Gray,
-                        )
-                    }
+            item {
+                Column {
+                    Text(
+                        text = "Queue",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 21.sp,
+                        color = White,
+                    )
+                    Spacer(modifier = Modifier.height(5.dp))
+                    Text(
+                        text = "Playing + ${currentTrack?.title}",
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 15.sp,
+                        color = Gray,
+                    )
                 }
+            }
 
-                item {
-                    Spacer(modifier = Modifier.height(10.dp))
+            item {
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+
+            item {
+                currentTrack?.let {
+                    CurrentPlayingTrack(
+                        track = currentTrack,
+                        onPlayPauseClick = onPlayPauseClick,
+                        isPlaying = isPlaying,
+                    )
                 }
+            }
 
-                item {
-                    currentTrack?.let {
-                        CurrentPlayingTrack(
-                            track = currentTrack,
-                            onPlayPauseClick = onPlayPauseClick,
-                            isPlaying = isPlaying,
-                        )
-                    }
-                }
+            item {
+                Spacer(modifier = Modifier.height(15.dp))
+            }
 
-                item {
-                    Spacer(modifier = Modifier.height(15.dp))
-                }
+            if (!upcomingTracks.isEmpty()) {
+                itemsIndexed(
+                    items = localUpcomingTracks,
+                    key = { index, track -> "${track.id}_$index" }
+                ) { index, track ->
+                    val isCurrentDragging = draggingIndex == index
+                    Box(
+                        modifier = Modifier
+                            .animateItem()
+                            .graphicsLayer {
+                                translationY = if (isCurrentDragging) itemTranslationY else 0f
 
-                if (!upcomingTracks.isEmpty()) {
-                    itemsIndexed(
-                        items = localUpcomingTracks,
-                        key = { index, track -> "${track.id}_$index" }
-                    ) { index, track ->
-                        val isCurrentDragging = draggingIndex == index
-                        Box(
-                            modifier = Modifier
-                                .animateItem()
-                                .graphicsLayer {
-                                    translationY = if (isCurrentDragging) itemTranslationY else 0f
+                                scaleX = if (isCurrentDragging) 1.05f else 1f
+                                scaleY = if (isCurrentDragging) 1.05f else 1f
+                                shadowElevation = if (isCurrentDragging) 20f else 0f
 
-                                    scaleX = if (isCurrentDragging) 1.05f else 1f
-                                    scaleY = if (isCurrentDragging) 1.05f else 1f
-                                    shadowElevation = if (isCurrentDragging) 20f else 0f
-
-                                }
-                                .background(
-                                    color = if (isCurrentDragging) White.copy(alpha = 0.08f)
-                                    else Color.Transparent,
-                                    shape = RoundedCornerShape(8.dp)
-                                )
-                        ) {
-                            TrackInQueue(
-                                track = track,
-                                onTrackClick = { onTrackClick(track) },
-                                dragHandleModifier = Modifier.pointerInput(index) {
-                                    detectDragGesturesAfterLongPress(
-                                        onDragStart = {
-                                            draggingIndex = index
-                                            itemTranslationY = 0f
-                                        },
-                                        onDragEnd = {
-                                            if (draggingIndex != -1) {
-                                                val indexOffset = (itemTranslationY / itemHeightPx).roundToInt()
-                                                val targetIndex = (draggingIndex + indexOffset)
-                                                    .coerceIn(0, localUpcomingTracks.lastIndex)
-
-                                                if (targetIndex != draggingIndex) {
-                                                    val fromList = localUpcomingTracks.toMutableList()
-                                                    val movedItem = fromList.removeAt(draggingIndex)
-                                                    fromList.add(targetIndex, movedItem)
-                                                    localUpcomingTracks = fromList
-
-                                                    onMoveTrack(draggingIndex, targetIndex)
-                                                }
-                                            }
-                                            draggingIndex = -1
-                                            itemTranslationY = 0f
-                                        },
-                                        onDragCancel = {
-                                            draggingIndex = -1
-                                            itemTranslationY = 0f
-                                        },
-                                        onDrag = { change, dragAmount ->
-                                            change.consume()
-                                            itemTranslationY += dragAmount.y
-                                        }
-                                    )
-                                },
+                            }
+                            .background(
+                                color = if (isCurrentDragging) White.copy(alpha = 0.08f)
+                                else Color.Transparent,
+                                shape = RoundedCornerShape(8.dp)
                             )
-                        }
+                    ) {
+                        TrackInQueue(
+                            track = track,
+                            onTrackClick = { onTrackClick(track) },
+                            dragHandleModifier = Modifier.pointerInput(index) {
+                                detectDragGesturesAfterLongPress(
+                                    onDragStart = {
+                                        draggingIndex = index
+                                        itemTranslationY = 0f
+                                    },
+                                    onDragEnd = {
+                                        if (draggingIndex != -1) {
+                                            val indexOffset =
+                                                (itemTranslationY / itemHeightPx).roundToInt()
+                                            val targetIndex = (draggingIndex + indexOffset)
+                                                .coerceIn(0, localUpcomingTracks.lastIndex)
+
+                                            if (targetIndex != draggingIndex) {
+                                                val fromList = localUpcomingTracks.toMutableList()
+                                                val movedItem = fromList.removeAt(draggingIndex)
+                                                fromList.add(targetIndex, movedItem)
+                                                localUpcomingTracks = fromList
+
+                                                onMoveTrack(draggingIndex, targetIndex)
+                                            }
+                                        }
+                                        draggingIndex = -1
+                                        itemTranslationY = 0f
+                                    },
+                                    onDragCancel = {
+                                        draggingIndex = -1
+                                        itemTranslationY = 0f
+                                    },
+                                    onDrag = { change, dragAmount ->
+                                        change.consume()
+                                        itemTranslationY += dragAmount.y
+                                    }
+                                )
+                            },
+                        )
                     }
                 }
             }
