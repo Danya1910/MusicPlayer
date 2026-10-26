@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -24,6 +25,7 @@ fun MainScreenColumn(
     onTrackClick: (Track) -> Unit,
     onAlbumClick: (Album) -> Unit,
     playerState: PlayerUiState,
+    onMoreAboutTrack: (Track) -> Unit,
 ) {
 
     LazyColumn(
@@ -63,11 +65,17 @@ fun MainScreenColumn(
         item {
             Spacer(modifier = Modifier.height(10.dp))
         }
-        items(tracks) { track ->
+        itemsIndexed(
+            items = tracks,
+            key = { index, track -> "${track.id}_$index" }
+        ) { index, track ->
             TrackItem(
                 track = track,
                 onTrackClick = {
                     onTrackClick(track)
+                },
+                onMoreClick = {
+                    onMoreAboutTrack(track)
                 }
             )
         }
