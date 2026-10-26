@@ -234,7 +234,7 @@ fun MainScreen(
                 sheetState = trackInfoSheetState,
                 containerColor = Color.Transparent,
                 dragHandle = null, // добавить
-                scrimColor = DeepBlack.copy(alpha = 0.2f),
+                scrimColor = DeepBlack.copy(alpha = 0.5f),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 12.dp)
