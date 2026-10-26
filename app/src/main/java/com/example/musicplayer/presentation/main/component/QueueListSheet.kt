@@ -151,7 +151,7 @@ fun QueueListSheet(
                 if (!upcomingTracks.isEmpty()) {
                     itemsIndexed(
                         items = localUpcomingTracks,
-                        key = { _, track -> track.id }
+                        key = { index, track -> "${track.id}_$index" }
                     ) { index, track ->
                         val isCurrentDragging = draggingIndex == index
                         Box(
