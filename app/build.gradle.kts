@@ -40,6 +40,8 @@ android {
 
 dependencies {
 
+    implementation("dev.chrisbanes.haze:haze:1.0.0")
+
     implementation("androidx.palette:palette-ktx:1.0.0")
 
     // Базовая библиотека плеера ExoPlayer (для проигрывания аудио по URL)
