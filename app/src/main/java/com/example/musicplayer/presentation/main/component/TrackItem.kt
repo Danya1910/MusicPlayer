@@ -32,6 +32,7 @@ import com.example.musicplayer.ui.theme.White
 fun TrackItem(
     track: Track,
     onTrackClick: () -> Unit,
+    onMoreClick: () -> Unit,
 ) {
 
     Row(
@@ -76,9 +77,13 @@ fun TrackItem(
         }
         Spacer(modifier = Modifier.width(10.dp))
         Icon(
-            painter = painterResource(R.drawable.ic_ellipsis),
+            painter = painterResource(R.drawable.ic_ellipsis_space),
             contentDescription = null,
             tint = Color(0xFFB3B3B3),
+            modifier = Modifier
+                .clickable{
+                    onMoreClick()
+                }
         )
     }
 
