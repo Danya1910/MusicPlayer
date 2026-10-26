@@ -35,6 +35,7 @@ import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.White
+import com.google.android.play.integrity.internal.ac
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
@@ -47,6 +48,40 @@ fun TrackInfo(
     hazeState: HazeState,
     playNext: () -> Unit,
 ) {
+
+    val actionsList = listOf(
+        ActionButtonData(
+            icon = R.drawable.ic_share,
+            title = "Share",
+            onClick = {}
+        ),
+        ActionButtonData(
+            icon = R.drawable.ic_circle_plus,
+            title = "Add to playlist",
+            onClick = {}
+        ),
+        ActionButtonData(
+            icon = R.drawable.ic_apple_logo,
+            title = "Add to Liked Songs",
+            onClick = {}
+        ),
+        ActionButtonData(
+            icon = R.drawable.ic_add_queue,
+            title = "Add to Queue",
+            onClick = playNext
+        ),
+        ActionButtonData(
+            icon = R.drawable.ic_album,
+            title = "Go to album",
+            onClick = {}
+        ),
+        ActionButtonData(
+            icon = R.drawable.ic_artist,
+            title = "Go to artist",
+            onClick = {  }
+        ),
+    )
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -59,7 +94,7 @@ fun TrackInfo(
                 style = HazeStyle(
                     backgroundColor = DeepBlack,
                     blurRadius = 30.dp,
-                    tint = HazeTint(color = DeepBlack.copy(alpha = 0.08f)),
+                    tint = HazeTint(color = White.copy(alpha = 0.08f)),
                     noiseFactor = 0.02f
                 ),
             )
@@ -86,13 +121,12 @@ fun TrackInfo(
                     color = Gray
                 )
         )
-        ActionButton(
-            data = ActionButtonData(
-                icon = R.drawable.ic_apple_logo,
-                title = "Add to Queue",
-                onClick = playNext
+
+        actionsList.forEach { actionButtonData ->
+            ActionButton(
+                data = actionButtonData
             )
-        )
+        }
     }
 }
 
@@ -119,7 +153,7 @@ private fun CurrentTrack(
         )
         Spacer(modifier = Modifier.width(15.dp))
         Column(
-            verticalArrangement = Arrangement.SpaceAround,
+            verticalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxHeight()
         ) {
             Text(
@@ -131,6 +165,7 @@ private fun CurrentTrack(
                 modifier = Modifier
                     .basicMarquee()
             )
+            Spacer(modifier = Modifier.height(5.dp))
             Text(
                 text = track.artist,
                 fontWeight = FontWeight.Medium,
@@ -161,7 +196,7 @@ private fun ActionButton(
         Icon(
             painter = painterResource(data.icon),
             contentDescription = null,
-            tint = Gray,
+            tint = White,
         )
         Spacer(modifier = Modifier.width(15.dp))
         Text(
