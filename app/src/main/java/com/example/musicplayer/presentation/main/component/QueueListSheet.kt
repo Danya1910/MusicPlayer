@@ -1,10 +1,14 @@
 package com.example.musicplayer.presentation.main.component
 
-import android.util.Log
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.AnchoredDraggableState
+import androidx.compose.foundation.gestures.DraggableAnchors
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -24,11 +29,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +47,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -169,43 +173,72 @@ fun QueueListSheet(
                 ) { globalIndex, item ->
 
                     if (globalIndex > currentPlayingIndex) {
-                        val dismissState = rememberSwipeToDismissBoxState(
-                            confirmValueChange = { dismissValue ->
-                                if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
-                                    val fromList = localFullQueue.toMutableList()
 
-                                    val actualGlobalIndex = fromList.indexOfFirst { it.id == item.id }
+                        val maxTargetOffsetPx = with(density) { 80.dp.toPx() }
 
-                                    if (actualGlobalIndex != -1) {
-                                        Log.d("MusicPlayer_UI", "=== СВАЙП НА UI ===")
-                                        Log.d("MusicPlayer_UI", "Смахнули трек: ${item.track.title}")
-                                        Log.d("MusicPlayer_UI", "Глобальный живой индекс (actualGlobalIndex): $actualGlobalIndex")
+                        val dragState = remember(item.id) {
+                            AnchoredDraggableState(
+                                initialValue = "Center",
+                                positionalThreshold = { distance -> distance * 0.5f },
+                                velocityThreshold = { with(density) { 100.dp.toPx() } },
+                                snapAnimationSpec = tween(durationMillis = 250),
+                                decayAnimationSpec = androidx.compose.animation.core.Animatable(0f).run {
+                                    androidx.compose.animation.core.exponentialDecay()
+                                }
+                            )
+                        }.apply {
+                            updateAnchors(
+                                DraggableAnchors {
+                                    "Center" at 0f
+                                    "Left" at -maxTargetOffsetPx
+                                    "Dismissed" at -with(density) { 150.dp.toPx() }
+                                }
+                            )
+                        }
 
-                                        fromList.removeAt(actualGlobalIndex)
-                                        localFullQueue = fromList
-
-                                        removeFromQueue(actualGlobalIndex)
-                                        true
-                                    } else {
-                                        false
-                                    }
-                                } else {
-                                    false
+                        LaunchedEffect(dragState.currentValue) {
+                            if (dragState.currentValue == "Dismissed") {
+                                val fromList = localFullQueue.toMutableList()
+                                val actualGlobalIndex = fromList.indexOfFirst { it.id == item.id }
+                                if (actualGlobalIndex != -1) {
+                                    fromList.removeAt(actualGlobalIndex)
+                                    localFullQueue = fromList
+                                    removeFromQueue(actualGlobalIndex)
                                 }
                             }
-                        )
+                        }
 
-                        SwipeToDismissBox(
-                            state = dismissState,
-                            enableDismissFromStartToEnd = false,
-                            backgroundContent = {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(Color.Red.copy(alpha = 0.8f), RoundedCornerShape(12.dp))
-                                        .padding(end = 16.dp),
-                                    contentAlignment = Alignment.CenterEnd
-                                ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(58.dp)
+                                .animateItem()
+                                .anchoredDraggable(state = dragState, orientation = Orientation.Horizontal)
+                        ) {
+                            val swipeWidthPx = (-dragState.offset).coerceAtLeast(0f)
+                            val swipeWidthDp = with(density) { swipeWidthPx.toDp() }
+
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .width(swipeWidthDp)
+                                    .fillMaxHeight()
+                                    .background(
+                                        color = Color(0xFFE91E63),
+                                        shape = RoundedCornerShape(topEnd = 12.dp, bottomEnd = 12.dp)
+                                    )
+                                    .clickable {
+                                        val fromList = localFullQueue.toMutableList()
+                                        val actualGlobalIndex = fromList.indexOfFirst { it.id == item.id }
+                                        if (actualGlobalIndex != -1) {
+                                            fromList.removeAt(actualGlobalIndex)
+                                            localFullQueue = fromList
+                                            removeFromQueue(actualGlobalIndex)
+                                        }
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (swipeWidthPx > with(density) { 24.dp.toPx() }) {
                                     Icon(
                                         painter = painterResource(id = R.drawable.ic_album),
                                         contentDescription = "Delete",
@@ -214,18 +247,19 @@ fun QueueListSheet(
                                     )
                                 }
                             }
-                        ) {
+
                             Box(
                                 modifier = Modifier
-                                    .animateItem()
+                                    .fillMaxSize()
+                                    .offset { IntOffset(dragState.offset.roundToInt(), 0) }
                                     .graphicsLayer {
                                         val currentTrackIndex = localFullQueue.indexOfFirst { it.id == item.id }
                                         val isCurrentDraggingItem = draggingIndex == currentTrackIndex
 
                                         translationY = if (isCurrentDraggingItem) itemTranslationY else 0f
-                                        scaleX = if (isCurrentDraggingItem) 1.05f else 1f
-                                        scaleY = if (isCurrentDraggingItem) 1.05f else 1f
-                                        shadowElevation = if (isCurrentDraggingItem) 20f else 0f
+                                        scaleX = if (isCurrentDraggingItem) 1.02f else 1f
+                                        scaleY = if (isCurrentDraggingItem) 1.02f else 1f
+                                        shadowElevation = if (isCurrentDraggingItem) 15f else 0f
                                     }
                                     .background(
                                         color = if (draggingIndex == localFullQueue.indexOfFirst { it.id == item.id })
@@ -253,7 +287,6 @@ fun QueueListSheet(
                                                         val movedItem = fromList.removeAt(draggingIndex)
                                                         fromList.add(targetIndex, movedItem)
                                                         localFullQueue = fromList
-
                                                         onMoveTrack(draggingIndex, targetIndex)
                                                     }
                                                 }
@@ -275,6 +308,7 @@ fun QueueListSheet(
                         }
                     }
                 }
+
             }
         }
     }
