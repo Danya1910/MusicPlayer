@@ -1,14 +1,11 @@
 package com.example.musicplayer.presentation.main.screen
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,7 +43,6 @@ import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.White
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
-import dev.chrisbanes.haze.hazeChild
 import kotlinx.coroutines.launch
 
 
@@ -227,6 +224,27 @@ fun MainScreen(
                 }
             }
         }
+
+        if (isTrackInfoVisible) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        val offset = runCatching { trackInfoSheetState.requireOffset() }.getOrNull() ?: 0f
+
+                        val startFadeOffset = 500f
+
+                        val alphaProgress = if (offset > startFadeOffset) {
+                            (0.8f - ((offset - startFadeOffset) / 1800f)).coerceIn(0f, 0.8f)
+                        } else {
+                            0.8f
+                        }
+                        alpha = alphaProgress
+                    }
+                    .background(DeepBlack)
+            )
+        }
+
         if (isTrackInfoVisible) {
 
             ModalBottomSheet(
@@ -234,11 +252,11 @@ fun MainScreen(
                 sheetState = trackInfoSheetState,
                 containerColor = Color.Transparent,
                 dragHandle = null, // добавить
-                scrimColor = DeepBlack.copy(alpha = 0.5f),
+                scrimColor = Color.Transparent,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp)
             ) {
+
                 currentInfoToShow?.let {
                     TrackInfo(
                         track = currentInfoToShow!!,
