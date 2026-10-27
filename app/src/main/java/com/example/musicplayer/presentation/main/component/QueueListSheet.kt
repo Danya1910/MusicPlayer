@@ -224,7 +224,7 @@ fun QueueListSheet(
                                     .width(swipeWidthDp)
                                     .fillMaxHeight()
                                     .background(
-                                        color = Color(0xFFE91E63),
+                                        color = Color(0xFFFF0000),
                                         shape = RoundedCornerShape(topEnd = 12.dp, bottomEnd = 12.dp)
                                     )
                                     .clickable {
@@ -240,10 +240,10 @@ fun QueueListSheet(
                             ) {
                                 if (swipeWidthPx > with(density) { 24.dp.toPx() }) {
                                     Icon(
-                                        painter = painterResource(id = R.drawable.ic_album),
+                                        painter = painterResource(id = R.drawable.ic_trash),
                                         contentDescription = "Delete",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(24.dp)
+                                        tint = Black,
+                                        modifier = Modifier.size(36.dp)
                                     )
                                 }
                             }
