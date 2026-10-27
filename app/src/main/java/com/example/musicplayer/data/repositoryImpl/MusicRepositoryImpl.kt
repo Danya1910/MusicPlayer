@@ -284,5 +284,18 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun removeTrackFromQueue(index: Int) {
+        val controller = mediaController ?: return
+        val currentQueue = _currentQueue.value
+
+        if(index in currentQueue.indices) {
+            controller.removeMediaItem(index)
+
+            val updatedQueue = currentQueue.toMutableList()
+            updatedQueue.removeAt(index)
+            _currentQueue.value = updatedQueue
+        }
+    }
+
 
 }
