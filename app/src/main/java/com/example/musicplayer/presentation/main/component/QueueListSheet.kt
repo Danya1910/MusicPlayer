@@ -168,14 +168,12 @@ fun QueueListSheet(
                     key = { _, item -> item.id }
                 ) { globalIndex, item ->
 
-                    // Отображаем в блоке "Далее" только те треки, которые идут СТРОГО после текущего
                     if (globalIndex > currentPlayingIndex) {
                         val dismissState = rememberSwipeToDismissBoxState(
                             confirmValueChange = { dismissValue ->
                                 if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
                                     val fromList = localFullQueue.toMutableList()
 
-                                    // Находим АКТУАЛЬНЫЙ чистый глобальный индекс строчки
                                     val actualGlobalIndex = fromList.indexOfFirst { it.id == item.id }
 
                                     if (actualGlobalIndex != -1) {
@@ -183,11 +181,9 @@ fun QueueListSheet(
                                         Log.d("MusicPlayer_UI", "Смахнули трек: ${item.track.title}")
                                         Log.d("MusicPlayer_UI", "Глобальный живой индекс (actualGlobalIndex): $actualGlobalIndex")
 
-                                        // 1. Удаляем из локального полного списка шторки
                                         fromList.removeAt(actualGlobalIndex)
                                         localFullQueue = fromList
 
-                                        // 2. Отправляем чистый глобальный индекс в плеер/ViewModel
                                         removeFromQueue(actualGlobalIndex)
                                         true
                                     } else {
@@ -201,7 +197,7 @@ fun QueueListSheet(
 
                         SwipeToDismissBox(
                             state = dismissState,
-                            enableDismissFromStartToEnd = false, // Только влево
+                            enableDismissFromStartToEnd = false,
                             backgroundContent = {
                                 Box(
                                     modifier = Modifier
@@ -211,7 +207,7 @@ fun QueueListSheet(
                                     contentAlignment = Alignment.CenterEnd
                                 ) {
                                     Icon(
-                                        painter = painterResource(id = R.drawable.ic_album), // Иконка удаления/корзины
+                                        painter = painterResource(id = R.drawable.ic_album),
                                         contentDescription = "Delete",
                                         tint = Color.White,
                                         modifier = Modifier.size(24.dp)
@@ -249,7 +245,6 @@ fun QueueListSheet(
                                             onDragEnd = {
                                                 if (draggingIndex != -1) {
                                                     val indexOffset = (itemTranslationY / itemHeightPx).roundToInt()
-                                                    // Ограничиваем Drag-and-Drop строго в пределах будущих треков
                                                     val targetIndex = (draggingIndex + indexOffset)
                                                         .coerceIn(currentPlayingIndex + 1, localFullQueue.lastIndex)
 
@@ -259,7 +254,6 @@ fun QueueListSheet(
                                                         fromList.add(targetIndex, movedItem)
                                                         localFullQueue = fromList
 
-                                                        // Передаем глобальные чистые индексы без смещений
                                                         onMoveTrack(draggingIndex, targetIndex)
                                                     }
                                                 }
