@@ -43,6 +43,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -192,7 +193,27 @@ fun TrackView(
             )
             Spacer(modifier = Modifier.height(30.dp))
         }
+        if (showQueue) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        val offset = runCatching { sheetState.requireOffset() }.getOrNull() ?: 0f
+
+                        val alphaProgress = if (offset > 0f) {
+                            (1f - (offset / 2300f)).coerceIn(0f, 0.7f)
+                        } else {
+                            0.7f
+                        }
+
+                        alpha = alphaProgress
+                    }
+                    .background(Color.Black) // Делаем глубокое кастомное затемнение
+            )
+        }
     }
+
+
 
 
     Box(
@@ -200,6 +221,7 @@ fun TrackView(
         modifier = Modifier
             .fillMaxSize()
     ) {
+
         if (showQueue) {
             ModalBottomSheet(
                 onDismissRequest = {
@@ -207,7 +229,7 @@ fun TrackView(
                 },
                 sheetState = sheetState,
                 containerColor = Color.Transparent,
-                scrimColor = DeepBlack.copy(alpha = 0.5f),
+                scrimColor = Color.Transparent,
                 shape = RoundedCornerShape(40.dp),
                 dragHandle = null,
                 modifier = Modifier
