@@ -36,4 +36,6 @@ interface MusicRepository {
 
     fun moveTrackInQueue(fromUpcomingIndex: Int, toUpcomingIndex: Int)
 
+    fun removeTrackFromQueue(index: Int)
+
 }
