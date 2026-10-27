@@ -3,6 +3,7 @@ package com.example.musicplayer.data.repositoryImpl
 import android.content.ComponentName
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
@@ -260,42 +261,65 @@ class MusicRepositoryImpl @Inject constructor(
         _currentQueue.value = updatedQueue
     }
 
-    override fun moveTrackInQueue(fromUpcomingIndex: Int, toUpcomingIndex: Int) {
+    override fun moveTrackInQueue(fromIndex: Int, toIndex: Int) {
         val controller = mediaController ?: return
-        val currentIndex = controller.currentMediaItemIndex
-
-        if (currentIndex == -1) return
-
-        val realFromIndex = currentIndex + 1 + fromUpcomingIndex
-        val realToIndex = currentIndex + 1 + toUpcomingIndex
-
+        val currentQueueData = _currentQueue.value
         val totalItems = controller.mediaItemCount
 
-        if (realFromIndex in 0 until totalItems && realToIndex in 0 until totalItems) {
+        if (fromIndex in 0 until totalItems && toIndex in 0 until totalItems) {
+            // Проверяем, включен ли режим перемешивания прямо сейчас
+            val isShuffleWasEnabled = controller.shuffleModeEnabled
 
-            controller.moveMediaItem(realFromIndex, realToIndex)
-
-            val updatedQueue = _currentQueue.value.toMutableList().apply {
-                if (realFromIndex in indices && realToIndex in indices) {
-                    add(realToIndex, removeAt(realFromIndex))
-                }
+            if (isShuffleWasEnabled) {
+                // ТРЮК ДЛЯ ШАФЛА: временно отключаем, чтобы сбросить старый случайный граф
+                controller.shuffleModeEnabled = false
             }
-            _currentQueue.value = updatedQueue
+
+            // 1. Перемещаем элемент в самом плеере Media3
+            controller.moveMediaItem(fromIndex, toIndex)
+
+            if (isShuffleWasEnabled) {
+                // Включаем Shuffle обратно — ExoPlayer сгенерирует НОВУЮ цепочку с учетом вашей перестановки
+                controller.shuffleModeEnabled = true
+            }
+
+            val updatedQueue = currentQueueData.toMutableList()
+            if (fromIndex in updatedQueue.indices && toIndex in updatedQueue.indices) {
+                val movedItem = updatedQueue.removeAt(fromIndex)
+                updatedQueue.add(toIndex, movedItem)
+                _currentQueue.value = updatedQueue
+            }
         }
     }
 
     override fun removeTrackFromQueue(index: Int) {
         val controller = mediaController ?: return
-        val currentQueue = _currentQueue.value
+        val currentQueueData = _currentQueue.value
+        val totalItemsInPlayer = controller.mediaItemCount
 
-        if(index in currentQueue.indices) {
+        if (index in 0 until totalItemsInPlayer) {
+            val trackToBeRemoved = controller.getMediaItemAt(index)
+            Log.d("MusicPlayer_Repo", "Плеер УДАЛЯЕТ трек: ${trackToBeRemoved.mediaMetadata.title}")
+
             controller.removeMediaItem(index)
+        } else {
+            Log.e("MusicPlayer_Repo", "ОШИБКА: Индекс $index вышел за границы плеера (0..${totalItemsInPlayer - 1})")
+        }
 
-            val updatedQueue = currentQueue.toMutableList()
+        // 2. Синхронно обновляем стейт очереди по этому же прямому индексу
+        if (index in currentQueueData.indices) {
+            val updatedQueue = currentQueueData.toMutableList()
+            Log.d("MusicPlayer_Repo", "Удаляем из стейта трек: ${updatedQueue[index].title}")
+
             updatedQueue.removeAt(index)
             _currentQueue.value = updatedQueue
+            Log.d("MusicPlayer_Repo", "Стейт _currentQueue успешно обновлен.")
+        } else {
+            Log.e("MusicPlayer_Repo", "ОШИБКА: Индекс $index отсутствует в _currentQueue")
         }
     }
+
+
 
 
 }
