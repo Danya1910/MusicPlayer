@@ -230,7 +230,8 @@ fun MainScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .graphicsLayer {
-                        val offset = runCatching { trackInfoSheetState.requireOffset() }.getOrNull() ?: 0f
+                        val offset =
+                            runCatching { trackInfoSheetState.requireOffset() }.getOrNull() ?: 0f
 
                         val startFadeOffset = 500f
 
@@ -327,6 +328,7 @@ fun MainScreen(
                     isShuffled = playerState.isShuffleEnabled,
                     repeatMode = playerState.repeatMode,
                     upcomingTracks = upcomingTracks,
+                    currentQueue = currentQueue,
                     onTrackInQueueClick = { track ->
                         mainViewModel.playTrackWithQueue(
                             track = track,
@@ -337,6 +339,11 @@ fun MainScreen(
                         mainViewModel.moveTrack(
                             fromIndex = fromIndex,
                             toIndex = toIndex,
+                        )
+                    },
+                    removeFromQueue = { index ->
+                        mainViewModel.removeTrackFromQueue(
+                            index = index
                         )
                     }
                 )
