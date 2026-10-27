@@ -267,19 +267,15 @@ class MusicRepositoryImpl @Inject constructor(
         val totalItems = controller.mediaItemCount
 
         if (fromIndex in 0 until totalItems && toIndex in 0 until totalItems) {
-            // Проверяем, включен ли режим перемешивания прямо сейчас
             val isShuffleWasEnabled = controller.shuffleModeEnabled
 
             if (isShuffleWasEnabled) {
-                // ТРЮК ДЛЯ ШАФЛА: временно отключаем, чтобы сбросить старый случайный граф
                 controller.shuffleModeEnabled = false
             }
 
-            // 1. Перемещаем элемент в самом плеере Media3
             controller.moveMediaItem(fromIndex, toIndex)
 
             if (isShuffleWasEnabled) {
-                // Включаем Shuffle обратно — ExoPlayer сгенерирует НОВУЮ цепочку с учетом вашей перестановки
                 controller.shuffleModeEnabled = true
             }
 
@@ -306,16 +302,11 @@ class MusicRepositoryImpl @Inject constructor(
             Log.e("MusicPlayer_Repo", "ОШИБКА: Индекс $index вышел за границы плеера (0..${totalItemsInPlayer - 1})")
         }
 
-        // 2. Синхронно обновляем стейт очереди по этому же прямому индексу
         if (index in currentQueueData.indices) {
             val updatedQueue = currentQueueData.toMutableList()
-            Log.d("MusicPlayer_Repo", "Удаляем из стейта трек: ${updatedQueue[index].title}")
 
             updatedQueue.removeAt(index)
             _currentQueue.value = updatedQueue
-            Log.d("MusicPlayer_Repo", "Стейт _currentQueue успешно обновлен.")
-        } else {
-            Log.e("MusicPlayer_Repo", "ОШИБКА: Индекс $index отсутствует в _currentQueue")
         }
     }
 
