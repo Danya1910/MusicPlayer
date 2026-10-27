@@ -92,9 +92,9 @@ fun TrackInfo(
                 state = hazeState,
                 style = HazeStyle(
                     backgroundColor = DeepBlack,
-                    blurRadius = 30.dp,
-                    tint = HazeTint(color = White.copy(alpha = 0.08f)),
-                    noiseFactor = 0.02f
+                    blurRadius = 10.dp,
+                    tint = HazeTint(color = DeepBlack.copy(alpha = 0.8f)),
+                    noiseFactor = 0.001f
                 ),
             )
             .border(
@@ -195,7 +195,7 @@ private fun ActionButton(
         Icon(
             painter = painterResource(data.icon),
             contentDescription = null,
-            tint = White,
+            tint = Gray,
         )
         Spacer(modifier = Modifier.width(15.dp))
         Text(
