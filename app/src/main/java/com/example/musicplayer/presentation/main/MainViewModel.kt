@@ -148,6 +148,12 @@ class MainViewModel @Inject constructor(
         musicRepository.moveTrackInQueue(fromIndex, toIndex)
     }
 
+    fun removeTrackFromQueue(index: Int) {
+        musicRepository.removeTrackFromQueue(
+            index = index,
+        )
+    }
+
 
     fun updateColorsFromBitmap(id: String, bitmap: Bitmap) {
         if (_paletteState.value.containsKey(id)) return
