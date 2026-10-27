@@ -1,5 +1,6 @@
 package com.example.musicplayer.presentation.main.component
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
@@ -23,7 +24,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,14 +66,22 @@ import kotlin.math.roundToInt
 fun QueueListSheet(
     currentTrack: Track?,
     upcomingTracks: List<Track>,
+    currentQueue: List<Track>,
     onTrackClick: (Track) -> Unit,
     isPlaying: Boolean,
     onPlayPauseClick: () -> Unit,
     onMoveTrack: (fromIndex: Int, toIndex: Int) -> Unit,
+    removeFromQueue: (Int) -> Unit,
     hazeState: HazeState,
 ) {
 
-    var localUpcomingTracks by remember(upcomingTracks) { mutableStateOf(upcomingTracks) }
+    var localFullQueue by remember(currentQueue) {
+        mutableStateOf(currentQueue.map { QueueItem(track = it) })
+    }
+
+    val currentPlayingIndex = remember(currentTrack, currentQueue) {
+        currentQueue.indexOfFirst { it.id == currentTrack?.id }.coerceAtLeast(0)
+    }
 
     var draggingIndex by remember { mutableStateOf(-1) }
 
@@ -152,66 +164,121 @@ fun QueueListSheet(
 
             if (!upcomingTracks.isEmpty()) {
                 itemsIndexed(
-                    items = localUpcomingTracks,
-                    key = { index, track -> "${track.id}_$index" }
-                ) { index, track ->
-                    val isCurrentDragging = draggingIndex == index
-                    Box(
-                        modifier = Modifier
-                            .animateItem()
-                            .graphicsLayer {
-                                translationY = if (isCurrentDragging) itemTranslationY else 0f
+                    items = localFullQueue,
+                    key = { _, item -> item.id }
+                ) { globalIndex, item ->
 
-                                scaleX = if (isCurrentDragging) 1.05f else 1f
-                                scaleY = if (isCurrentDragging) 1.05f else 1f
-                                shadowElevation = if (isCurrentDragging) 20f else 0f
+                    // Отображаем в блоке "Далее" только те треки, которые идут СТРОГО после текущего
+                    if (globalIndex > currentPlayingIndex) {
+                        val dismissState = rememberSwipeToDismissBoxState(
+                            confirmValueChange = { dismissValue ->
+                                if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
+                                    val fromList = localFullQueue.toMutableList()
 
-                            }
-                            .background(
-                                color = if (isCurrentDragging) White.copy(alpha = 0.08f)
-                                else Color.Transparent,
-                                shape = RoundedCornerShape(8.dp)
-                            )
-                    ) {
-                        TrackInQueue(
-                            track = track,
-                            onTrackClick = { onTrackClick(track) },
-                            dragHandleModifier = Modifier.pointerInput(index) {
-                                detectDragGesturesAfterLongPress(
-                                    onDragStart = {
-                                        draggingIndex = index
-                                        itemTranslationY = 0f
-                                    },
-                                    onDragEnd = {
-                                        if (draggingIndex != -1) {
-                                            val indexOffset =
-                                                (itemTranslationY / itemHeightPx).roundToInt()
-                                            val targetIndex = (draggingIndex + indexOffset)
-                                                .coerceIn(0, localUpcomingTracks.lastIndex)
+                                    // Находим АКТУАЛЬНЫЙ чистый глобальный индекс строчки
+                                    val actualGlobalIndex = fromList.indexOfFirst { it.id == item.id }
 
-                                            if (targetIndex != draggingIndex) {
-                                                val fromList = localUpcomingTracks.toMutableList()
-                                                val movedItem = fromList.removeAt(draggingIndex)
-                                                fromList.add(targetIndex, movedItem)
-                                                localUpcomingTracks = fromList
+                                    if (actualGlobalIndex != -1) {
+                                        Log.d("MusicPlayer_UI", "=== СВАЙП НА UI ===")
+                                        Log.d("MusicPlayer_UI", "Смахнули трек: ${item.track.title}")
+                                        Log.d("MusicPlayer_UI", "Глобальный живой индекс (actualGlobalIndex): $actualGlobalIndex")
 
-                                                onMoveTrack(draggingIndex, targetIndex)
-                                            }
-                                        }
-                                        draggingIndex = -1
-                                        itemTranslationY = 0f
-                                    },
-                                    onDragCancel = {
-                                        draggingIndex = -1
-                                        itemTranslationY = 0f
-                                    },
-                                    onDrag = { change, dragAmount ->
-                                        change.consume()
-                                        itemTranslationY += dragAmount.y
+                                        // 1. Удаляем из локального полного списка шторки
+                                        fromList.removeAt(actualGlobalIndex)
+                                        localFullQueue = fromList
+
+                                        // 2. Отправляем чистый глобальный индекс в плеер/ViewModel
+                                        removeFromQueue(actualGlobalIndex)
+                                        true
+                                    } else {
+                                        false
                                     }
-                                )
-                            },
+                                } else {
+                                    false
+                                }
+                            }
                         )
+
+                        SwipeToDismissBox(
+                            state = dismissState,
+                            enableDismissFromStartToEnd = false, // Только влево
+                            backgroundContent = {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color.Red.copy(alpha = 0.8f), RoundedCornerShape(12.dp))
+                                        .padding(end = 16.dp),
+                                    contentAlignment = Alignment.CenterEnd
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_album), // Иконка удаления/корзины
+                                        contentDescription = "Delete",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                            }
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .animateItem()
+                                    .graphicsLayer {
+                                        val currentTrackIndex = localFullQueue.indexOfFirst { it.id == item.id }
+                                        val isCurrentDraggingItem = draggingIndex == currentTrackIndex
+
+                                        translationY = if (isCurrentDraggingItem) itemTranslationY else 0f
+                                        scaleX = if (isCurrentDraggingItem) 1.05f else 1f
+                                        scaleY = if (isCurrentDraggingItem) 1.05f else 1f
+                                        shadowElevation = if (isCurrentDraggingItem) 20f else 0f
+                                    }
+                                    .background(
+                                        color = if (draggingIndex == localFullQueue.indexOfFirst { it.id == item.id })
+                                            White.copy(alpha = 0.08f) else DeepBlack.copy(alpha = 0.4f),
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                            ) {
+                                TrackInQueue(
+                                    track = item.track,
+                                    onTrackClick = { onTrackClick(item.track) },
+                                    dragHandleModifier = Modifier.pointerInput(item.id) {
+                                        detectDragGesturesAfterLongPress(
+                                            onDragStart = {
+                                                draggingIndex = localFullQueue.indexOfFirst { it.id == item.id }
+                                                itemTranslationY = 0f
+                                            },
+                                            onDragEnd = {
+                                                if (draggingIndex != -1) {
+                                                    val indexOffset = (itemTranslationY / itemHeightPx).roundToInt()
+                                                    // Ограничиваем Drag-and-Drop строго в пределах будущих треков
+                                                    val targetIndex = (draggingIndex + indexOffset)
+                                                        .coerceIn(currentPlayingIndex + 1, localFullQueue.lastIndex)
+
+                                                    if (targetIndex != draggingIndex) {
+                                                        val fromList = localFullQueue.toMutableList()
+                                                        val movedItem = fromList.removeAt(draggingIndex)
+                                                        fromList.add(targetIndex, movedItem)
+                                                        localFullQueue = fromList
+
+                                                        // Передаем глобальные чистые индексы без смещений
+                                                        onMoveTrack(draggingIndex, targetIndex)
+                                                    }
+                                                }
+                                                draggingIndex = -1
+                                                itemTranslationY = 0f
+                                            },
+                                            onDragCancel = {
+                                                draggingIndex = -1
+                                                itemTranslationY = 0f
+                                            },
+                                            onDrag = { change, dragAmount ->
+                                                change.consume()
+                                                itemTranslationY += dragAmount.y
+                                            }
+                                        )
+                                    },
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -358,3 +425,8 @@ private fun TrackInQueue(
         )
     }
 }
+
+data class QueueItem(
+    val id: String = java.util.UUID.randomUUID().toString(), // Уникальный UUID строчки
+    val track: Track
+)
