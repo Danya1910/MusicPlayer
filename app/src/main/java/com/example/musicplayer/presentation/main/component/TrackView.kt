@@ -87,8 +87,10 @@ fun TrackView(
     isShuffled: Boolean,
     repeatMode: Int,
     upcomingTracks: List<Track>,
+    currentQueue: List<Track>,
     onTrackInQueueClick: (Track) -> Unit,
     onMoveTrack: (fromIndex: Int, toIndex: Int) -> Unit,
+    removeFromQueue: (Int) -> Unit,
 ) {
 
     val bgGradient = Brush.verticalGradient(
@@ -238,6 +240,7 @@ fun TrackView(
                 QueueListSheet(
                     currentTrack = playerState.currentTrack,
                     upcomingTracks = upcomingTracks,
+                    currentQueue = currentQueue,
                     onTrackClick = { track ->
                         onTrackInQueueClick(track)
                     },
@@ -247,6 +250,9 @@ fun TrackView(
                         onMoveTrack(fromIndex, toIndex)
                     },
                     hazeState = hazeState,
+                    removeFromQueue = { index ->
+                        removeFromQueue(index)
+                    }
                 )
             }
         }
