@@ -11,10 +11,12 @@ interface TrackRepository {
 
     fun getAlbums() : Flow<List<Album>>
 
-    suspend fun createPlayList(playList: PlayList) : String
+    suspend fun createPlayList(
+        title: String,
+    ) : String
 
-    suspend fun addTrackToPlayList(playListId: String, trackId: Int)
+    suspend fun addTrackToPlayList(playListId: String, trackId: String)
 
-    suspend fun removeTrackFromPlayList(playListId: String, trackId: Int)
+    suspend fun removeTrackFromPlayList(playListId: String, trackId: String)
 
 }
