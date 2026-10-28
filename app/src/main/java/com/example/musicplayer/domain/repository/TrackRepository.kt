@@ -13,4 +13,6 @@ interface TrackRepository {
 
     suspend fun createPlayList(playList: PlayList) : String
 
+    suspend fun addTrackToPlayList(playListId: String, trackId: Int)
+
 }
