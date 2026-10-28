@@ -37,6 +37,7 @@ import com.example.musicplayer.presentation.main.component.BottomBar
 import com.example.musicplayer.presentation.main.component.MainScreenColumn
 import com.example.musicplayer.presentation.main.component.ModalRightSheet
 import com.example.musicplayer.presentation.main.component.NowPlayingBar
+import com.example.musicplayer.presentation.main.component.PlayListNameInput
 import com.example.musicplayer.presentation.main.component.TrackInfo
 import com.example.musicplayer.presentation.main.component.TrackView
 import com.example.musicplayer.presentation.main.state.MainUiState
@@ -44,7 +45,6 @@ import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.White
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 
@@ -81,9 +81,11 @@ fun MainScreen(
 
     val trackInfoSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val playListSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val nameInputSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     var currentInfoToShow by remember { mutableStateOf<Track?>(null) }
-    var currentTrackIdForAdd by remember { mutableStateOf<String?>(null) }
+    var currentTrackForAdd by remember { mutableStateOf<Track?>(null) }
+    var showPlayListName by remember { mutableStateOf(false) }
 
 
     Box(
@@ -272,13 +274,18 @@ fun MainScreen(
                                 track = currentInfoToShow!!
                             )
                         },
+                        addToPlayList = {
+                            currentTrackForAdd = currentInfoToShow!!
+                            isTrackInfoVisible = false
+                            isPlayListSelectionVisible = true
+                        }
                     )
                 }
             }
         }
     }
 
-    if(isPlayListSelectionVisible) {
+    if (isPlayListSelectionVisible) {
         ModalBottomSheet(
             onDismissRequest = { isPlayListSelectionVisible = false },
             sheetState = playListSheetState,
@@ -288,28 +295,54 @@ fun MainScreen(
             contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
             modifier = Modifier.fillMaxSize()
         ) {
-            currentTrackIdForAdd?.let {
+            currentTrackForAdd?.let {
                 AddTrackToPlayListWidget(
                     playLists = emptyList(),
                     onCancelClick = {
                         isPlayListSelectionVisible = false
-                        currentTrackIdForAdd = null
+                        currentTrackForAdd = null
                     },
                     onDoneClick = {
                         isPlayListSelectionVisible = false
-                        currentTrackIdForAdd = null
+                        currentTrackForAdd = null
                     },
                     onCreateClick = {
-                        // перенос на страницу ввода имени
+                        showPlayListName = true
+                        isPlayListSelectionVisible = false
                     },
                     onAddInPlayListClick = { id ->
                         scope.launch {
                             mainViewModel.addTrackToPlayList(
                                 playListId = id,
-                                trackId = currentTrackIdForAdd!!
+                                trackId = currentTrackForAdd!!.id
                             )
                         }
                     }
+                )
+            }
+        }
+    }
+
+    if (showPlayListName) {
+        ModalBottomSheet(
+            onDismissRequest = { showPlayListName = false },
+            sheetState = nameInputSheetState,
+            containerColor = Color.Transparent,
+            dragHandle = null,
+            scrimColor = DeepBlack.copy(alpha = 0.5f),
+            contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
+            modifier = Modifier.fillMaxSize()
+        ) {
+            currentTrackForAdd?.let { track ->
+                PlayListNameInput(
+                    onCreateClick = { title ->
+                        mainViewModel.createPlayListWithTrack(
+                            title = title,
+                            trackId = track.id
+                        )
+                        showPlayListName = false
+                    },
+                    trackName = track.title
                 )
             }
         }
