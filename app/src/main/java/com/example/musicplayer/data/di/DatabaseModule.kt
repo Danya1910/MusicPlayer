@@ -1,9 +1,11 @@
 package com.example.musicplayer.data.di
 
 import android.content.Context
+import androidx.room.Database
 import androidx.room.Room
 import com.example.musicplayer.data.local.AppDatabase
 import com.example.musicplayer.data.local.dao.AlbumDao
+import com.example.musicplayer.data.local.dao.PlayListDao
 import com.example.musicplayer.data.local.dao.TrackDao
 import dagger.Module
 import dagger.Provides
@@ -39,6 +41,12 @@ object DatabaseModule {
     @Singleton
     fun provideAlbumDao(database: AppDatabase): AlbumDao {
         return database.albumDao()
+    }
+
+    @Provides
+    @Singleton
+    fun providePlayListDao(database: AppDatabase): PlayListDao {
+        return database.playListDao()
     }
 
 }
