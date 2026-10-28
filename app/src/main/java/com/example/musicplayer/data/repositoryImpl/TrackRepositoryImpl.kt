@@ -12,6 +12,7 @@ import com.example.musicplayer.domain.model.PlayList
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.domain.repository.TrackRepository
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -120,6 +121,17 @@ class TrackRepositoryImpl @Inject constructor(
         try {
             newDocumentRef.set(finalPlayList).await()
             return generatedId
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    override suspend fun addTrackToPlayList(playListId: String, trackId: Int) {
+        try {
+            firestore.collection("playlists")
+                .document(playListId)
+                .update("tracks", FieldValue.arrayUnion(trackId))
+                .await()
         } catch (e: Exception) {
             throw e
         }
