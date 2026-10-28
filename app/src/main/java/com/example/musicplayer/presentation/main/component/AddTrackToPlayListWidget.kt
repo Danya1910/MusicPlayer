@@ -1,6 +1,5 @@
 package com.example.musicplayer.presentation.main.component
 
-import android.widget.Space
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
@@ -11,13 +10,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -26,10 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.ModifierInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,7 +35,6 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.PlayList
-import com.example.musicplayer.presentation.main.util.glassEffect
 import com.example.musicplayer.ui.theme.DarkGray
 import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.White
@@ -82,6 +79,25 @@ fun AddTrackToPlayListWidget(
                 )
         )
 
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp)
+        ) {
+            items(playLists) { playList ->
+                PlayListItem(
+                    playList = playList,
+                    onAddInPlayListClick = {
+                        playList.id?.let {
+                            onAddInPlayListClick(
+                                it
+                            )
+                        }
+                    }
+                )
+            }
+        }
+
     }
 
 }
@@ -96,6 +112,7 @@ private fun ActionButtons(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
+            .padding(horizontal = 20.dp)
     ) {
         Text(
             text = "Cancel",
@@ -137,6 +154,7 @@ private fun CreatePlayList(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
+            .padding(horizontal = 20.dp)
     ) {
         Text(
             text = "Save in",
@@ -174,6 +192,9 @@ private fun PlayListItem(
         modifier = Modifier
             .fillMaxWidth()
             .height(90.dp)
+            .clickable {
+                onAddInPlayListClick()
+            }
     ) {
         AsyncImage(
             model = playList.imageUrl,
@@ -215,18 +236,11 @@ private fun PlayListItem(
             tint = Gray,
             modifier = Modifier
                 .size(25.dp)
-                .padding(all = 5.dp)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ){
-                    onAddInPlayListClick()
-                }
         )
     }
 
 }
 
 fun Int.toSongsString(): String {
-    return if(this == 1) "1 song" else "$this songs"
+    return if (this == 1) "1 song" else "$this songs"
 }
