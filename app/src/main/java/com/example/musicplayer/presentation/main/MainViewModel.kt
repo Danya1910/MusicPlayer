@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -65,7 +66,6 @@ class MainViewModel @Inject constructor(
 
     val currentTrack = musicRepository.currentTrack
     val isPlaying = musicRepository.isPlaying
-
     private val _paletteState =
         MutableStateFlow<Map<String, Triple<Color, Color, Color>>>(emptyMap())
 
