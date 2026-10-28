@@ -212,4 +212,33 @@ class MainViewModel @Inject constructor(
         musicRepository.toggleRepeatMode()
     }
 
+    suspend fun createPlayList(
+        title: String
+    ) {
+        trackRepository.createPlayList(
+            title = title,
+        )
+    }
+
+    suspend fun addTrackToPlayList(
+        playListId: String,
+        trackId: String,
+    ) {
+        trackRepository.addTrackToPlayList(
+            playListId = playListId,
+            trackId = trackId,
+        )
+    }
+
+    suspend fun removeTrackFromPlayList(
+        playListId: String,
+        trackId: String,
+    ) {
+        trackRepository.removeTrackFromPlayList(
+            playListId = playListId,
+            trackId = trackId,
+        )
+    }
+
+
 }
