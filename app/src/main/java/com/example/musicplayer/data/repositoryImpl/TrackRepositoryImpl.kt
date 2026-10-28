@@ -2,6 +2,7 @@ package com.example.musicplayer.data.repositoryImpl
 
 import android.util.Log
 import com.example.musicplayer.data.local.dao.AlbumDao
+import com.example.musicplayer.data.local.dao.PlayListDao
 import com.example.musicplayer.data.local.dao.TrackDao
 import com.example.musicplayer.data.local.entity.AlbumEntity
 import com.example.musicplayer.data.local.entity.toDomain
@@ -29,6 +30,7 @@ class TrackRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val trackDao: TrackDao,
     private val albumDao: AlbumDao,
+    private val playListDao: PlayListDao,
 ) : TrackRepository {
 
     override fun getAllTrack(): Flow<List<Track>> = flow {
@@ -135,6 +137,50 @@ class TrackRepositoryImpl @Inject constructor(
             throw e
         }
     }
+
+    override fun getUserPlayLists(): Flow<List<PlayList>> = flow {
+
+        val currentUserId = firebaseAuth.currentUser?.uid
+            ?: throw Exception("Пользователь не авторизирован")
+
+        val savedPlayLists = playListDao.getPlaylistsOnce(currentUserId).map {
+            it.toDomain()
+        }
+        emit(savedPlayLists)
+
+        try {
+            val playListsSnapshot =firestore.collection("playlists")
+                .whereEqualTo("creatorId", currentUserId)
+                .get()
+                .await()
+
+            val remotePlayLists = playListsSnapshot.documents.map { document ->
+                val rawTracks = document.get("tracks") as? List<*>
+                val trackIds = rawTracks?.mapNotNull { it?.toString() } ?: emptyList()
+
+                PlayList(
+                    id = document.id,
+                    name = document.getString("name") ?: "Без названия",
+                    updatedAt = document.getLong("updatedAt") ?: 0L,
+                    imageUrl = document.getString("imageUrl"),
+                    creatorId = document.getString("creatorId"),
+                    creatorName = document.getString("creatorName"),
+                    isPrivate = document.getBoolean("isPrivate") ?: true,
+                    tracks = trackIds
+                )
+            }
+
+            val entitiesToInsert = remotePlayLists.map { it.toEntity() }
+            playListDao.insertPlaylists(entitiesToInsert)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        emitAll(
+            playListDao.getPlaylistsFlow(currentUserId)
+                .map { list -> list.map { it.toDomain() } }
+        )
+
+    }.flowOn(Dispatchers.IO)
 
     override suspend fun addTrackToPlayList(playListId: String, trackId: String) {
         try {
