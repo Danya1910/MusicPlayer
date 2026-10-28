@@ -31,6 +31,7 @@ import androidx.navigation.NavController
 import com.example.musicplayer.domain.model.Album
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.presentation.main.MainViewModel
+import com.example.musicplayer.presentation.main.component.AddTrackToPlayListWidget
 import com.example.musicplayer.presentation.main.component.AlbumView
 import com.example.musicplayer.presentation.main.component.BottomBar
 import com.example.musicplayer.presentation.main.component.MainScreenColumn
@@ -43,6 +44,7 @@ import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.White
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 
@@ -65,6 +67,7 @@ fun MainScreen(
     var isAlbumViewVisible by remember { mutableStateOf(false) }
     var isTrackViewVisible by remember { mutableStateOf(false) }
     var isTrackInfoVisible by remember { mutableStateOf(false) }
+    var isPlayListSelectionVisible by remember { mutableStateOf(false) }
 
     var clickedAlbum by remember { mutableStateOf<Album?>(null) }
 
@@ -77,8 +80,10 @@ fun MainScreen(
     val currentQueue by mainViewModel.currentQueue.collectAsStateWithLifecycle()
 
     val trackInfoSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val playListSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     var currentInfoToShow by remember { mutableStateOf<Track?>(null) }
+    var currentTrackIdForAdd by remember { mutableStateOf<String?>(null) }
 
 
     Box(
@@ -273,6 +278,42 @@ fun MainScreen(
         }
     }
 
+    if(isPlayListSelectionVisible) {
+        ModalBottomSheet(
+            onDismissRequest = { isPlayListSelectionVisible = false },
+            sheetState = playListSheetState,
+            containerColor = Color.Transparent,
+            dragHandle = null,
+            scrimColor = DeepBlack.copy(alpha = 0.5f),
+            contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
+            modifier = Modifier.fillMaxSize()
+        ) {
+            currentTrackIdForAdd?.let {
+                AddTrackToPlayListWidget(
+                    playLists = emptyList(),
+                    onCancelClick = {
+                        isPlayListSelectionVisible = false
+                        currentTrackIdForAdd = null
+                    },
+                    onDoneClick = {
+                        isPlayListSelectionVisible = false
+                        currentTrackIdForAdd = null
+                    },
+                    onCreateClick = {
+                        // перенос на страницу ввода имени
+                    },
+                    onAddInPlayListClick = { id ->
+                        scope.launch {
+                            mainViewModel.addTrackToPlayList(
+                                playListId = id,
+                                trackId = currentTrackIdForAdd!!
+                            )
+                        }
+                    }
+                )
+            }
+        }
+    }
 
 
 
