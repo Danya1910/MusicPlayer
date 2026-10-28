@@ -137,4 +137,15 @@ class TrackRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun removeTrackFromPlayList(playListId: String, trackId: Int) {
+        try {
+            firestore.collection("playlists")
+                .document(playListId)
+                .update("tracks", FieldValue.arrayRemove(trackId))
+                .await()
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
 }
