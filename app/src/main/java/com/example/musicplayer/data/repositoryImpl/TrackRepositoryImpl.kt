@@ -109,7 +109,17 @@ class TrackRepositoryImpl @Inject constructor(
         }
     }.flowOn(Dispatchers.IO)
 
-    override suspend fun createPlayList(playList: PlayList): String {
+    override suspend fun createPlayList(title: String): String {
+
+        val currentUser = firebaseAuth.currentUser
+
+        val playList = PlayList(
+            name = title,
+            updatedAt = System.currentTimeMillis(),
+            creatorId = currentUser?.uid,
+            creatorName = currentUser?.displayName ?: "Unknown User",
+        )
+
         val newDocumentRef = firestore
             .collection("playlists")
             .document()
@@ -126,7 +136,7 @@ class TrackRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun addTrackToPlayList(playListId: String, trackId: Int) {
+    override suspend fun addTrackToPlayList(playListId: String, trackId: String) {
         try {
             firestore.collection("playlists")
                 .document(playListId)
@@ -137,7 +147,7 @@ class TrackRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun removeTrackFromPlayList(playListId: String, trackId: Int) {
+    override suspend fun removeTrackFromPlayList(playListId: String, trackId: String) {
         try {
             firestore.collection("playlists")
                 .document(playListId)
