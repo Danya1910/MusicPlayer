@@ -8,6 +8,7 @@ import com.example.musicplayer.data.local.entity.toDomain
 import com.example.musicplayer.data.local.entity.toEntity
 import com.example.musicplayer.data.wrapper.toDomain
 import com.example.musicplayer.domain.model.Album
+import com.example.musicplayer.domain.model.PlayList
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.domain.repository.TrackRepository
 import com.google.firebase.auth.FirebaseAuth
@@ -106,5 +107,22 @@ class TrackRepositoryImpl @Inject constructor(
             e.printStackTrace()
         }
     }.flowOn(Dispatchers.IO)
+
+    override suspend fun createPlayList(playList: PlayList): String {
+        val newDocumentRef = firestore
+            .collection("playlists")
+            .document()
+
+        val generatedId = newDocumentRef.id
+
+        val finalPlayList = playList.copy(id = generatedId)
+
+        try {
+            newDocumentRef.set(finalPlayList).await()
+            return generatedId
+        } catch (e: Exception) {
+            throw e
+        }
+    }
 
 }
