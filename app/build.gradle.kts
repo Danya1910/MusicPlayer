@@ -40,6 +40,8 @@ android {
 
 dependencies {
 
+    implementation("com.google.code.gson:gson:2.10.1")
+
     implementation("dev.chrisbanes.haze:haze:1.0.0")
 
     implementation("androidx.palette:palette-ktx:1.0.0")
