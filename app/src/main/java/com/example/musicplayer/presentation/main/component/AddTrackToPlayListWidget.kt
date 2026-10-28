@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -35,8 +36,10 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.PlayList
+import com.example.musicplayer.ui.theme.Black
 import com.example.musicplayer.ui.theme.DarkGray
 import com.example.musicplayer.ui.theme.Gray
+import com.example.musicplayer.ui.theme.SpotifyGreen
 import com.example.musicplayer.ui.theme.White
 
 @Composable
@@ -48,58 +51,115 @@ fun AddTrackToPlayListWidget(
     onAddInPlayListClick: (String) -> Unit,
 ) {
 
-    Column(
+    Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight()
-            .statusBarsPadding()
-            .clip(
-                shape = RoundedCornerShape(20.dp)
-            )
-            .background(
-                color = DarkGray
-            )
-            .padding(top = 10.dp)
+            .fillMaxSize()
     ) {
-        ActionButtons(
-            onCancelClick = onCancelClick,
-            onDoneClick = onDoneClick,
-        )
-        Spacer(modifier = Modifier.height(25.dp))
-        CreatePlayList(
-            onCreateClick = onCreateClick,
-        )
-        Spacer(modifier = Modifier.height(15.dp))
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(1.dp)
+                .fillMaxHeight()
+                .statusBarsPadding()
+                .clip(
+                    shape = RoundedCornerShape(20.dp)
+                )
                 .background(
-                    color = Gray
+                    color = DarkGray
                 )
-        )
-
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 20.dp)
+                .padding(top = 10.dp)
         ) {
-            items(playLists) { playList ->
-                PlayListItem(
-                    playList = playList,
-                    onAddInPlayListClick = {
-                        playList.id?.let {
-                            onAddInPlayListClick(
-                                it
-                            )
-                        }
-                    }
-                )
-            }
-        }
+            DragHandle()
+            Spacer(modifier = Modifier.height(15.dp))
+            ActionButtons(
+                onCancelClick = onCancelClick,
+                onDoneClick = onDoneClick,
+            )
+            Spacer(modifier = Modifier.height(25.dp))
+            CreatePlayList(
+                onCreateClick = onCreateClick,
+            )
+            Spacer(modifier = Modifier.height(15.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(
+                        color = Gray
+                    )
+            )
 
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 20.dp)
+            ) {
+                items(playLists) { playList ->
+                    PlayListItem(
+                        playList = playList,
+                        onAddInPlayListClick = {
+                            playList.id?.let {
+                                onAddInPlayListClick(
+                                    it
+                                )
+                            }
+                        }
+                    )
+                }
+            }
+
+        }
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(
+                    bottom = 60.dp
+                )
+                .clip(
+                    shape = CircleShape
+                )
+                .background(
+                    color = SpotifyGreen
+                )
+                .padding(
+                    horizontal = 28.dp,
+                    vertical = 14.dp
+                )
+                .clickable {
+                    onDoneClick()
+                }
+        ) {
+            Text(
+                text = "Done",
+                fontWeight = FontWeight.Bold,
+                fontSize = 17.sp,
+                color = Black,
+            )
+        }
     }
 
+}
+
+@Composable
+private fun DragHandle() {
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Box(
+            modifier = Modifier
+                .height(5.dp)
+                .fillMaxWidth(0.25f)
+                .clip(
+                    shape = RoundedCornerShape(21.dp)
+                )
+                .background(
+                    color = Gray,
+                )
+        )
+    }
 }
 
 @Composable
@@ -116,8 +176,8 @@ private fun ActionButtons(
     ) {
         Text(
             text = "Cancel",
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 16.sp,
             color = White,
             modifier = Modifier
                 .clickable(
@@ -130,8 +190,8 @@ private fun ActionButtons(
         Spacer(modifier = Modifier.weight(1f))
         Text(
             text = "Done",
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 16.sp,
             color = White,
             modifier = Modifier
                 .padding(vertical = 7.dp)
@@ -159,15 +219,15 @@ private fun CreatePlayList(
         Text(
             text = "Save in",
             fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
+            fontSize = 20.sp,
             color = White,
         )
         Spacer(modifier = Modifier.weight(1f))
         Text(
             text = "New playlist",
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            color = White,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 16.sp,
+            color = SpotifyGreen,
             modifier = Modifier
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
