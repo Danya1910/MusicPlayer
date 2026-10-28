@@ -46,6 +46,7 @@ fun TrackInfo(
     track: Track,
     hazeState: HazeState,
     playNext: () -> Unit,
+    addToPlayList: () -> Unit,
 ) {
 
     val actionsList = listOf(
@@ -57,7 +58,7 @@ fun TrackInfo(
         ActionButtonData(
             icon = R.drawable.ic_circle_plus,
             title = "Add to playlist",
-            onClick = {}
+            onClick = addToPlayList
         ),
         ActionButtonData(
             icon = R.drawable.ic_apple_logo,
