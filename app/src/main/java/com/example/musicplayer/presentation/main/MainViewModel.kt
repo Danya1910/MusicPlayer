@@ -1,6 +1,9 @@
 package com.example.musicplayer.presentation.main
 
 import android.graphics.Bitmap
+import android.util.Log
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -212,32 +215,68 @@ class MainViewModel @Inject constructor(
         musicRepository.toggleRepeatMode()
     }
 
-    suspend fun createPlayList(
+    fun createPlayList(
         title: String
     ) {
-        trackRepository.createPlayList(
-            title = title,
-        )
+        viewModelScope.launch {
+            try {
+
+                trackRepository.createPlayList(
+                    title = title,
+                )
+            } catch (e: Exception) {
+                Log.d("TrackVM", e.toString())
+            }
+        }
     }
 
-    suspend fun addTrackToPlayList(
+    fun createPlayListWithTrack(title: String, trackId: String) {
+        viewModelScope.launch {
+            try {
+                val newPlayListId = trackRepository.createPlayList(title = title)
+
+                trackRepository.addTrackToPlayList(
+                    playListId = newPlayListId,
+                    trackId = trackId,
+                )
+            } catch (e: Exception) {
+                Log.d("TrackVM", e.toString())
+            }
+        }
+    }
+
+    fun addTrackToPlayList(
         playListId: String,
         trackId: String,
     ) {
-        trackRepository.addTrackToPlayList(
-            playListId = playListId,
-            trackId = trackId,
-        )
+        viewModelScope.launch {
+            try {
+
+                trackRepository.addTrackToPlayList(
+                    playListId = playListId,
+                    trackId = trackId,
+                )
+            } catch (e: Exception) {
+                Log.d("TrackVM", e.toString())
+            }
+        }
     }
 
-    suspend fun removeTrackFromPlayList(
+    fun removeTrackFromPlayList(
         playListId: String,
         trackId: String,
     ) {
-        trackRepository.removeTrackFromPlayList(
-            playListId = playListId,
-            trackId = trackId,
-        )
+        viewModelScope.launch {
+            try {
+
+                trackRepository.removeTrackFromPlayList(
+                    playListId = playListId,
+                    trackId = trackId,
+                )
+            } catch (e: Exception) {
+                Log.d("TrackVM", e.toString())
+            }
+        }
     }
 
 
