@@ -15,6 +15,8 @@ interface TrackRepository {
         title: String,
     ) : String
 
+    fun getUserPlayLists() : Flow<List<PlayList>>
+
     suspend fun addTrackToPlayList(playListId: String, trackId: String)
 
     suspend fun removeTrackFromPlayList(playListId: String, trackId: String)
