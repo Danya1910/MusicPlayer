@@ -2,12 +2,11 @@ package com.example.musicplayer.presentation.main
 
 import android.graphics.Bitmap
 import android.util.Log
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
+import com.example.musicplayer.domain.model.PlayList
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.domain.repository.MusicRepository
 import com.example.musicplayer.domain.repository.TrackRepository
@@ -40,7 +39,7 @@ class MainViewModel @Inject constructor(
 
     val uiState: StateFlow<MainUiState> = combine(
         trackRepository.getAllTrack(),
-        trackRepository.getAlbums()
+        trackRepository.getAlbums(),
     ) { tracks, albums ->
         MainUiState.Success(tracks = tracks, albums = albums) as MainUiState
     }
@@ -52,6 +51,17 @@ class MainViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = MainUiState.Loading
         )
+
+    val playlistsState: StateFlow<List<PlayList>> = trackRepository.getUserPlayLists()
+        .catch { exception ->
+            exception.printStackTrace()
+            emit(emptyList<PlayList>())
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        ) as StateFlow<List<PlayList>>
 
     val currentTrack = musicRepository.currentTrack
     val isPlaying = musicRepository.isPlaying
