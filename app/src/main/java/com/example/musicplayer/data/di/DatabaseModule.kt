@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import com.example.musicplayer.data.local.AppDatabase
+import com.example.musicplayer.data.local.MIGRATION_1_2
 import com.example.musicplayer.data.local.dao.AlbumDao
 import com.example.musicplayer.data.local.dao.PlayListDao
 import com.example.musicplayer.data.local.dao.TrackDao
@@ -28,7 +29,10 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "music_player_db"
-        ).build()
+        )
+            .addMigrations(MIGRATION_1_2)
+            .build()
+
     }
 
     @Provides
