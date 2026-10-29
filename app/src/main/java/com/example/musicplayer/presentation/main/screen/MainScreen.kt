@@ -314,12 +314,16 @@ fun MainScreen(
                         isPlayListSelectionVisible = false
                     },
                     onAddInPlayListClick = { id ->
-                        scope.launch {
                             mainViewModel.addTrackToPlayList(
                                 playListId = id,
                                 trackId = currentTrackForAdd!!.id
                             )
-                        }
+                    },
+                    onRemoveFromPlayList = { id ->
+                        mainViewModel.removeTrackFromPlayList(
+                            playListId = id,
+                            trackId = currentTrackForAdd!!.id
+                        )
                     }
                 )
             }
