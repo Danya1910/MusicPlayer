@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,8 +24,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.musicplayer.ui.theme.Black
@@ -69,10 +74,14 @@ fun PlayListNameInput(
                 .padding(horizontal = 40.dp)
         ) {
             Text(
+                textAlign = TextAlign.Center,
                 text = "Give your playlist a name",
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 26.sp,
+                letterSpacing = -(0.43).sp,
                 color = White,
+                modifier = Modifier
+                    .fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(90.dp))
             InputField(
@@ -108,10 +117,16 @@ private fun InputField(
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
+            cursorBrush = SolidColor(Color.Transparent),
             textStyle = TextStyle(
                 fontWeight = FontWeight.Bold,
                 fontSize = 46.sp,
                 color = White,
+                textAlign = TextAlign.Center,
+            ),
+            keyboardOptions = KeyboardOptions(
+                capitalization = KeyboardCapitalization.None,
+                autoCorrect = false
             ),
             decorationBox = { innerTextField ->
                 Box(
@@ -151,28 +166,34 @@ private fun CreateButton(
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .padding(
-                bottom = 60.dp
-            )
-            .clip(
-                shape = CircleShape
-            )
-            .background(
-                color = SpotifyGreen
-            )
-            .padding(
-                horizontal = 28.dp,
-                vertical = 14.dp
-            )
-            .clickable {
-                onClick()
-            }
+            .fillMaxWidth()
     ) {
-        Text(
-            text = "Create",
-            fontWeight = FontWeight.Bold,
-            fontSize = 17.sp,
-            color = Black,
-        )
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .padding(
+                    bottom = 60.dp
+                )
+                .clip(
+                    shape = CircleShape
+                )
+                .background(
+                    color = SpotifyGreen
+                )
+                .padding(
+                    horizontal = 28.dp,
+                    vertical = 14.dp
+                )
+                .clickable {
+                    onClick()
+                }
+        ) {
+            Text(
+                text = "Create",
+                fontWeight = FontWeight.Bold,
+                fontSize = 17.sp,
+                color = Black,
+            )
+        }
     }
 }
