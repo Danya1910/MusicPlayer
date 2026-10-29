@@ -16,7 +16,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -138,56 +140,75 @@ class TrackRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getUserPlayLists(): Flow<List<PlayList>> = flow {
+    override fun getUserPlayLists(): Flow<List<PlayList>> = callbackFlow {
+        val currentUserId = firebaseAuth.currentUser?.uid
+            ?: throw Exception("Пользователь не авторизирован")
+
+        val savedPlaylists = playListDao.getPlaylistsOnce(currentUserId).map { it.toDomain() }
+        send(savedPlaylists)
+
+        val query = firestore.collection("playlists")
+            .whereEqualTo("creatorId", currentUserId)
+
+        val listenerRegistration = query.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                error.printStackTrace()
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null) {
+                val remotePlaylists = snapshot.documents.map { document ->
+                    val rawTracks = document.get("tracks") as? List<*>
+                    val trackIds = rawTracks?.mapNotNull { it?.toString() } ?: emptyList()
+
+                    PlayList(
+                        id = document.id,
+                        name = document.getString("name") ?: "Без названия",
+                        updatedAt = document.getLong("updatedAt") ?: 0L,
+                        imageUrl = document.getString("imageUrl"),
+                        creatorId = document.getString("creatorId"),
+                        creatorName = document.getString("creatorName"),
+                        isPrivate = document.getBoolean("isPrivate") ?: true,
+                        tracks = trackIds
+                    )
+                }
+
+                trySend(remotePlaylists)
+
+            }
+        }
+
+        awaitClose {
+            listenerRegistration.remove()
+        }
+    }.flowOn(Dispatchers.IO)
+
+
+    override suspend fun addTrackToPlayList(playListId: String, trackId: String) {
 
         val currentUserId = firebaseAuth.currentUser?.uid
             ?: throw Exception("Пользователь не авторизирован")
 
-        val savedPlayLists = playListDao.getPlaylistsOnce(currentUserId).map {
-            it.toDomain()
-        }
-        emit(savedPlayLists)
-
-        try {
-            val playListsSnapshot =firestore.collection("playlists")
-                .whereEqualTo("creatorId", currentUserId)
-                .get()
-                .await()
-
-            val remotePlayLists = playListsSnapshot.documents.map { document ->
-                val rawTracks = document.get("tracks") as? List<*>
-                val trackIds = rawTracks?.mapNotNull { it?.toString() } ?: emptyList()
-
-                PlayList(
-                    id = document.id,
-                    name = document.getString("name") ?: "Без названия",
-                    updatedAt = document.getLong("updatedAt") ?: 0L,
-                    imageUrl = document.getString("imageUrl"),
-                    creatorId = document.getString("creatorId"),
-                    creatorName = document.getString("creatorName"),
-                    isPrivate = document.getBoolean("isPrivate") ?: true,
-                    tracks = trackIds
-                )
-            }
-
-            val entitiesToInsert = remotePlayLists.map { it.toEntity() }
-            playListDao.insertPlaylists(entitiesToInsert)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        emitAll(
-            playListDao.getPlaylistsFlow(currentUserId)
-                .map { list -> list.map { it.toDomain() } }
-        )
-
-    }.flowOn(Dispatchers.IO)
-
-    override suspend fun addTrackToPlayList(playListId: String, trackId: String) {
         try {
             firestore.collection("playlists")
                 .document(playListId)
                 .update("tracks", FieldValue.arrayUnion(trackId))
                 .await()
+
+            val cachedPlaylists = playListDao.getPlaylistsOnce(
+                currentUserId
+            )
+
+            val currentPlaylist = cachedPlaylists.find { it.id == playListId }
+
+            currentPlaylist?.let { entity ->
+                val updatedTracks = entity.tracks.toMutableList().apply {
+                    if (!contains(trackId)) add(trackId)
+                }
+
+                playListDao.insertPlaylists(listOf(entity.copy(tracks = updatedTracks)))
+            }
+
         } catch (e: Exception) {
             throw e
         }
