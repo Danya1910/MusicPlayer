@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.PlayList
+import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.ui.theme.Black
 import com.example.musicplayer.ui.theme.DarkGray
 import com.example.musicplayer.ui.theme.Gray
@@ -49,12 +50,22 @@ import com.example.musicplayer.ui.theme.White
 @Composable
 fun AddTrackToPlayListWidget(
     playLists: List<PlayList>,
+    currentTrackToSave: Track,
     onCancelClick: () -> Unit,
     onDoneClick: () -> Unit,
     onCreateClick: () -> Unit,
     onAddInPlayListClick: (String) -> Unit,
     onRemoveFromPlayList: (String) -> Unit,
 ) {
+
+    val initialPlaylistIdsWithTrack = remember(currentTrackToSave.id) {
+        playLists.filter { it.tracks?.contains(currentTrackToSave.id) == true }
+            .mapNotNull { it.id }
+    }
+
+    val wasTrackInAnyPlaylist = initialPlaylistIdsWithTrack.isNotEmpty()
+
+    val bottomPlaylists = playLists.filter { !initialPlaylistIdsWithTrack.contains(it.id) }
 
     Box(
         modifier = Modifier
@@ -83,6 +94,28 @@ fun AddTrackToPlayListWidget(
             CreatePlayList(
                 onCreateClick = onCreateClick,
             )
+            if (wasTrackInAnyPlaylist) {
+                val topPlaylists = playLists.filter { initialPlaylistIdsWithTrack.contains(it.id) }
+
+                LazyColumn(modifier = Modifier.padding(horizontal = 20.dp)) {
+                    items(topPlaylists) { playList ->
+                        PlayListItem(
+                            playList = playList,
+                            onAddInPlayListClick = {
+                                playList.id?.let {
+                                    onAddInPlayListClick(it)
+                                }
+                            },
+                            onRemoveFromPlayList = {
+                                playList.id?.let {
+                                    onRemoveFromPlayList(it)
+                                }
+                            },
+                            isInPlayList = playList.tracks?.contains(currentTrackToSave.id) == true,
+                        )
+                    }
+                }
+            }
             Spacer(modifier = Modifier.height(15.dp))
             Box(
                 modifier = Modifier
@@ -98,7 +131,7 @@ fun AddTrackToPlayListWidget(
                     .fillMaxSize()
                     .padding(horizontal = 20.dp)
             ) {
-                items(playLists) { playList ->
+                items(bottomPlaylists) { playList ->
                     PlayListItem(
                         playList = playList,
                         onAddInPlayListClick = {
@@ -114,7 +147,8 @@ fun AddTrackToPlayListWidget(
                                     it
                                 )
                             }
-                        }
+                        },
+                        isInPlayList = playList.tracks?.contains(currentTrackToSave.id) == true,
                     )
                 }
             }
@@ -256,11 +290,12 @@ private fun PlayListItem(
     playList: PlayList,
     onAddInPlayListClick: () -> Unit,
     onRemoveFromPlayList: () -> Unit,
+    isInPlayList: Boolean,
 ) {
 
     val songsCount = playList.tracks?.size?.toSongsString()
 
-    var isAdded by remember { mutableStateOf(false) }
+    var isAdded by remember { mutableStateOf(isInPlayList) }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -268,7 +303,7 @@ private fun PlayListItem(
             .fillMaxWidth()
             .height(90.dp)
             .clickable {
-                if(isAdded) onRemoveFromPlayList() else onAddInPlayListClick()
+                if (isAdded) onRemoveFromPlayList() else onAddInPlayListClick()
                 isAdded = !isAdded
             }
     ) {
@@ -312,7 +347,7 @@ private fun PlayListItem(
                 else R.drawable.ic_circle_plus
             ),
             contentDescription = null,
-            tint = if(isAdded) Color.Unspecified else Gray,
+            tint = if (isAdded) Color.Unspecified else Gray,
             modifier = Modifier
                 .size(25.dp)
         )
