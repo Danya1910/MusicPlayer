@@ -324,7 +324,8 @@ fun MainScreen(
                             playListId = id,
                             trackId = currentTrackForAdd!!.id
                         )
-                    }
+                    },
+                    currentTrackToSave = currentTrackForAdd!!,
                 )
             }
         }
