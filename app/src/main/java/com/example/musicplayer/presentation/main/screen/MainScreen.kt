@@ -300,7 +300,7 @@ fun MainScreen(
         ) {
             currentTrackForAdd?.let {
                 AddTrackToPlayListWidget(
-                    playLists = emptyList(),
+                    playLists = userPlaylists,
                     onCancelClick = {
                         isPlayListSelectionVisible = false
                         currentTrackForAdd = null
