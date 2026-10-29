@@ -1,7 +1,6 @@
 package com.example.musicplayer.data.di
 
 import android.content.Context
-import androidx.room.Database
 import androidx.room.Room
 import com.example.musicplayer.data.local.AppDatabase
 import com.example.musicplayer.data.local.MIGRATION_1_2
