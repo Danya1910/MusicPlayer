@@ -24,10 +24,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,6 +53,7 @@ fun AddTrackToPlayListWidget(
     onDoneClick: () -> Unit,
     onCreateClick: () -> Unit,
     onAddInPlayListClick: (String) -> Unit,
+    onRemoveFromPlayList: (String) -> Unit,
 ) {
 
     Box(
@@ -99,6 +104,13 @@ fun AddTrackToPlayListWidget(
                         onAddInPlayListClick = {
                             playList.id?.let {
                                 onAddInPlayListClick(
+                                    it
+                                )
+                            }
+                        },
+                        onRemoveFromPlayList = {
+                            playList.id?.let {
+                                onRemoveFromPlayList(
                                     it
                                 )
                             }
@@ -243,9 +255,12 @@ private fun CreatePlayList(
 private fun PlayListItem(
     playList: PlayList,
     onAddInPlayListClick: () -> Unit,
+    onRemoveFromPlayList: () -> Unit,
 ) {
 
     val songsCount = playList.tracks?.size?.toSongsString()
+
+    var isAdded by remember { mutableStateOf(false) }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -253,7 +268,8 @@ private fun PlayListItem(
             .fillMaxWidth()
             .height(90.dp)
             .clickable {
-                onAddInPlayListClick()
+                if(isAdded) onRemoveFromPlayList() else onAddInPlayListClick()
+                isAdded = !isAdded
             }
     ) {
         AsyncImage(
@@ -291,9 +307,12 @@ private fun PlayListItem(
             )
         }
         Icon(
-            painter = painterResource(R.drawable.ic_circle_plus),
+            painter = painterResource(
+                if (isAdded) R.drawable.ic_tick_circle
+                else R.drawable.ic_circle_plus
+            ),
             contentDescription = null,
-            tint = Gray,
+            tint = if(isAdded) Color.Unspecified else Gray,
             modifier = Modifier
                 .size(25.dp)
         )
