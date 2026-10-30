@@ -19,11 +19,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 
@@ -142,10 +144,11 @@ class TrackRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getUserPlayLists(): Flow<List<PlayList>> = callbackFlow {
+    private fun getRawUserPlayLists(): Flow<List<PlayList>> = callbackFlow {
         val currentUserId = firebaseAuth.currentUser?.uid
             ?: throw Exception("Пользователь не авторизирован")
 
+        // Отправляем локальные данные из Room для мгновенного отображения
         val savedPlaylists = playListDao.getPlaylistsOnce(currentUserId).map { it.toDomain() }
         send(savedPlaylists)
 
@@ -171,12 +174,11 @@ class TrackRepositoryImpl @Inject constructor(
                         creatorId = document.getString("creatorId"),
                         creatorName = document.getString("creatorName"),
                         isPrivate = document.getBoolean("isPrivate") ?: true,
-                        tracks = trackIds
+                        tracks = trackIds,
+                        duration = "00:00" // Временно ставим дефолт
                     )
                 }
-
                 trySend(remotePlaylists)
-
             }
         }
 
@@ -184,6 +186,29 @@ class TrackRepositoryImpl @Inject constructor(
             listenerRegistration.remove()
         }
     }.flowOn(Dispatchers.IO)
+
+    // 3. ПУБЛИЧНЫЙ МЕТОД: Соединяет плейлисты с треками и вычисляет длительность
+    override fun getUserPlayLists(): Flow<List<PlayList>> {
+        // Получаем ваши треки (подставьте сюда ваш реальный метод получения треков, например из Room)
+        val allTracksFlow: Flow<List<Track>> = trackDao.getAllTracksFlow().map { list -> list.map { it.toDomain() } }
+
+        return getRawUserPlayLists().combine(allTracksFlow) { playlists, allTracks ->
+            playlists.map { playlist ->
+                // Фильтруем все доступные треки, находя те, чьи ID есть в данном плейлисте
+                val playlistTracks = allTracks.filter { track ->
+                    playlist.tracks?.contains(track.id) == true
+                }
+
+                // Суммируем длительность (предполагаем, что track.duration хранится в мс)
+                val totalMs = playlistTracks.sumOf { it.duration }
+
+                // Возвращаем обновленный плейлист с посчитанным временем
+                playlist.copy(
+                    duration = formatDuration(totalMs)
+                )
+            }
+        }.flowOn(Dispatchers.Default) // Расчеты лучше делать на Default-диспетчере
+    }
 
 
     override suspend fun addTrackToPlayList(playListId: String, trackId: String) {
@@ -259,4 +284,17 @@ class TrackRepositoryImpl @Inject constructor(
     }
 
 
+}
+
+
+private fun formatDuration(durationMs: Long): String {
+    val hours = TimeUnit.MILLISECONDS.toHours(durationMs)
+    val minutes = TimeUnit.MILLISECONDS.toMinutes(durationMs) % 60
+    val seconds = TimeUnit.MILLISECONDS.toSeconds(durationMs) % 60
+
+    return if (hours > 0) {
+        String.format("%d ч %02d мин", hours, minutes)
+    } else {
+        String.format("%02d", minutes)
+    }
 }
