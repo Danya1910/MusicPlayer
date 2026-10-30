@@ -231,8 +231,12 @@ private fun TopBarItem(
 ) {
 
     val gradientColors = listOf(
-        Color(0xFFFF0055),
-        Color(0xFF0000FF)
+        Color(0xFFFFFFFF).copy(alpha = 0.8f),
+        Color(0xFFFFFFFF).copy(alpha = 0.5f),
+        Color(0xFFFFFFFF).copy(alpha = 0.3f),
+        Color(0xFFFFFFFF).copy(alpha = 0.1f),
+        Color(0xFFFFFFFF).copy(alpha = 0.3f),
+        Color(0xFFFFFFFF).copy(alpha = 0.8f),
     )
 
     Box(
@@ -245,7 +249,7 @@ private fun TopBarItem(
                 color = DeepBlack,
             )
             .border(
-                width = 0.5.dp,
+                width = 1.dp,
                 shape = CircleShape,
                 brush = Brush.linearGradient(
                     colors = gradientColors,
