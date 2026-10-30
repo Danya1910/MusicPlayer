@@ -8,8 +8,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
 import com.example.musicplayer.domain.model.PlayList
 import com.example.musicplayer.domain.model.Track
+import com.example.musicplayer.domain.model.User
 import com.example.musicplayer.domain.repository.MusicRepository
 import com.example.musicplayer.domain.repository.TrackRepository
+import com.example.musicplayer.domain.repository.UserRepository
 import com.example.musicplayer.presentation.main.state.MainUiState
 import com.example.musicplayer.presentation.player.state.PlayerUiState
 import com.example.musicplayer.ui.theme.DeepBlack
@@ -34,6 +36,7 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val trackRepository: TrackRepository,
     private val musicRepository: MusicRepository,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
 
@@ -62,6 +65,16 @@ class MainViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         ) as StateFlow<List<PlayList>>
+
+    val userState: StateFlow<User> = userRepository.getUserData()
+        .catch { exception ->
+            exception.printStackTrace()
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = User()
+        ) as StateFlow<User>
 
     val currentTrack = musicRepository.currentTrack
     val isPlaying = musicRepository.isPlaying
