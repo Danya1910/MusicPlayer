@@ -9,4 +9,6 @@ data class PlayList(
     val creatorName: String? = null,
     val isPrivate: Boolean = true,
     val tracks: List<String>? = emptyList(),
+    val duration: String? = null,
 )
+
