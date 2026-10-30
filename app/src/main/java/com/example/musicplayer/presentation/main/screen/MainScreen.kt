@@ -64,7 +64,6 @@ fun MainScreen(
     val currentTrack by mainViewModel.currentTrack.collectAsStateWithLifecycle()
     val isPlaying by mainViewModel.isPlaying.collectAsStateWithLifecycle()
 
-    // use in play list select screen
     val userPlaylists by mainViewModel.playlistsState.collectAsStateWithLifecycle()
 
     var isAlbumViewVisible by remember { mutableStateOf(false) }
