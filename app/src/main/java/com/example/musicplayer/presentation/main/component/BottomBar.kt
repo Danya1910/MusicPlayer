@@ -51,7 +51,7 @@ fun BottomBar(
         BottomBarData(
             icon = R.drawable.ic_library,
             text = "Library",
-            route = Screen.Welcome,
+            route = Screen.Library,
         ),
     )
 
