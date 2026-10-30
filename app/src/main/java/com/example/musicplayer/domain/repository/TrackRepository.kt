@@ -13,6 +13,7 @@ interface TrackRepository {
 
     suspend fun createPlayList(
         title: String,
+        imageUrl: String,
     ) : String
 
     fun getUserPlayLists() : Flow<List<PlayList>>
