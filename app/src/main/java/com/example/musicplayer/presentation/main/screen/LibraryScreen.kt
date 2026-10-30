@@ -26,6 +26,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,6 +48,8 @@ import com.example.musicplayer.domain.model.PlayList
 import com.example.musicplayer.domain.model.User
 import com.example.musicplayer.presentation.main.MainViewModel
 import com.example.musicplayer.presentation.main.component.BottomBar
+import com.example.musicplayer.presentation.main.component.ModalRightSheet
+import com.example.musicplayer.presentation.main.component.PlaylistView
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.White
@@ -59,6 +64,9 @@ fun LibraryScreen(
     val playlists by mainViewModel.playlistsState.collectAsStateWithLifecycle()
 
     val user by mainViewModel.userState.collectAsStateWithLifecycle()
+
+    var currentPlaylistToShow by remember { mutableStateOf<PlayList?>(null) }
+    var showPlayList by remember { mutableStateOf(false) }
 
     Log.d("Library", user.toString())
 
@@ -86,15 +94,43 @@ fun LibraryScreen(
                 .padding(paddingValues)
         ) {
 
-            items(playlists) {playlist ->
+            items(playlists) { playlist ->
                 PlayListItem(
                     playList = playlist,
                     onClick = {
-
+                        currentPlaylistToShow = playlist
+                        showPlayList = true
                     }
                 )
             }
         }
+    }
+
+    if (showPlayList) {
+        ModalRightSheet(
+            onDismissRequest = {
+                showPlayList = false
+                currentPlaylistToShow = null
+            },
+            content = {
+                currentPlaylistToShow?.let {
+                    PlaylistView(
+                        playList = currentPlaylistToShow!!,
+                        onPlayPauseClick = {
+
+                        },
+                        onShuffleClick = {},
+                        onTrackClick = {},
+                        onTrackInfoClick = {},
+                        onDownloadClick = {},
+                        onBackClick = {
+                            showPlayList = false
+                            currentPlaylistToShow = null
+                        }
+                    )
+                }
+            }
+        )
     }
 
 }
@@ -109,7 +145,7 @@ private fun PlayListItem(
         modifier = Modifier
             .fillMaxWidth()
             .height(95.dp)
-            .clickable{
+            .clickable {
                 onClick()
             }
             .padding(horizontal = 20.dp)
@@ -261,7 +297,7 @@ private fun TopBarItem(
                 horizontal = 20.dp,
                 vertical = 12.dp
             )
-            .clickable{
+            .clickable {
                 onClick()
             }
     ) {
