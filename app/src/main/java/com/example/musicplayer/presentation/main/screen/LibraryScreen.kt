@@ -206,7 +206,7 @@ private fun TopBar(
         Spacer(modifier = Modifier.height(22.dp))
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(7.dp)
+            horizontalArrangement = Arrangement.spacedBy(15.dp)
         ) {
             TopBarItem(
                 title = "Playlists",
