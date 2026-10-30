@@ -115,7 +115,10 @@ class TrackRepositoryImpl @Inject constructor(
         }
     }.flowOn(Dispatchers.IO)
 
-    override suspend fun createPlayList(title: String): String {
+    override suspend fun createPlayList(
+        title: String,
+        imageUrl: String,
+    ): String {
 
         val currentUser = firebaseAuth.currentUser
 
@@ -126,6 +129,7 @@ class TrackRepositoryImpl @Inject constructor(
             updatedAt = System.currentTimeMillis(),
             creatorId = currentUser?.uid,
             creatorName = userName,
+            imageUrl = imageUrl,
         )
 
         val newDocumentRef = firestore
