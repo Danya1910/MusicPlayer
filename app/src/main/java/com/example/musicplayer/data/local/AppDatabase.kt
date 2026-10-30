@@ -15,7 +15,7 @@ import com.example.musicplayer.data.local.entity.TrackEntity
 
 @Database(
     entities = [TrackEntity::class, AlbumEntity::class, PlaylistEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = false,
 )
 
@@ -46,5 +46,13 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
                 PRIMARY KEY(`id`)
             )
         """.trimIndent())
+    }
+}
+
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // Добавляем колонку duration в таблицу playlists_table
+        // Тип TEXT, так как в сущности это String?, и он может быть NULL
+        db.execSQL("ALTER TABLE playlists_table ADD COLUMN duration TEXT")
     }
 }
