@@ -345,7 +345,8 @@ fun MainScreen(
                     onCreateClick = { title ->
                         mainViewModel.createPlayListWithTrack(
                             title = title,
-                            trackId = track.id
+                            trackId = track.id,
+                            imageUrl = track.imageUrl,
                         )
                         showPlayListName = false
                     },
