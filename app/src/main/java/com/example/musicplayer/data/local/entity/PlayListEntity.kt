@@ -14,7 +14,8 @@ data class PlaylistEntity(
     val creatorId: String?,
     val creatorName: String?,
     val isPrivate: Boolean,
-    val tracks: List<String> // Конвертер сам превратит это в строку в БД
+    val tracks: List<String>,
+    val duration: String?,
 )
 
 fun PlaylistEntity.toDomain(): PlayList {
@@ -26,7 +27,8 @@ fun PlaylistEntity.toDomain(): PlayList {
         creatorId = creatorId,
         creatorName = creatorName,
         isPrivate = isPrivate,
-        tracks = tracks
+        tracks = tracks,
+        duration = duration,
     )
 }
 
@@ -39,6 +41,7 @@ fun PlayList.toEntity(): PlaylistEntity {
         creatorId = creatorId,
         creatorName = creatorName,
         isPrivate = isPrivate,
-        tracks = tracks ?: emptyList()
+        tracks = tracks ?: emptyList(),
+        duration = duration,
     )
 }
