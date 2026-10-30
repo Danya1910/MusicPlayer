@@ -1,5 +1,6 @@
 package com.example.musicplayer.presentation.main.screen
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
@@ -47,8 +48,6 @@ import com.example.musicplayer.presentation.main.component.BottomBar
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.White
-import dev.chrisbanes.haze.haze
-import org.jetbrains.annotations.Async
 
 
 @Composable
@@ -59,10 +58,19 @@ fun LibraryScreen(
 
     val playlists by mainViewModel.playlistsState.collectAsStateWithLifecycle()
 
+    val user by mainViewModel.userState.collectAsStateWithLifecycle()
+
+    Log.d("Library", user.toString())
+
     Scaffold(
         containerColor = Color.Transparent,
         modifier = Modifier
             .fillMaxSize(),
+        topBar = {
+            TopBar(
+                user = user,
+            )
+        },
         bottomBar = {
             BottomBar(
                 navController = navController
