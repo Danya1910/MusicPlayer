@@ -63,6 +63,8 @@ fun LibraryScreen(
 
     val playlists by mainViewModel.playlistsState.collectAsStateWithLifecycle()
 
+    val playerState by mainViewModel.playerState.collectAsStateWithLifecycle()
+
     val user by mainViewModel.userState.collectAsStateWithLifecycle()
 
     var currentPlaylistToShow by remember { mutableStateOf<PlayList?>(null) }
@@ -113,9 +115,10 @@ fun LibraryScreen(
                 currentPlaylistToShow = null
             },
             content = {
-                currentPlaylistToShow?.let {
+                currentPlaylistToShow?.let { playList ->
                     PlaylistView(
-                        playList = currentPlaylistToShow!!,
+                        playList = playList,
+                        playerState = playerState,
                         onPlayPauseClick = {
 
                         },
@@ -126,6 +129,12 @@ fun LibraryScreen(
                         onBackClick = {
                             showPlayList = false
                             currentPlaylistToShow = null
+                        },
+                        onBitmapLoaded = { bitmap ->
+                            mainViewModel.updateColorsFromBitmap(
+                                id = playList.id ?: "",
+                                bitmap = bitmap,
+                            )
                         }
                     )
                 }
