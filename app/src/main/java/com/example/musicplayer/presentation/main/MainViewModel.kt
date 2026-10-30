@@ -238,13 +238,15 @@ class MainViewModel @Inject constructor(
     }
 
     fun createPlayList(
-        title: String
+        title: String,
+        imageUrl: String,
     ) {
         viewModelScope.launch {
             try {
 
                 trackRepository.createPlayList(
                     title = title,
+                    imageUrl = imageUrl,
                 )
             } catch (e: Exception) {
                 Log.d("TrackVM", e.toString())
@@ -252,10 +254,17 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun createPlayListWithTrack(title: String, trackId: String) {
+    fun createPlayListWithTrack(
+        title: String,
+        trackId: String,
+        imageUrl: String,
+    ) {
         viewModelScope.launch {
             try {
-                val newPlayListId = trackRepository.createPlayList(title = title)
+                val newPlayListId = trackRepository.createPlayList(
+                    title = title,
+                    imageUrl = imageUrl,
+                )
 
                 trackRepository.addTrackToPlayList(
                     playListId = newPlayListId,
