@@ -1,5 +1,6 @@
 package com.example.musicplayer.presentation.main.component
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
@@ -24,15 +26,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.drawable.toBitmap
 import coil.compose.AsyncImage
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.PlayList
+import com.example.musicplayer.presentation.player.state.PlayerUiState
 import com.example.musicplayer.ui.theme.Black
+import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.SpotifyGreen
 import com.example.musicplayer.ui.theme.White
@@ -42,13 +48,26 @@ import dev.chrisbanes.haze.HazeState
 @Composable
 fun PlaylistView(
     playList: PlayList,
+    playerState: PlayerUiState,
     onPlayPauseClick: () -> Unit,
     onShuffleClick: () -> Unit,
     onTrackClick: () -> Unit,
     onTrackInfoClick: () -> Unit,
     onDownloadClick: () -> Unit,
     onBackClick: () -> Unit,
+    onBitmapLoaded: (Bitmap) -> Unit,
 ) {
+
+    val imageColors = playerState.paletteState[playList.id]
+
+    val currentBgColor = imageColors?.first ?: DeepBlack
+
+    val bgGradient = Brush.verticalGradient(
+        colors = listOf(
+            currentBgColor,
+            DeepBlack,
+        )
+    )
 
 
     val hazeState = remember { HazeState() }
@@ -56,11 +75,16 @@ fun PlaylistView(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding()
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(0.5f)
+                .background(
+                    brush = bgGradient,
+                )
+                .padding(top = 20.dp)
         ) {
             BackButton(
                 hazeState = hazeState,
@@ -73,7 +97,10 @@ fun PlaylistView(
                 creatorAvatarUrl = "", // доделать
                 playlistName = playList.name,
                 creatorName = playList.creatorName ?: "",
-                playlistDuration = playList.duration + " min"
+                playlistDuration = playList.duration + " min",
+                onBitmapLoaded = { bitmap ->
+                    onBitmapLoaded(bitmap)
+                },
             )
         }
         Spacer(modifier = Modifier.height(10.dp))
@@ -94,6 +121,7 @@ private fun PlaylistHat(
     playlistName: String,
     creatorName: String,
     playlistDuration: String,
+    onBitmapLoaded: (Bitmap) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -113,7 +141,11 @@ private fun PlaylistHat(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth(0.6f)
-                    .aspectRatio(1f)
+                    .aspectRatio(1f),
+                onSuccess = { successResult ->
+                    val bitmap = successResult.result.drawable.toBitmap()
+                    onBitmapLoaded(bitmap)
+                }
             )
         }
         Spacer(modifier = Modifier.height(15.dp))
