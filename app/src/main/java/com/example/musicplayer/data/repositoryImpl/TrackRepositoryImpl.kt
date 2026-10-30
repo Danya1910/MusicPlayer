@@ -117,11 +117,13 @@ class TrackRepositoryImpl @Inject constructor(
 
         val currentUser = firebaseAuth.currentUser
 
+        val userName = getCurrentUserName()
+
         val playList = PlayList(
             name = title,
             updatedAt = System.currentTimeMillis(),
             creatorId = currentUser?.uid,
-            creatorName = currentUser?.displayName ?: "Unknown User",
+            creatorName = userName,
         )
 
         val newDocumentRef = firestore
@@ -224,5 +226,37 @@ class TrackRepositoryImpl @Inject constructor(
             throw e
         }
     }
+
+    private suspend fun getCurrentUserName(): String? {
+        val uid = firebaseAuth.currentUser?.uid
+        if (uid == null) {
+            Log.e("TrackRepo", "getCurrentUserName: currentUser.uid IS NULL! Пользователь не авторизован в Auth.")
+            return null
+        }
+
+        Log.d("TrackRepo", "getCurrentUserName: Начинаем запрос в Firestore для UID: $uid")
+
+        return try {
+            val document = firestore
+                .collection("users")
+                .document(uid)
+                .get()
+                .await()
+
+            if (document.exists()) {
+                val name = document.getString("name")
+                Log.d("TrackRepo", "getCurrentUserName: Документ найден! Имя в БД: '$name'")
+                name
+            } else {
+                Log.e("TrackRepo", "getCurrentUserName: Документ с UID $uid НЕ НАЙДЕН в коллекции 'users'!")
+                null
+            }
+        } catch (e: Exception) {
+            // Если тут выпадет Permission Denied — нужно поправить Rules в консоли Firebase
+            Log.e("TrackRepo", "getCurrentUserName: Исключение при запросе к Firestore для UID: $uid", e)
+            null
+        }
+    }
+
 
 }
