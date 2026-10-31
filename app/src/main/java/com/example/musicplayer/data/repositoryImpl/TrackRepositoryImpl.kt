@@ -149,6 +149,8 @@ class TrackRepositoryImpl @Inject constructor(
     }
 
     private fun getRawUserPlayLists(): Flow<List<PlayList>> = callbackFlow {
+
+
         val currentUserId = firebaseAuth.currentUser?.uid
             ?: throw Exception("Пользователь не авторизирован")
 
@@ -197,11 +199,14 @@ class TrackRepositoryImpl @Inject constructor(
         val allTracksFlow: Flow<List<Track>> = trackDao.getAllTracksFlow().map { list -> list.map { it.toDomain() } }
 
         return getRawUserPlayLists().combine(allTracksFlow) { playlists, allTracks ->
+            Log.d("TrackRepo", "Combine сработал! Всего треков в базе: ${allTracks.size}")
             playlists.map { playlist ->
                 // Фильтруем все доступные треки, находя те, чьи ID есть в данном плейлисте
                 val playlistTracks = allTracks.filter { track ->
                     playlist.tracks?.contains(track.id) == true
                 }
+
+                Log.d("TrackRepo", "Плейлист '${playlist.name}' содержит треков из базы: ${playlistTracks.size} (ID в плейлисте: ${playlist.tracks})")
 
                 // Суммируем длительность (предполагаем, что track.duration хранится в мс)
                 val totalMs = playlistTracks.sumOf { it.duration }
@@ -296,9 +301,26 @@ private fun formatDuration(durationMs: Long): String {
     val minutes = TimeUnit.MILLISECONDS.toMinutes(durationMs) % 60
     val seconds = TimeUnit.MILLISECONDS.toSeconds(durationMs) % 60
 
-    return if (hours > 0) {
-        String.format("%d ч %02d мин", hours, minutes)
-    } else {
-        String.format("%02d", minutes)
+    return when {
+        // Если есть часы (например: 1 ч 30 мин)
+        hours > 0 -> {
+            if (minutes > 0) {
+                String.format("%d h %d min", hours, minutes)
+            } else {
+                String.format("%d h", hours)
+            }
+        }
+        // Если часов нет, но есть минуты (например: 4 мин, 20 мин)
+        minutes > 0 -> {
+            String.format("%d min", minutes)
+        }
+        // Если плейлист совсем короткий, меньше минуты (например: 45 сек)
+        else -> {
+            if (seconds > 0) {
+                String.format("%d sec", seconds)
+            } else {
+                "0 min" // Дефолтное значение для пустого плейлиста
+            }
+        }
     }
 }
