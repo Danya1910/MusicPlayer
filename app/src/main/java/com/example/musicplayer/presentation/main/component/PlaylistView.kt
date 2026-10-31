@@ -78,7 +78,6 @@ fun PlaylistView(
         )
     )
 
-
     val hazeState = remember { HazeState() }
 
     Column(
