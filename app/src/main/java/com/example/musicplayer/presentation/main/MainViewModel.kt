@@ -13,6 +13,7 @@ import com.example.musicplayer.domain.repository.MusicRepository
 import com.example.musicplayer.domain.repository.TrackRepository
 import com.example.musicplayer.domain.repository.UserRepository
 import com.example.musicplayer.presentation.main.state.MainUiState
+import com.example.musicplayer.presentation.main.util.PlaylistUi
 import com.example.musicplayer.presentation.player.state.PlayerUiState
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
@@ -65,6 +66,39 @@ class MainViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         ) as StateFlow<List<PlayList>>
+
+
+    val playlistsUiState: StateFlow<List<PlaylistUi>> = combine(
+        playlistsState,
+        uiState
+    ) { playlists, mainUiState ->
+
+        if (mainUiState !is MainUiState.Success) {
+            return@combine playlists.map {
+                PlaylistUi(
+                    playlist = it,
+                    tracks = emptyList<Track>()
+                )
+            }
+        }
+
+        val allTracks = mainUiState.tracks
+
+        playlists.map { playlist ->
+            val orderedTracks = playlist.tracks?.mapNotNull { trackId ->
+                allTracks.find { it.id == trackId }
+            } ?: emptyList()
+
+            PlaylistUi(
+                playlist = playlist,
+                tracks = orderedTracks as List<Track>
+            )
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    ) as StateFlow<List<PlaylistUi>>
 
     val userState: StateFlow<User> = userRepository.getUserData()
         .catch { exception ->
