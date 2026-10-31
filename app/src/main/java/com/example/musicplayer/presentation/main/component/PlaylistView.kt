@@ -1,6 +1,7 @@
 package com.example.musicplayer.presentation.main.component
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
@@ -62,6 +63,8 @@ fun PlaylistView(
 
     val currentBgColor = imageColors?.first ?: DeepBlack
 
+    Log.d("Playlist", "playlist: $playList")
+
     val bgGradient = Brush.verticalGradient(
         colors = listOf(
             currentBgColor,
@@ -97,7 +100,7 @@ fun PlaylistView(
                 creatorAvatarUrl = "", // доделать
                 playlistName = playList.name,
                 creatorName = playList.creatorName ?: "",
-                playlistDuration = playList.duration + " min",
+                playlistDuration = playList.duration ?: "0 min",
                 onBitmapLoaded = { bitmap ->
                     onBitmapLoaded(bitmap)
                 },
