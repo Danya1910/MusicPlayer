@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -38,6 +40,8 @@ import androidx.core.graphics.drawable.toBitmap
 import coil.compose.AsyncImage
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.PlayList
+import com.example.musicplayer.domain.model.Track
+import com.example.musicplayer.presentation.main.util.PlaylistUi
 import com.example.musicplayer.presentation.player.state.PlayerUiState
 import com.example.musicplayer.ui.theme.Black
 import com.example.musicplayer.ui.theme.DeepBlack
@@ -49,7 +53,8 @@ import dev.chrisbanes.haze.HazeState
 
 @Composable
 fun PlaylistView(
-    playList: PlayList,
+    playList: PlaylistUi,
+    tracks: List<Track>,
     playerState: PlayerUiState,
     onPlayPauseClick: () -> Unit,
     onShuffleClick: () -> Unit,
@@ -60,7 +65,7 @@ fun PlaylistView(
     onBitmapLoaded: (Bitmap) -> Unit,
 ) {
 
-    val imageColors = playerState.paletteState[playList.id]
+    val imageColors = playerState.paletteState[playList.playlist.id]
 
     val currentBgColor = imageColors?.first ?: DeepBlack
 
@@ -101,11 +106,11 @@ fun PlaylistView(
                 }
             )
             PlaylistHat(
-                playlistImageUrl = playList.imageUrl ?: "",
+                playlistImageUrl = playList.playlist.imageUrl ?: "",
                 creatorAvatarUrl = "", // доделать
-                playlistName = playList.name,
-                creatorName = playList.creatorName ?: "",
-                playlistDuration = playList.duration ?: "0 min",
+                playlistName = playList.playlist.name,
+                creatorName = playList.playlist.creatorName ?: "",
+                playlistDuration = playList.playlist.duration ?: "0 min",
                 onBitmapLoaded = { bitmap ->
                     onBitmapLoaded(bitmap)
                 },
@@ -119,6 +124,20 @@ fun PlaylistView(
             isShuffled = true,
             isPlaying = true,
         )
+        Spacer(modifier = Modifier.height(20.dp))
+        LazyColumn(
+        ) {
+            itemsIndexed(
+                items = tracks,
+                key = { index, track -> "${track.id}_$index" }
+            ) { index, track ->
+                TrackItem(
+                    track = track,
+                    onTrackClick = {},
+                    onMoreClick = {}
+                )
+            }
+        }
     }
 }
 
