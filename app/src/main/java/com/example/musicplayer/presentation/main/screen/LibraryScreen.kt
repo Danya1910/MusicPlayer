@@ -50,6 +50,7 @@ import com.example.musicplayer.presentation.main.MainViewModel
 import com.example.musicplayer.presentation.main.component.BottomBar
 import com.example.musicplayer.presentation.main.component.ModalRightSheet
 import com.example.musicplayer.presentation.main.component.PlaylistView
+import com.example.musicplayer.presentation.main.util.PlaylistUi
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.White
@@ -61,13 +62,13 @@ fun LibraryScreen(
     navController: NavController
 ) {
 
-    val playlists by mainViewModel.playlistsState.collectAsStateWithLifecycle()
+    val playlists by mainViewModel.playlistsUiState.collectAsStateWithLifecycle()
 
     val playerState by mainViewModel.playerState.collectAsStateWithLifecycle()
 
     val user by mainViewModel.userState.collectAsStateWithLifecycle()
 
-    var currentPlaylistToShow by remember { mutableStateOf<PlayList?>(null) }
+    var currentPlaylistToShow by remember { mutableStateOf<PlaylistUi?>(null) }
     var showPlayList by remember { mutableStateOf(false) }
 
     Log.d("Library", user.toString())
@@ -98,7 +99,7 @@ fun LibraryScreen(
 
             items(playlists) { playlist ->
                 PlayListItem(
-                    playList = playlist,
+                    playList = playlist.playlist,
                     onClick = {
                         currentPlaylistToShow = playlist
                         showPlayList = true
@@ -118,6 +119,7 @@ fun LibraryScreen(
                 currentPlaylistToShow?.let { playList ->
                     PlaylistView(
                         playList = playList,
+                        tracks = playList.tracks,
                         playerState = playerState,
                         onPlayPauseClick = {
 
@@ -132,7 +134,7 @@ fun LibraryScreen(
                         },
                         onBitmapLoaded = { bitmap ->
                             mainViewModel.updateColorsFromBitmap(
-                                id = playList.id ?: "",
+                                id = playList.playlist.id ?: "",
                                 bitmap = bitmap,
                             )
                         }
