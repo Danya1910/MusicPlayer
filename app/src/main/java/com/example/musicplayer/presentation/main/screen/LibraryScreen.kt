@@ -78,7 +78,7 @@ fun LibraryScreen(
         modifier = Modifier
             .fillMaxSize(),
         topBar = {
-            TopBar(
+            LibraryTopBar(
                 user = user,
             )
         },
@@ -122,10 +122,20 @@ fun LibraryScreen(
                         tracks = playList.tracks,
                         playerState = playerState,
                         onPlayPauseClick = {
-
+                            mainViewModel.playTrackWithQueue(
+                                track = playList.tracks[0],
+                                queue = playList.tracks,
+                            )
                         },
-                        onShuffleClick = {},
-                        onTrackClick = {},
+                        onShuffleClick = {
+                            mainViewModel.toggleShuffleMode()
+                        },
+                        onTrackClick = { track ->
+                            mainViewModel.playTrackWithQueue(
+                                track = track,
+                                queue = playList.tracks,
+                            )
+                        },
                         onTrackInfoClick = {},
                         onDownloadClick = {},
                         onBackClick = {
@@ -137,7 +147,8 @@ fun LibraryScreen(
                                 id = playList.playlist.id ?: "",
                                 bitmap = bitmap,
                             )
-                        }
+                        },
+
                     )
                 }
             }
@@ -200,7 +211,7 @@ private fun PlayListItem(
 
 
 @Composable
-private fun TopBar(
+private fun LibraryTopBar(
     user: User,
 ) {
     Column(
