@@ -71,7 +71,7 @@ fun PlaylistView(
     playerState: PlayerUiState,
     onPlayPauseClick: () -> Unit,
     onShuffleClick: () -> Unit,
-    onTrackClick: () -> Unit,
+    onTrackClick: (Track) -> Unit,
     onTrackInfoClick: () -> Unit,
     onDownloadClick: () -> Unit,
     onBackClick: () -> Unit,
@@ -109,6 +109,9 @@ fun PlaylistView(
         targetValue = if (isImageExpanded) 0f else 1f,
         animationSpec = tween(durationMillis = 350)
     )
+
+    val isShuffled = playerState.isShuffleEnabled
+    val isPlaying = playerState.isPlaying
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -164,9 +167,9 @@ fun PlaylistView(
                 PlaylistActions(
                     onDownloadClick = onDownloadClick,
                     onShuffleClick = onShuffleClick,
-                    onPlayPauseClick = onShuffleClick,
-                    isShuffled = true,
-                    isPlaying = true,
+                    onPlayPauseClick = onPlayPauseClick,
+                    isShuffled = isShuffled,
+                    isPlaying = isPlaying,
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 LazyColumn {
@@ -176,7 +179,9 @@ fun PlaylistView(
                     ) { index, track ->
                         TrackItem(
                             track = track,
-                            onTrackClick = {},
+                            onTrackClick = {
+                                onTrackClick(track)
+                            },
                             onMoreClick = {}
                         )
                     }
