@@ -9,12 +9,25 @@ import androidx.navigation.navigation
 import com.example.musicplayer.presentation.main.MainViewModel
 import com.example.musicplayer.presentation.main.screen.LibraryScreen
 import com.example.musicplayer.presentation.main.screen.MainScreen
+import com.example.musicplayer.presentation.main.screen.MainTest
 
 fun NavGraphBuilder.mainGraph(
     navController: NavController,
 ) {
 
-    navigation<Screen.MainGraph>(startDestination = Screen.Main) {
+    navigation<Screen.MainGraph>(startDestination = Screen.MainTest) {
+
+        composable<Screen.MainTest> { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry<Screen.MainGraph>()
+            }
+            val mainViewModel: MainViewModel = hiltViewModel(parentEntry)
+
+            MainTest(
+                mainViewModel = mainViewModel,
+                navController = navController,
+            )
+        }
 
         composable<Screen.Main> { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
