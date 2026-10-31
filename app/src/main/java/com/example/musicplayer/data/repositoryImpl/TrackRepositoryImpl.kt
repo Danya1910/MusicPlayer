@@ -154,7 +154,6 @@ class TrackRepositoryImpl @Inject constructor(
         val currentUserId = firebaseAuth.currentUser?.uid
             ?: throw Exception("Пользователь не авторизирован")
 
-        // Отправляем локальные данные из Room для мгновенного отображения
         val savedPlaylists = playListDao.getPlaylistsOnce(currentUserId).map { it.toDomain() }
         send(savedPlaylists)
 
@@ -181,7 +180,7 @@ class TrackRepositoryImpl @Inject constructor(
                         creatorName = document.getString("creatorName"),
                         isPrivate = document.getBoolean("isPrivate") ?: true,
                         tracks = trackIds,
-                        duration = "00:00" // Временно ставим дефолт
+                        duration = "0 min"
                     )
                 }
                 trySend(remotePlaylists)
@@ -193,30 +192,32 @@ class TrackRepositoryImpl @Inject constructor(
         }
     }.flowOn(Dispatchers.IO)
 
-    // 3. ПУБЛИЧНЫЙ МЕТОД: Соединяет плейлисты с треками и вычисляет длительность
     override fun getUserPlayLists(): Flow<List<PlayList>> {
-        // Получаем ваши треки (подставьте сюда ваш реальный метод получения треков, например из Room)
-        val allTracksFlow: Flow<List<Track>> = trackDao.getAllTracksFlow().map { list -> list.map { it.toDomain() } }
+        val allTracksFlow: Flow<List<Track>> = trackDao.getAllTracksFlow().map { list ->
+            list.map {
+                it.toDomain()
+            }
+        }
 
         return getRawUserPlayLists().combine(allTracksFlow) { playlists, allTracks ->
             Log.d("TrackRepo", "Combine сработал! Всего треков в базе: ${allTracks.size}")
             playlists.map { playlist ->
-                // Фильтруем все доступные треки, находя те, чьи ID есть в данном плейлисте
                 val playlistTracks = allTracks.filter { track ->
                     playlist.tracks?.contains(track.id) == true
                 }
 
-                Log.d("TrackRepo", "Плейлист '${playlist.name}' содержит треков из базы: ${playlistTracks.size} (ID в плейлисте: ${playlist.tracks})")
+                Log.d(
+                    "TrackRepo",
+                    "Плейлист '${playlist.name}' содержит треков из базы: ${playlistTracks.size} (ID в плейлисте: ${playlist.tracks})"
+                )
 
-                // Суммируем длительность (предполагаем, что track.duration хранится в мс)
                 val totalMs = playlistTracks.sumOf { it.duration }
 
-                // Возвращаем обновленный плейлист с посчитанным временем
                 playlist.copy(
                     duration = formatDuration(totalMs)
                 )
             }
-        }.flowOn(Dispatchers.Default) // Расчеты лучше делать на Default-диспетчере
+        }.flowOn(Dispatchers.Default)
     }
 
 
@@ -264,7 +265,10 @@ class TrackRepositoryImpl @Inject constructor(
     private suspend fun getCurrentUserName(): String? {
         val uid = firebaseAuth.currentUser?.uid
         if (uid == null) {
-            Log.e("TrackRepo", "getCurrentUserName: currentUser.uid IS NULL! Пользователь не авторизован в Auth.")
+            Log.e(
+                "TrackRepo",
+                "getCurrentUserName: currentUser.uid IS NULL! Пользователь не авторизован в Auth."
+            )
             return null
         }
 
@@ -282,12 +286,19 @@ class TrackRepositoryImpl @Inject constructor(
                 Log.d("TrackRepo", "getCurrentUserName: Документ найден! Имя в БД: '$name'")
                 name
             } else {
-                Log.e("TrackRepo", "getCurrentUserName: Документ с UID $uid НЕ НАЙДЕН в коллекции 'users'!")
+                Log.e(
+                    "TrackRepo",
+                    "getCurrentUserName: Документ с UID $uid НЕ НАЙДЕН в коллекции 'users'!"
+                )
                 null
             }
         } catch (e: Exception) {
             // Если тут выпадет Permission Denied — нужно поправить Rules в консоли Firebase
-            Log.e("TrackRepo", "getCurrentUserName: Исключение при запросе к Firestore для UID: $uid", e)
+            Log.e(
+                "TrackRepo",
+                "getCurrentUserName: Исключение при запросе к Firestore для UID: $uid",
+                e
+            )
             null
         }
     }
