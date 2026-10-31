@@ -226,6 +226,7 @@ private fun PlaylistActions(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
+            .padding(horizontal = 20.dp)
     ) {
         Box(
             contentAlignment = Alignment.Center,
@@ -235,7 +236,7 @@ private fun PlaylistActions(
                     shape = CircleShape,
                 )
                 .border(
-                    width = 3.dp,
+                    width = 1.dp,
                     color = Gray,
                     shape = CircleShape,
                 )
