@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -30,6 +31,15 @@ fun BackButton(
     onClick: () -> Unit,
     hazeState: HazeState,
 ) {
+
+    val gradientColors = listOf(
+        Color(0xFFFFFFFF).copy(alpha = 0.5f),
+        Color(0xFFFFFFFF).copy(alpha = 0.3f),
+        Color(0xFFFFFFFF).copy(alpha = 0.2f),
+        Color(0xFFFFFFFF).copy(alpha = 0.1f),
+        Color(0xFFFFFFFF).copy(alpha = 0.2f),
+        Color(0xFFFFFFFF).copy(alpha = 0.5f),
+    )
 
     Box(
         contentAlignment = Alignment.Center,
@@ -50,13 +60,12 @@ fun BackButton(
             )
             .border(
                 width = 1.dp,
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color.White.copy(alpha = 0.15f),
-                        Color.White.copy(alpha = 0.02f)
-                    )
+                shape = CircleShape,
+                brush = Brush.linearGradient(
+                    colors = gradientColors,
+                    start = Offset(0f, 0f),
+                    end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
                 ),
-                shape = RoundedCornerShape(40.dp)
             )
             .clickable{
                 onClick()
