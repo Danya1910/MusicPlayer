@@ -46,6 +46,28 @@ fun MainRootPagerScreen(
 
     val isPlaying = playerState.isPlaying
 
+    val scope = rememberCoroutineScope()
+
+    val upcomingTracks by mainViewModel.upcomingTracks.collectAsStateWithLifecycle()
+    val currentQueue by mainViewModel.currentQueue.collectAsStateWithLifecycle()
+
+    val tabNavController = rememberNavController()
+
+    val backStackEntry by tabNavController.currentBackStackEntryAsState()
+    val selectedTab: TabScreen = when (backStackEntry?.destination?.route) {
+        TabScreen.Home::class.qualifiedName -> TabScreen.Home
+        TabScreen.Search::class.qualifiedName -> TabScreen.Search
+        TabScreen.Library::class.qualifiedName -> TabScreen.Library
+        else -> TabScreen.Home
+    }
+
+    val bottomPadding = if (currentTrack != null) 145.dp else 85.dp
+
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val trackInfoSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val playListSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+
     var isTrackViewVisible by remember { mutableStateOf(false) }
 
     val bottomPadding = if (currentTrack != null) {
