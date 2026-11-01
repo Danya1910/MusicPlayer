@@ -3,6 +3,7 @@ package com.example.musicplayer.presentation.main.component
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,50 +30,47 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.musicplayer.R
 import com.example.musicplayer.presentation.navigation.Screen
+import com.example.musicplayer.presentation.navigation.TabScreen
+import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.White
 
 
 @Composable
 fun BottomBarTest(
-    navController: NavController,
-    pagerState: PagerState,
-    onItemClick: (Int) -> Unit,
+    selectedTab: TabScreen,
+    onTabSelected: (TabScreen) -> Unit,
 ) {
 
     val bottomBarItems = listOf(
         BottomBarDataTest(
             icon = R.drawable.ic_home,
             text = "Home",
-            route = 0,
+            route = TabScreen.Home,
         ),
         BottomBarDataTest(
             icon = R.drawable.ic_search,
             text = "Search",
-            route = 1
+            route = TabScreen.Search
         ),
         BottomBarDataTest(
             icon = R.drawable.ic_library,
             text = "Library",
-            route = 2,
+            route = TabScreen.Library,
         ),
     )
-
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-
-    val currentDestination = navBackStackEntry?.destination
-
-
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
+            .navigationBarsPadding()
             .fillMaxWidth()
             .height(85.dp)
+            .background(color = DeepBlack)
     ) {
         bottomBarItems.forEach { item ->
 
-            val isSelected = item.route == pagerState.currentPage
+            val isSelected = item.route == selectedTab
 
 
             val itemColor by animateColorAsState(
@@ -86,7 +84,7 @@ fun BottomBarTest(
                 color = itemColor,
                 modifier = Modifier.weight(1f),
                 onClick = {
-                    onItemClick(item.route)
+                    onTabSelected(item.route)
                 }
             )
         }
@@ -97,7 +95,7 @@ fun BottomBarTest(
 data class BottomBarDataTest(
     val icon: Int,
     val text: String,
-    val route: Int,
+    val route: TabScreen,
 )
 
 @Composable
