@@ -335,12 +335,16 @@ class TrackRepositoryImpl @Inject constructor(
             val likeData = mapOf(
                 "likedAt" to System.currentTimeMillis()
             )
+            Log.d("TrackRepo", "start liking track with id:$trackId")
+
             firestore.collection("favorites")
                 .document(currentUserUid)
                 .collection("tracks")
                 .document(trackId)
                 .set(likeData)
                 .await()
+
+            Log.d("TrackRepo", "track with id:$trackId liked")
         } catch (e: Exception) {
             e.printStackTrace()
             trackDao.updateFavoriteStatus(trackId = trackId, isFavorite = false)
@@ -360,12 +364,16 @@ class TrackRepositoryImpl @Inject constructor(
         trackDao.updateFavoriteStatus(trackId = trackId, isFavorite = false)
 
         try {
+            Log.d("TrackRepo", "start deleting track with id:$trackId")
+
             firestore.collection("favorites")
                 .document(currentUserUid)
                 .collection("tracks")
                 .document(trackId)
                 .delete()
                 .await()
+
+            Log.d("TrackRepo", "track with id:$trackId deleted from favorites")
         } catch (e: Exception) {
             e.printStackTrace()
             trackDao.updateFavoriteStatus(trackId = trackId, isFavorite = true)
