@@ -68,35 +68,42 @@ fun MainRootPagerScreen(
                 color = DeepBlack
             )
     ) {
-        HorizontalPager(
-            state = pagerState,
+
+        NavHost(
+            navController = tabNavController,
+            startDestination = TabScreen.Home,
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    color = DeepBlack
-                )
-                .padding(
-                    top = topPadding,
-                    bottom = bottomPadding + 85.dp
-                )
-        ) { page ->
-            when (page) {
-                0 -> MainTest(
-                    mainViewModel = mainViewModel,
-                    navController = navController,
-                )
+                .padding(bottom = bottomPadding)
+        ) {
 
-                1 -> Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(color = Color.Blue)
-                )
-
-                2 -> LibraryTest(
+            composable<TabScreen.Home> {
+                MainTest(
                     mainViewModel = mainViewModel,
-                    navController = navController,
+                    navController = rootNavController,
+                    onMoreClick = { track ->
+                        currentInfoToShow = track
+                        isTrackInfoVisible = true
+                    }
                 )
             }
+
+                1 -> Box(
+            composable<TabScreen.Search> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(DeepBlack)
+                )
+            }
+
+            composable<TabScreen.Library> {
+                LibraryTest(
+                    mainViewModel = mainViewModel,
+                    navController = rootNavController,
+                )
+            }
+
         }
 
 
