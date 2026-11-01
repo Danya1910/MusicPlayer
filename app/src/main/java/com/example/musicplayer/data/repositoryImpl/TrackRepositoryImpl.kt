@@ -325,9 +325,12 @@ class TrackRepositoryImpl @Inject constructor(
     override suspend fun likeTrack(trackId: String) {
 
         val currentUserUid = firebaseAuth.currentUser?.uid
+
         if (currentUserUid == null) {
             return
         }
+
+        trackDao.updateFavoriteStatus(trackId = trackId, isFavorite = true)
 
         try {
             val likeData = mapOf(
@@ -338,18 +341,24 @@ class TrackRepositoryImpl @Inject constructor(
                 .collection("tracks")
                 .document(trackId)
                 .set(likeData)
+                .await()
         } catch (e: Exception) {
             e.printStackTrace()
+            trackDao.updateFavoriteStatus(trackId = trackId, isFavorite = false)
         }
 
     }
 
 
     override suspend fun unlikeTrack(trackId: String) {
+
         val currentUserUid = firebaseAuth.currentUser?.uid
+
         if (currentUserUid == null) {
             return
         }
+
+        trackDao.updateFavoriteStatus(trackId = trackId, isFavorite = false)
 
         try {
             firestore.collection("favorites")
@@ -357,8 +366,10 @@ class TrackRepositoryImpl @Inject constructor(
                 .collection("tracks")
                 .document(trackId)
                 .delete()
+                .await()
         } catch (e: Exception) {
             e.printStackTrace()
+            trackDao.updateFavoriteStatus(trackId = trackId, isFavorite = true)
         }
     }
 }
