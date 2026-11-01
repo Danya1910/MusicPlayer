@@ -313,10 +313,10 @@ fun MainScreen(
                         isPlayListSelectionVisible = false
                     },
                     onAddInPlayListClick = { id ->
-                            mainViewModel.addTrackToPlayList(
-                                playListId = id,
-                                trackId = currentTrackForAdd!!.id
-                            )
+                        mainViewModel.addTrackToPlayList(
+                            playListId = id,
+                            trackId = currentTrackForAdd!!.id
+                        )
                     },
                     onRemoveFromPlayList = { id ->
                         mainViewModel.removeTrackFromPlayList(
@@ -357,81 +357,80 @@ fun MainScreen(
     }
 
 
-
-    if (isTrackViewVisible) {
-        ModalBottomSheet(
-            onDismissRequest = { isTrackViewVisible = false },
-            sheetState = sheetState,
-            containerColor = Color.Transparent,
-            dragHandle = null,
-            scrimColor = DeepBlack.copy(alpha = 0.5f),
-            contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
-            modifier = Modifier.fillMaxSize()
-        ) {
-            currentTrack?.let { track ->
-                TrackView(
-                    track = track,
-                    onCancelClick = {
-                        scope.launch { sheetState.hide() }.invokeOnCompletion {
-                            if (!sheetState.isVisible) {
-                                isTrackViewVisible = false
-                            }
-                        }
-                    },
-                    onPauseClick = {
-                        mainViewModel.togglePlayPause()
-                    },
-                    onHeartClick = {
-
-                    },
-                    playerState = playerState,
-                    onBitmapLoaded = { bitmap ->
-                        mainViewModel.updateColorsFromBitmap(
-                            id = track.id,
-                            bitmap = bitmap,
-                        )
-                    },
-                    isPlaying = isPlaying,
-                    onSkipToNext = {
-                        mainViewModel.skipToNext()
-                    },
-                    onSkipToPrevious = {
-                        mainViewModel.skipToPrevious()
-                    },
-                    onSeekTo = { ms ->
-                        mainViewModel.seekTo(positionMs = ms)
-                    },
-                    onShuffleClick = {
-                        mainViewModel.toggleShuffleMode()
-                    },
-                    onRepeatClick = {
-                        mainViewModel.toggleRepeatMode()
-                    },
-                    isShuffled = playerState.isShuffleEnabled,
-                    repeatMode = playerState.repeatMode,
-                    upcomingTracks = upcomingTracks,
-                    currentQueue = currentQueue,
-                    onTrackInQueueClick = { track ->
-                        mainViewModel.playTrackWithQueue(
-                            track = track,
-                            queue = currentQueue
-                        )
-                    },
-                    onMoveTrack = { fromIndex, toIndex ->
-                        mainViewModel.moveTrack(
-                            fromIndex = fromIndex,
-                            toIndex = toIndex,
-                        )
-                    },
-                    removeFromQueue = { index ->
-                        mainViewModel.removeTrackFromQueue(
-                            index = index
-                        )
-                    }
-                )
-
-            }
-        }
-    }
+//    if (isTrackViewVisible) {
+//        ModalBottomSheet(
+//            onDismissRequest = { isTrackViewVisible = false },
+//            sheetState = sheetState,
+//            containerColor = Color.Transparent,
+//            dragHandle = null,
+//            scrimColor = DeepBlack.copy(alpha = 0.5f),
+//            contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
+//            modifier = Modifier.fillMaxSize()
+//        ) {
+//            currentTrack?.let { track ->
+//                TrackView(
+//                    track = track,
+//                    onCancelClick = {
+//                        scope.launch { sheetState.hide() }.invokeOnCompletion {
+//                            if (!sheetState.isVisible) {
+//                                isTrackViewVisible = false
+//                            }
+//                        }
+//                    },
+//                    onPauseClick = {
+//                        mainViewModel.togglePlayPause()
+//                    },
+//                    onHeartClick = {
+//
+//                    },
+//                    playerState = playerState,
+//                    onBitmapLoaded = { bitmap ->
+//                        mainViewModel.updateColorsFromBitmap(
+//                            id = track.id,
+//                            bitmap = bitmap,
+//                        )
+//                    },
+//                    isPlaying = isPlaying,
+//                    onSkipToNext = {
+//                        mainViewModel.skipToNext()
+//                    },
+//                    onSkipToPrevious = {
+//                        mainViewModel.skipToPrevious()
+//                    },
+//                    onSeekTo = { ms ->
+//                        mainViewModel.seekTo(positionMs = ms)
+//                    },
+//                    onShuffleClick = {
+//                        mainViewModel.toggleShuffleMode()
+//                    },
+//                    onRepeatClick = {
+//                        mainViewModel.toggleRepeatMode()
+//                    },
+//                    isShuffled = playerState.isShuffleEnabled,
+//                    repeatMode = playerState.repeatMode,
+//                    upcomingTracks = upcomingTracks,
+//                    currentQueue = currentQueue,
+//                    onTrackInQueueClick = { track ->
+//                        mainViewModel.playTrackWithQueue(
+//                            track = track,
+//                            queue = currentQueue
+//                        )
+//                    },
+//                    onMoveTrack = { fromIndex, toIndex ->
+//                        mainViewModel.moveTrack(
+//                            fromIndex = fromIndex,
+//                            toIndex = toIndex,
+//                        )
+//                    },
+//                    removeFromQueue = { index ->
+//                        mainViewModel.removeTrackFromQueue(
+//                            index = index
+//                        )
+//                    }
+//                )
+//
+//            }
+//        }
+    //}
 
 }
