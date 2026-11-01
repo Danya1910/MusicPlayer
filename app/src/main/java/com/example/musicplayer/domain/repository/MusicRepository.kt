@@ -38,4 +38,6 @@ interface MusicRepository {
 
     fun removeTrackFromQueue(index: Int)
 
+    fun updateFavoriteStatus(trackId: String, isFavorite: Boolean)
+
 }
