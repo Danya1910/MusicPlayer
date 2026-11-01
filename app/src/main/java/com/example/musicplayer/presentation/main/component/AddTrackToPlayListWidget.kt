@@ -1,5 +1,14 @@
 package com.example.musicplayer.presentation.main.component
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
@@ -341,16 +350,32 @@ private fun PlayListItem(
                 color = Gray,
             )
         }
-        Icon(
-            painter = painterResource(
-                if (isAdded) R.drawable.ic_tick_circle
-                else R.drawable.ic_circle_plus
-            ),
-            contentDescription = null,
-            tint = if (isAdded) Color.Unspecified else Gray,
-            modifier = Modifier
-                .size(25.dp)
-        )
+        AnimatedContent(
+            targetState = isAdded,
+            transitionSpec = {
+                val springSpec = spring<Float>(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessLow
+                )
+
+                (fadeIn(animationSpec = tween(220)) +
+                        scaleIn(initialScale = 0.5f, animationSpec = springSpec)) togetherWith
+                        (fadeOut(animationSpec = tween(220)) +
+                                scaleOut(targetScale = 0.5f, animationSpec = tween(220)))
+            },
+        ) { favoriteState ->
+            Icon(
+                painter = painterResource(
+                    if (favoriteState) R.drawable.ic_tick_circle
+                    else R.drawable.ic_circle_plus
+                ),
+                contentDescription = null,
+                tint = if(isAdded) Color.Unspecified else Gray,
+                modifier = Modifier
+                    .size(36.dp)
+                    .padding(6.dp)
+            )
+        }
     }
 
 }
