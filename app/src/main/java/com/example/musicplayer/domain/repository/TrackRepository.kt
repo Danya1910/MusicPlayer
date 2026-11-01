@@ -22,4 +22,9 @@ interface TrackRepository {
 
     suspend fun removeTrackFromPlayList(playListId: String, trackId: String)
 
+    suspend fun likeTrack(trackId: String)
+
+    suspend fun unlikeTrack(trackId: String)
+
+
 }
