@@ -21,6 +21,9 @@ interface TrackDao {
     @Query("SELECT * FROM tracks_table")
     suspend fun getAllTracksOnce(): List<TrackEntity>
 
+    @Query("UPDATE tracks_table SET isFavorite = :isFavorite WHERE id = :trackId")
+    suspend fun updateFavoriteStatus(trackId: String, isFavorite: Boolean)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTracks(tracks: List<TrackEntity>)
 
