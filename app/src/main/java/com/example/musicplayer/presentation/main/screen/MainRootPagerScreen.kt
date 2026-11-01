@@ -253,6 +253,10 @@ fun MainRootPagerScreen(
                             mainViewModel.togglePlayPause()
                         },
                         onHeartClick = {
+                            if(track.isFavorite)
+                                mainViewModel.unlikeTrack(trackId = track.id)
+                            else
+                                mainViewModel.likeTrack(trackId = track.id)
 
                         },
                         playerState = playerState,
