@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.example.musicplayer.presentation.main.MainViewModel
 import com.example.musicplayer.presentation.main.screen.LibraryScreen
+import com.example.musicplayer.presentation.main.screen.MainRootPagerScreen
 import com.example.musicplayer.presentation.main.screen.MainScreen
 import com.example.musicplayer.presentation.main.screen.MainTest
 
@@ -15,44 +16,19 @@ fun NavGraphBuilder.mainGraph(
     navController: NavController,
 ) {
 
-    navigation<Screen.MainGraph>(startDestination = Screen.MainTest) {
+    navigation<Screen.MainGraph>(startDestination = Screen.Pager) {
 
-        composable<Screen.MainTest> { backStackEntry ->
+        composable<Screen.Pager> { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry<Screen.MainGraph>()
             }
             val mainViewModel: MainViewModel = hiltViewModel(parentEntry)
 
-            MainTest(
+            MainRootPagerScreen(
                 mainViewModel = mainViewModel,
-                navController = navController,
+                rootNavController = navController,
             )
         }
-
-        composable<Screen.Main> { backStackEntry ->
-            val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry<Screen.MainGraph>()
-            }
-            val mainViewModel: MainViewModel = hiltViewModel(parentEntry)
-
-            MainScreen(
-                mainViewModel = mainViewModel,
-                navController = navController,
-            )
-        }
-
-        composable<Screen.Library> { backStackEntry ->
-            val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry<Screen.MainGraph>()
-            }
-            val mainViewModel: MainViewModel = hiltViewModel(parentEntry)
-
-            LibraryScreen(
-                mainViewModel = mainViewModel,
-                navController = navController,
-            )
-        }
-
     }
 
 
