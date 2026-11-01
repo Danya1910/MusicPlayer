@@ -8,11 +8,9 @@ sealed interface Screen {
     @Serializable data object AuthGraph: Screen
     @Serializable data object MainGraph: Screen
 
-    @Serializable data object MainTest: Screen
+
+    @Serializable data object Pager: Screen
 
     @Serializable data object Welcome: Screen
-    @Serializable data object Main: Screen
-
-    @Serializable data object Library: Screen
 
 }
