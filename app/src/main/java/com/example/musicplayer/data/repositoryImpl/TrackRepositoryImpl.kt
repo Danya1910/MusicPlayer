@@ -348,6 +348,7 @@ class TrackRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             e.printStackTrace()
             trackDao.updateFavoriteStatus(trackId = trackId, isFavorite = false)
+            throw e
         }
 
     }
@@ -377,6 +378,7 @@ class TrackRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             e.printStackTrace()
             trackDao.updateFavoriteStatus(trackId = trackId, isFavorite = true)
+            throw e
         }
     }
 }
