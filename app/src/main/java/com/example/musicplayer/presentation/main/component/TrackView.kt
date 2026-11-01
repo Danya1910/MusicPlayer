@@ -1,6 +1,16 @@
 package com.example.musicplayer.presentation.main.component
 
 import android.graphics.Bitmap
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -394,16 +404,38 @@ private fun TrackInfoAndHeart(
             )
         }
         Spacer(modifier = Modifier.width(42.dp))
-        Icon(
-            painter = painterResource(R.drawable.ic_heart),
-            contentDescription = null,
-            tint = if(isFavorite) Color.Red else White,
-            modifier = Modifier
-                .size(23.dp)
-                .clickable {
-                    onHeartClick()
-                },
-        )
+        AnimatedContent(
+            targetState = isFavorite,
+            transitionSpec = {
+                val springSpec = spring<Float>(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessLow
+                )
+
+                (fadeIn(animationSpec = tween(220)) +
+                        scaleIn(initialScale = 0.5f, animationSpec = springSpec)) togetherWith
+                        (fadeOut(animationSpec = tween(220)) +
+                                scaleOut(targetScale = 0.5f, animationSpec = tween(220)))
+            },
+        ) { favoriteState ->
+            Icon(
+                painter = painterResource(
+                    if (favoriteState) R.drawable.ic_tick_circle
+                    else R.drawable.ic_circle_plus
+                ),
+                contentDescription = null,
+                tint = if(isFavorite) Color.Unspecified else Gray,
+                modifier = Modifier
+                    .size(36.dp)
+                    .padding(6.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        onHeartClick()
+                    },
+            )
+        }
     }
 }
 
