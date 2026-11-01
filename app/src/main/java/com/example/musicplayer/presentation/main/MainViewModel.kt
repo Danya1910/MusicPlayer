@@ -344,5 +344,33 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun likeTrack(
+        trackId: String,
+    ) {
+        viewModelScope.launch {
+            try {
+                trackRepository.likeTrack(
+                    trackId = trackId,
+                )
+            } catch (e: Exception) {
+                Log.e("TrackVM", e.toString())
+            }
+        }
+    }
+
+    fun unlikeTrack(
+        trackId: String,
+    ) {
+        viewModelScope.launch {
+            try {
+                trackRepository.unlikeTrack(
+                    trackId = trackId,
+                )
+            } catch (e: Exception) {
+                Log.e("TrackVM", e.toString())
+            }
+        }
+    }
+
 
 }
