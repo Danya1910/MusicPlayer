@@ -16,7 +16,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
@@ -46,38 +48,55 @@ class TrackRepositoryImpl @Inject constructor(
             val currentUserId = firebaseAuth.currentUser?.uid ?: throw Exception(
                 "Пользователь не авторизирован"
             )
-            val favoriteTrackIds = firestore.collection("users")
-                .document(currentUserId)
-                .collection("favorites")
-                .get()
-                .await()
-                .map { it.id }
 
-            val allTracksSnapshot = firestore.collection("tracks").get().await()
+            coroutineScope {
 
-            val remoteTracks = allTracksSnapshot.documents.map { document ->
-                val trackId = document.id
-                Track(
-                    id = trackId,
-                    title = document.getString("title") ?: "",
-                    artist = document.getString("artist") ?: "",
-                    audioUrl = document.getString("audioUrl") ?: "",
-                    imageUrl = document.getString("imageUrl") ?: "",
-                    duration = document.getLong("duration") ?: 0L,
-                    genre = document.getString("genre") ?: "",
-                    isFavorite = favoriteTrackIds.contains(trackId),
-                    localAudioPath = null,
-                    albumName = document.getString("albumName") ?: "",
-                    albumId = document.getString("albumId") ?: "",
-                )
+                val favoriteDeferred = async {
+                    firestore.collection("favorites")
+                        .document(currentUserId)
+                        .collection("tracks")
+                        .get()
+                        .await()
+                        .map { it.id }
+                        .toSet()
+                }
+
+                val tracksDeferred = async {
+                    firestore.collection("tracks").get().await()
+                }
+
+                val favoriteTracksIds = favoriteDeferred.await()
+                val allTracksSnapshot = tracksDeferred.await()
+
+                val currentCache = trackDao.getAllTracksOnce()
+                val cacheMap = currentCache.associateBy { it.id }
+
+
+                val remoteTracks = allTracksSnapshot.documents.map { document ->
+                    val trackId = document.id
+                    Track(
+                        id = trackId,
+                        title = document.getString("title") ?: "",
+                        artist = document.getString("artist") ?: "",
+                        audioUrl = document.getString("audioUrl") ?: "",
+                        imageUrl = document.getString("imageUrl") ?: "",
+                        duration = document.getLong("duration") ?: 0L,
+                        genre = document.getString("genre") ?: "",
+                        isFavorite = favoriteTracksIds.contains(trackId),
+                        localAudioPath = null,
+                        albumName = document.getString("albumName") ?: "",
+                        albumId = document.getString("albumId") ?: "",
+                    )
+                }
+
+                val entitiesToInsert = remoteTracks.map { remoteTrack ->
+                    val cachedTrack = cacheMap[remoteTrack.id]
+                    remoteTrack.toEntity().copy(
+                        localAudioPath = cachedTrack?.localAudioPath
+                    )
+                }
+                trackDao.insertTracks(entitiesToInsert)
             }
-            val entitiesToInsert = remoteTracks.map { remoteTrack ->
-                val cachedTrack = trackDao.getAllTracksOnce().find { it.id == remoteTrack.id }
-                remoteTrack.toEntity().copy(
-                    localAudioPath = cachedTrack?.localAudioPath
-                )
-            }
-            trackDao.insertTracks(entitiesToInsert)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -303,7 +322,45 @@ class TrackRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun likeTrack(trackId: String) {
 
+        val currentUserUid = firebaseAuth.currentUser?.uid
+        if (currentUserUid == null) {
+            return
+        }
+
+        try {
+            val likeData = mapOf(
+                "likedAt" to System.currentTimeMillis()
+            )
+            firestore.collection("favorites")
+                .document(currentUserUid)
+                .collection("tracks")
+                .document(trackId)
+                .set(likeData)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+    }
+
+
+    override suspend fun unlikeTrack(trackId: String) {
+        val currentUserUid = firebaseAuth.currentUser?.uid
+        if (currentUserUid == null) {
+            return
+        }
+
+        try {
+            firestore.collection("favorites")
+                .document(currentUserUid)
+                .collection("tracks")
+                .document(trackId)
+                .delete()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 }
 
 
