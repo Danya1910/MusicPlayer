@@ -130,6 +130,7 @@ fun MainRootPagerScreen(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 85.dp)
+                    .navigationBarsPadding()
             ) {
                 NowPlayingBar(
                     track = track,
