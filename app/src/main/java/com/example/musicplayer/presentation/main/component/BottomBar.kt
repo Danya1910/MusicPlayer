@@ -41,7 +41,7 @@ fun BottomBar(
         BottomBarData(
             icon = R.drawable.ic_home,
             text = "Home",
-            route = Screen.Main,
+            route = Screen.Pager,
         ),
         BottomBarData(
             icon = R.drawable.ic_search,
@@ -51,7 +51,7 @@ fun BottomBar(
         BottomBarData(
             icon = R.drawable.ic_library,
             text = "Library",
-            route = Screen.Library,
+            route = Screen.Pager,
         ),
     )
 
