@@ -347,6 +347,8 @@ class MainViewModel @Inject constructor(
     fun likeTrack(
         trackId: String,
     ) {
+        musicRepository.updateFavoriteStatus(trackId, isFavorite = true)
+
         viewModelScope.launch {
             try {
                 trackRepository.likeTrack(
@@ -354,6 +356,7 @@ class MainViewModel @Inject constructor(
                 )
             } catch (e: Exception) {
                 Log.e("TrackVM", e.toString())
+                musicRepository.updateFavoriteStatus(trackId, isFavorite = false)
             }
         }
     }
@@ -361,6 +364,8 @@ class MainViewModel @Inject constructor(
     fun unlikeTrack(
         trackId: String,
     ) {
+        musicRepository.updateFavoriteStatus(trackId, isFavorite = false)
+
         viewModelScope.launch {
             try {
                 trackRepository.unlikeTrack(
@@ -368,8 +373,14 @@ class MainViewModel @Inject constructor(
                 )
             } catch (e: Exception) {
                 Log.e("TrackVM", e.toString())
+                musicRepository.updateFavoriteStatus(trackId, isFavorite = true)
             }
         }
+    }
+
+    fun toggleFavorite(track: Track) {
+        if (track.isFavorite) unlikeTrack(track.id)
+        else likeTrack(track.id)
     }
 
 
