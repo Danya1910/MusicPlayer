@@ -156,9 +156,10 @@ fun TrackView(
             TrackInfoAndHeart(
                 title = track.title,
                 artist = track.artist,
-                onHeartClick = {},
+                onHeartClick = onHeartClick,
                 titleColor = White,
                 bodyColor = White,
+                isFavorite = track.isFavorite,
             )
 
             Spacer(modifier = Modifier.height(15.dp))
@@ -281,6 +282,7 @@ private fun TopBarPreview() {
             onHeartClick = {},
             titleColor = Black,
             bodyColor = White,
+            isFavorite = true,
         )
     }
 }
@@ -358,6 +360,7 @@ private fun TrackInfoAndHeart(
     onHeartClick: () -> Unit,
     titleColor: Color,
     bodyColor: Color,
+    isFavorite: Boolean,
 ) {
 
     Row(
@@ -394,7 +397,7 @@ private fun TrackInfoAndHeart(
         Icon(
             painter = painterResource(R.drawable.ic_heart),
             contentDescription = null,
-            tint = White,
+            tint = if(isFavorite) Color.Red else White,
             modifier = Modifier
                 .size(23.dp)
                 .clickable {
