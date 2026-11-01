@@ -312,7 +312,6 @@ class TrackRepositoryImpl @Inject constructor(
                 null
             }
         } catch (e: Exception) {
-            // Если тут выпадет Permission Denied — нужно поправить Rules в консоли Firebase
             Log.e(
                 "TrackRepo",
                 "getCurrentUserName: Исключение при запросе к Firestore для UID: $uid",
@@ -381,7 +380,6 @@ private fun formatDuration(durationMs: Long): String {
     val seconds = TimeUnit.MILLISECONDS.toSeconds(durationMs) % 60
 
     return when {
-        // Если есть часы (например: 1 ч 30 мин)
         hours > 0 -> {
             if (minutes > 0) {
                 String.format("%d h %d min", hours, minutes)
@@ -389,16 +387,14 @@ private fun formatDuration(durationMs: Long): String {
                 String.format("%d h", hours)
             }
         }
-        // Если часов нет, но есть минуты (например: 4 мин, 20 мин)
         minutes > 0 -> {
             String.format("%d min", minutes)
         }
-        // Если плейлист совсем короткий, меньше минуты (например: 45 сек)
         else -> {
             if (seconds > 0) {
                 String.format("%d sec", seconds)
             } else {
-                "0 min" // Дефолтное значение для пустого плейлиста
+                "0 min"
             }
         }
     }
