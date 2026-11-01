@@ -23,6 +23,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -311,6 +312,13 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
 
-
+    override fun updateFavoriteStatus(trackId: String, isFavorite: Boolean) {
+        _currentTrack.update { cur ->
+            if (cur?.id == trackId) cur.copy(isFavorite = isFavorite) else cur
+        }
+        _currentQueue.update { queue ->
+            queue.map { if (it.id == trackId) it.copy(isFavorite = isFavorite) else it }
+        }
+    }
 
 }
