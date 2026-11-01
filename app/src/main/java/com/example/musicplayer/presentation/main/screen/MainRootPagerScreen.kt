@@ -88,7 +88,6 @@ fun MainRootPagerScreen(
                 )
             }
 
-                1 -> Box(
             composable<TabScreen.Search> {
                 Box(
                     modifier = Modifier
@@ -106,6 +105,25 @@ fun MainRootPagerScreen(
 
         }
 
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+        ) {
+            BottomBarTest(
+                selectedTab = selectedTab,
+                onTabSelected = { tab ->
+                    tabNavController.navigate(tab) {
+                        popUpTo(tabNavController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+        }
 
         currentTrack?.let { track ->
             Box(
