@@ -53,12 +53,12 @@ import kotlinx.coroutines.launch
 fun MainTest(
     mainViewModel: MainViewModel,
     navController: NavController,
+    onMoreClick: (Track) -> Unit,
 
 ) {
 
     BackHandler(enabled = true) {}
 
-    val hazeState = remember { HazeState() }
 
     val uiState by mainViewModel.uiState.collectAsStateWithLifecycle()
 
@@ -68,7 +68,6 @@ fun MainTest(
     val userPlaylists by mainViewModel.playlistsState.collectAsStateWithLifecycle()
 
     var isAlbumViewVisible by remember { mutableStateOf(false) }
-    var isTrackViewVisible by remember { mutableStateOf(false) }
     var isTrackInfoVisible by remember { mutableStateOf(false) }
     var isPlayListSelectionVisible by remember { mutableStateOf(false) }
 
@@ -95,6 +94,9 @@ fun MainTest(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(
+                color = DeepBlack
+            )
     ) {
         when (val state = uiState) {
             is MainUiState.Loading ->
@@ -136,8 +138,7 @@ fun MainTest(
                             },
                             playerState = playerState,
                             onMoreAboutTrack = { track ->
-                                currentInfoToShow = track
-                                isTrackInfoVisible = true
+                                onMoreClick(track)
                             },
                         )
 
@@ -193,80 +194,9 @@ fun MainTest(
                 }
             )
         }
-
-        currentTrack?.let { track ->
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 5.dp)
-            ) {
-                NowPlayingBar(
-                    track = track,
-                    onPlayPauseClick = {
-                        mainViewModel.togglePlayPause()
-                    },
-                    onCardClick = {
-                        isTrackViewVisible = true
-                    },
-                    isPlaying = isPlaying,
-                    currentPosition = playerState.currentPosition,
-                    duration = track.duration,
-                )
-            }
-        }
     }
 
-    if (isTrackInfoVisible) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer {
-                    val offset =
-                        runCatching { trackInfoSheetState.requireOffset() }.getOrNull() ?: 0f
 
-                    val startFadeOffset = 500f
-
-                    val alphaProgress = if (offset > startFadeOffset) {
-                        (0.8f - ((offset - startFadeOffset) / 1800f)).coerceIn(0f, 0.8f)
-                    } else {
-                        0.8f
-                    }
-                    alpha = alphaProgress
-                }
-                .background(DeepBlack)
-        )
-    }
-
-    if (isTrackInfoVisible) {
-
-        ModalBottomSheet(
-            onDismissRequest = { isTrackInfoVisible = false },
-            sheetState = trackInfoSheetState,
-            containerColor = Color.Transparent,
-            dragHandle = null, // добавить
-            scrimColor = Color.Transparent,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-
-            currentInfoToShow?.let {
-                TrackInfo(
-                    track = currentInfoToShow!!,
-                    hazeState = hazeState,
-                    playNext = {
-                        mainViewModel.playNext(
-                            track = currentInfoToShow!!
-                        )
-                    },
-                    addToPlayList = {
-                        currentTrackForAdd = currentInfoToShow!!
-                        isTrackInfoVisible = false
-                        isPlayListSelectionVisible = true
-                    }
-                )
-            }
-        }
-    }
 
     if (isPlayListSelectionVisible) {
         ModalBottomSheet(
@@ -338,81 +268,5 @@ fun MainTest(
     }
 
 
-
-    if (isTrackViewVisible) {
-        ModalBottomSheet(
-            onDismissRequest = { isTrackViewVisible = false },
-            sheetState = sheetState,
-            containerColor = Color.Transparent,
-            dragHandle = null,
-            scrimColor = DeepBlack.copy(alpha = 0.5f),
-            contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
-            modifier = Modifier.fillMaxSize()
-        ) {
-            currentTrack?.let { track ->
-                TrackView(
-                    track = track,
-                    onCancelClick = {
-                        scope.launch { sheetState.hide() }.invokeOnCompletion {
-                            if (!sheetState.isVisible) {
-                                isTrackViewVisible = false
-                            }
-                        }
-                    },
-                    onPauseClick = {
-                        mainViewModel.togglePlayPause()
-                    },
-                    onHeartClick = {
-
-                    },
-                    playerState = playerState,
-                    onBitmapLoaded = { bitmap ->
-                        mainViewModel.updateColorsFromBitmap(
-                            id = track.id,
-                            bitmap = bitmap,
-                        )
-                    },
-                    isPlaying = isPlaying,
-                    onSkipToNext = {
-                        mainViewModel.skipToNext()
-                    },
-                    onSkipToPrevious = {
-                        mainViewModel.skipToPrevious()
-                    },
-                    onSeekTo = { ms ->
-                        mainViewModel.seekTo(positionMs = ms)
-                    },
-                    onShuffleClick = {
-                        mainViewModel.toggleShuffleMode()
-                    },
-                    onRepeatClick = {
-                        mainViewModel.toggleRepeatMode()
-                    },
-                    isShuffled = playerState.isShuffleEnabled,
-                    repeatMode = playerState.repeatMode,
-                    upcomingTracks = upcomingTracks,
-                    currentQueue = currentQueue,
-                    onTrackInQueueClick = { track ->
-                        mainViewModel.playTrackWithQueue(
-                            track = track,
-                            queue = currentQueue
-                        )
-                    },
-                    onMoveTrack = { fromIndex, toIndex ->
-                        mainViewModel.moveTrack(
-                            fromIndex = fromIndex,
-                            toIndex = toIndex,
-                        )
-                    },
-                    removeFromQueue = { index ->
-                        mainViewModel.removeTrackFromQueue(
-                            index = index
-                        )
-                    }
-                )
-
-            }
-        }
-    }
 
 }
