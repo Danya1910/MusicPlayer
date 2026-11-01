@@ -62,34 +62,13 @@ fun MainTest(
 
     val uiState by mainViewModel.uiState.collectAsStateWithLifecycle()
 
-    val currentTrack by mainViewModel.currentTrack.collectAsStateWithLifecycle()
-    val isPlaying by mainViewModel.isPlaying.collectAsStateWithLifecycle()
-
-    val userPlaylists by mainViewModel.playlistsState.collectAsStateWithLifecycle()
 
     var isAlbumViewVisible by remember { mutableStateOf(false) }
-    var isTrackInfoVisible by remember { mutableStateOf(false) }
-    var isPlayListSelectionVisible by remember { mutableStateOf(false) }
 
     var clickedAlbum by remember { mutableStateOf<Album?>(null) }
 
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val scope = rememberCoroutineScope()
 
     val playerState by mainViewModel.playerState.collectAsStateWithLifecycle()
-
-    val upcomingTracks by mainViewModel.upcomingTracks.collectAsStateWithLifecycle()
-    val currentQueue by mainViewModel.currentQueue.collectAsStateWithLifecycle()
-
-    val trackInfoSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val playListSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val nameInputSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    var currentInfoToShow by remember { mutableStateOf<Track?>(null) }
-    var currentTrackForAdd by remember { mutableStateOf<Track?>(null) }
-    var showPlayListName by remember { mutableStateOf(false) }
-
-
 
     Box(
         modifier = Modifier
@@ -195,78 +174,4 @@ fun MainTest(
             )
         }
     }
-
-
-
-    if (isPlayListSelectionVisible) {
-        ModalBottomSheet(
-            onDismissRequest = { isPlayListSelectionVisible = false },
-            sheetState = playListSheetState,
-            containerColor = Color.Transparent,
-            dragHandle = null,
-            scrimColor = DeepBlack.copy(alpha = 0.5f),
-            contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
-            modifier = Modifier.fillMaxSize()
-        ) {
-            currentTrackForAdd?.let {
-                AddTrackToPlayListWidget(
-                    playLists = userPlaylists,
-                    onCancelClick = {
-                        isPlayListSelectionVisible = false
-                        currentTrackForAdd = null
-                    },
-                    onDoneClick = {
-                        isPlayListSelectionVisible = false
-                        currentTrackForAdd = null
-                    },
-                    onCreateClick = {
-                        showPlayListName = true
-                        isPlayListSelectionVisible = false
-                    },
-                    onAddInPlayListClick = { id ->
-                        mainViewModel.addTrackToPlayList(
-                            playListId = id,
-                            trackId = currentTrackForAdd!!.id
-                        )
-                    },
-                    onRemoveFromPlayList = { id ->
-                        mainViewModel.removeTrackFromPlayList(
-                            playListId = id,
-                            trackId = currentTrackForAdd!!.id
-                        )
-                    },
-                    currentTrackToSave = currentTrackForAdd!!,
-                )
-            }
-        }
-    }
-
-    if (showPlayListName) {
-        ModalBottomSheet(
-            onDismissRequest = { showPlayListName = false },
-            sheetState = nameInputSheetState,
-            containerColor = Color.Transparent,
-            dragHandle = null,
-            scrimColor = DeepBlack.copy(alpha = 0.5f),
-            contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
-            modifier = Modifier.fillMaxSize()
-        ) {
-            currentTrackForAdd?.let { track ->
-                PlayListNameInput(
-                    onCreateClick = { title ->
-                        mainViewModel.createPlayListWithTrack(
-                            title = title,
-                            trackId = track.id,
-                            imageUrl = track.imageUrl,
-                        )
-                        showPlayListName = false
-                    },
-                    trackName = track.title
-                )
-            }
-        }
-    }
-
-
-
 }
