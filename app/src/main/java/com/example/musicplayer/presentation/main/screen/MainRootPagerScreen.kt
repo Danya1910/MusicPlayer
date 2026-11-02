@@ -27,6 +27,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.musicplayer.domain.model.DownloadProgress
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.presentation.main.MainViewModel
 import com.example.musicplayer.presentation.main.component.AddTrackToPlayListWidget
@@ -259,9 +260,17 @@ fun MainRootPagerScreen(
 
                         },
                         onLoadClick = {
-                            mainViewModel.toggleFile(
-                                track = track,
-                            )
+
+                            if(track.localAudioPath == null) {
+                                mainViewModel.download(
+                                    trackId = track.id,
+                                    url = track.audioUrl,
+                                )
+                            } else {
+                                mainViewModel.deleteTrackFromFiles(
+                                    track = track,
+                                )
+                            }
                         },
                         playerState = playerState,
                         onBitmapLoaded = { bitmap ->
