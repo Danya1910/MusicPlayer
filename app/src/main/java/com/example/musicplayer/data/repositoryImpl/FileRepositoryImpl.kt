@@ -30,9 +30,14 @@ class FileRepositoryImpl @Inject constructor(
                     }
                 }
 
+                trackDao.updateAudioPath(trackId, file.absolutePath)
+
                 file
+
             } catch (e: Exception) {
                 e.printStackTrace()
+                val file = File(context.filesDir, "tracks/$trackId.mp3")
+                if (file.exists()) file.delete()
                 null
             }
         }
@@ -46,6 +51,8 @@ class FileRepositoryImpl @Inject constructor(
                 if(file.exists()) {
                     file.delete()
                 }
+
+                trackDao.updateAudioPath(trackId, null)
 
             } catch (e: Exception) {
                 e.printStackTrace()
