@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
+import com.example.musicplayer.domain.model.DownloadProgress
 import com.example.musicplayer.domain.model.PlayList
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.domain.model.User
@@ -22,9 +23,11 @@ import com.example.musicplayer.ui.theme.White
 import com.google.protobuf.LazyStringArrayList.emptyList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
@@ -42,6 +45,10 @@ class MainViewModel @Inject constructor(
     private val userRepository: UserRepository,
 ) : ViewModel() {
 
+    private val _downloadState = MutableStateFlow<DownloadProgress?>(null)
+    val downloadState = _downloadState.asStateFlow()
+
+    private var downloadJob: Job? = null
 
     val uiState: StateFlow<MainUiState> = combine(
         trackRepository.getAllTrack(),
@@ -385,22 +392,22 @@ class MainViewModel @Inject constructor(
         else likeTrack(track.id)
     }
 
-    fun loadTrack(
-        track: Track
-    ) {
-        viewModelScope.launch {
-            try {
-                fileRepository.downloadTrackToFile(
-                    trackId = track.id,
-                    networkUrl = track.audioUrl,
-                )
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+    fun download(trackId: String, url: String) {
+        downloadJob?.cancel()
+        downloadJob = viewModelScope.launch {
+            fileRepository.downloadTrackToFile(trackId, url)
+                .collect { progress ->
+                    _downloadState.value = progress
+                }
         }
     }
 
-    fun deleteTrack(
+    fun cancelDownload() {
+        downloadJob?.cancel()
+        _downloadState.value = null
+    }
+
+    fun deleteTrackFromFiles(
         track: Track
     ) {
         viewModelScope.launch {
@@ -412,18 +419,6 @@ class MainViewModel @Inject constructor(
                 e.printStackTrace()
             }
         }
-    }
-
-    fun toggleFile(
-        track: Track
-    ) {
-        if(track.localAudioPath == null)
-            loadTrack(
-                track = track,
-            )
-        else deleteTrack(
-            track = track,
-        )
     }
 
 
