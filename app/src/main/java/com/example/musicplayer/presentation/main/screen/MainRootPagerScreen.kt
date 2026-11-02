@@ -253,8 +253,15 @@ fun MainRootPagerScreen(
                             mainViewModel.togglePlayPause()
                         },
                         onHeartClick = {
-                           mainViewModel.toggleFavorite(track = track)
+                           mainViewModel.toggleFavorite(
+                               track = track,
+                               )
 
+                        },
+                        onLoadClick = {
+                            mainViewModel.toggleFile(
+                                track = track,
+                            )
                         },
                         playerState = playerState,
                         onBitmapLoaded = { bitmap ->
