@@ -5,7 +5,8 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface MusicRepository {
 
-    val currentTrack : StateFlow<Track?>
+    val currentTrackId: StateFlow<String?>
+    val currentTrack: StateFlow<Track?>
     val isPlaying: StateFlow<Boolean>
     val currentPosition: StateFlow<Long>
     val duration: StateFlow<Long>
