@@ -21,8 +21,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -38,15 +43,25 @@ class MusicRepositoryImpl @Inject constructor(
 
     private var mediaController: MediaController? = null
 
-    private val _currentTrack = MutableStateFlow<Track?>(null)
-    override val currentTrack = _currentTrack.asStateFlow()
+    private val _currentTrackId = MutableStateFlow<String?>(null)
+    override val currentTrackId = _currentTrackId.asStateFlow()
+
+    override val currentTrack: StateFlow<Track?> = _currentTrackId
+        .flatMapLatest { id ->
+            if (id == null) flowOf(null)
+            else trackDao.observeTrackById(id).map { it?.toDomain() }
+        }
+        .stateIn(
+            scope = repositoryScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = null
+        )
 
     private val _isShuffleModeEnabled = MutableStateFlow(false)
-    override val  isShuffleModeEnabled = _isShuffleModeEnabled.asStateFlow()
+    override val isShuffleModeEnabled = _isShuffleModeEnabled.asStateFlow()
 
     private val _repeatMode = MutableStateFlow(0)
     override val repeatMode = _repeatMode.asStateFlow()
-
 
 
     private val _isPlaying = MutableStateFlow(false)
@@ -55,10 +70,13 @@ class MusicRepositoryImpl @Inject constructor(
     private val _currentPosition = MutableStateFlow(0L)
     override val currentPosition = _currentPosition.asStateFlow()
 
-    override val duration: StateFlow<Long>
-        get() = MutableStateFlow(
-            mediaController?.duration?.coerceAtLeast(0L) ?: 0L
-        )
+//    override val duration: StateFlow<Long>
+//        get() = MutableStateFlow(
+//            mediaController?.duration?.coerceAtLeast(0L) ?: 0L
+//        )
+
+    private val _duration = MutableStateFlow(0L)
+    override val duration: StateFlow<Long> = _duration.asStateFlow()
 
     private val _currentQueue = MutableStateFlow<List<Track>>(emptyList())
     override val currentQueue = _currentQueue.asStateFlow()
@@ -91,29 +109,40 @@ class MusicRepositoryImpl @Inject constructor(
                 _repeatMode.value = repeatMode
             }
 
+//            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+//                val trackId = mediaItem?.mediaId
+//
+//                if (trackId != null) {
+//                    repositoryScope.launch(Dispatchers.IO) {
+//                        val trackEntity = trackDao.getTrackById(trackId)
+//
+//                        val fullTrack = trackEntity?.toDomain()
+//
+//                        launch(Dispatchers.Main) {
+//                            _currentTrackId.value = fullTrack
+//                        }
+//                    }
+//                } else {
+//                    _currentTrack.value = null
+//                }
+//            }
+
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-                val trackId = mediaItem?.mediaId
-
-                if (trackId != null) {
-                    repositoryScope.launch(Dispatchers.IO) {
-                        val trackEntity = trackDao.getTrackById(trackId)
-
-                        val fullTrack = trackEntity?.toDomain()
-
-                        launch(Dispatchers.Main) {
-                            _currentTrack.value = fullTrack
-                        }
-                    }
-                } else {
-                    _currentTrack.value = null
-                }
+                _currentTrackId.value = mediaItem?.mediaId
+                _duration.value = 0L
             }
+
+//            override fun onPlaybackStateChanged(playbackState: Int) {
+//                if (playbackState == Player.STATE_READY) {
+//                    _currentTrack.value = _currentTrack.value?.copy(
+//                        duration = mediaController?.duration?.coerceAtLeast(0L) ?: 0L
+//                    )
+//                }
+//            }
 
             override fun onPlaybackStateChanged(playbackState: Int) {
                 if (playbackState == Player.STATE_READY) {
-                    _currentTrack.value = _currentTrack.value?.copy(
-                        duration = mediaController?.duration?.coerceAtLeast(0L) ?: 0L
-                    )
+                    _duration.value = mediaController?.duration?.coerceAtLeast(0L) ?: 0L
                 }
             }
         })
@@ -221,7 +250,7 @@ class MusicRepositoryImpl @Inject constructor(
 
     override fun toggleRepeatMode() {
         mediaController?.let { player ->
-            val nextRepeatMode = when(player.repeatMode) {
+            val nextRepeatMode = when (player.repeatMode) {
                 Player.REPEAT_MODE_OFF -> Player.REPEAT_MODE_ALL
                 Player.REPEAT_MODE_ALL -> Player.REPEAT_MODE_ONE
                 else -> Player.REPEAT_MODE_OFF
@@ -300,7 +329,10 @@ class MusicRepositoryImpl @Inject constructor(
 
             controller.removeMediaItem(index)
         } else {
-            Log.e("MusicPlayer_Repo", "ОШИБКА: Индекс $index вышел за границы плеера (0..${totalItemsInPlayer - 1})")
+            Log.e(
+                "MusicPlayer_Repo",
+                "ОШИБКА: Индекс $index вышел за границы плеера (0..${totalItemsInPlayer - 1})"
+            )
         }
 
         if (index in currentQueueData.indices) {
@@ -311,14 +343,19 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
-
     override fun updateFavoriteStatus(trackId: String, isFavorite: Boolean) {
-        _currentTrack.update { cur ->
-            if (cur?.id == trackId) cur.copy(isFavorite = isFavorite) else cur
-        }
-        _currentQueue.update { queue ->
-            queue.map { if (it.id == trackId) it.copy(isFavorite = isFavorite) else it }
+        repositoryScope.launch(Dispatchers.IO) {
+            trackDao.updateFavoriteStatus(trackId, isFavorite)
         }
     }
+
+//    override fun updateFavoriteStatus(trackId: String, isFavorite: Boolean) {
+//        _currentTrack.update { cur ->
+//            if (cur?.id == trackId) cur.copy(isFavorite = isFavorite) else cur
+//        }
+//        _currentQueue.update { queue ->
+//            queue.map { if (it.id == trackId) it.copy(isFavorite = isFavorite) else it }
+//        }
+//    }
 
 }
