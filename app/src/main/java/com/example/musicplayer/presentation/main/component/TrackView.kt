@@ -86,6 +86,7 @@ fun TrackView(
     onCancelClick: () -> Unit,
     onPauseClick: () -> Unit,
     onHeartClick: () -> Unit,
+    onLoadClick: () -> Unit,
     playerState: PlayerUiState,
     onBitmapLoaded: (Bitmap) -> Unit,
     isPlaying: Boolean,
@@ -167,9 +168,11 @@ fun TrackView(
                 title = track.title,
                 artist = track.artist,
                 onHeartClick = onHeartClick,
+                onLoadClick = onLoadClick,
                 titleColor = White,
                 bodyColor = White,
                 isFavorite = track.isFavorite,
+                isLoaded = !track.localAudioPath.isNullOrBlank()
             )
 
             Spacer(modifier = Modifier.height(15.dp))
@@ -286,14 +289,6 @@ private fun TopBarPreview() {
             onCancelClick = {},
             title = "?"
         )
-        TrackInfoAndHeart(
-            title = "Hope",
-            artist = "XXXTENTACION",
-            onHeartClick = {},
-            titleColor = Black,
-            bodyColor = White,
-            isFavorite = true,
-        )
     }
 }
 
@@ -368,9 +363,11 @@ private fun TrackInfoAndHeart(
     title: String,
     artist: String,
     onHeartClick: () -> Unit,
+    onLoadClick: () -> Unit,
     titleColor: Color,
     bodyColor: Color,
     isFavorite: Boolean,
+    isLoaded: Boolean,
 ) {
 
     Row(
@@ -403,7 +400,21 @@ private fun TrackInfoAndHeart(
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        Spacer(modifier = Modifier.width(42.dp))
+        Spacer(modifier = Modifier.width(22.dp))
+        Icon(
+            painter = painterResource(R.drawable.ic_load),
+            contentDescription = null,
+            tint = if(isLoaded) SpotifyGreen else Gray,
+            modifier = Modifier
+                .size(36.dp)
+                .padding(6.dp)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    onLoadClick()
+                },
+        )
         AnimatedContent(
             targetState = isFavorite,
             transitionSpec = {
