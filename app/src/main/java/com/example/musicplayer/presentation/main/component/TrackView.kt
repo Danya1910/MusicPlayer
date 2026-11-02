@@ -2,8 +2,12 @@ package com.example.musicplayer.presentation.main.component
 
 import android.graphics.Bitmap
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -50,9 +54,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -67,10 +74,10 @@ import androidx.core.graphics.drawable.toBitmap
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.musicplayer.R
+import com.example.musicplayer.domain.model.DownloadProgress
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.presentation.main.util.formatDuration
 import com.example.musicplayer.presentation.player.state.PlayerUiState
-import com.example.musicplayer.ui.theme.Black
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.SpotifyGreen
@@ -102,6 +109,7 @@ fun TrackView(
     onTrackInQueueClick: (Track) -> Unit,
     onMoveTrack: (fromIndex: Int, toIndex: Int) -> Unit,
     removeFromQueue: (Int) -> Unit,
+    downloads:  Map<String, DownloadProgress>,
 ) {
 
     val bgGradient = Brush.verticalGradient(
@@ -165,6 +173,7 @@ fun TrackView(
             Spacer(modifier = Modifier.weight(1f))
 
             TrackInfoAndHeart(
+                trackId = track.id,
                 title = track.title,
                 artist = track.artist,
                 onHeartClick = onHeartClick,
@@ -172,7 +181,8 @@ fun TrackView(
                 titleColor = White,
                 bodyColor = White,
                 isFavorite = track.isFavorite,
-                isLoaded = !track.localAudioPath.isNullOrBlank()
+                isLoaded = !track.localAudioPath.isNullOrBlank(),
+                downloads = downloads,
             )
 
             Spacer(modifier = Modifier.height(15.dp))
@@ -360,6 +370,7 @@ private fun TrackImage(
 
 @Composable
 private fun TrackInfoAndHeart(
+    trackId: String,
     title: String,
     artist: String,
     onHeartClick: () -> Unit,
@@ -368,6 +379,7 @@ private fun TrackInfoAndHeart(
     bodyColor: Color,
     isFavorite: Boolean,
     isLoaded: Boolean,
+    downloads: Map<String, DownloadProgress>,
 ) {
 
     Row(
@@ -401,20 +413,25 @@ private fun TrackInfoAndHeart(
             )
         }
         Spacer(modifier = Modifier.width(22.dp))
-        Icon(
-            painter = painterResource(R.drawable.ic_load),
-            contentDescription = null,
-            tint = if(isLoaded) SpotifyGreen else Gray,
-            modifier = Modifier
-                .size(36.dp)
-                .padding(6.dp)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) {
-                    onLoadClick()
-                },
+        LoadButtonWithRing(
+            isLoaded = isLoaded,
+            progress = downloads[trackId],
+            onLoadClick = onLoadClick,
         )
+//        Icon(
+//            painter = painterResource(R.drawable.ic_load),
+//            contentDescription = null,
+//            tint = if(isLoaded) SpotifyGreen else Gray,
+//            modifier = Modifier
+//                .size(36.dp)
+//                .padding(6.dp)
+//                .clickable(
+//                    interactionSource = remember { MutableInteractionSource() },
+//                    indication = null
+//                ) {
+//                    onLoadClick()
+//                },
+//        )
         AnimatedContent(
             targetState = isFavorite,
             transitionSpec = {
@@ -447,6 +464,101 @@ private fun TrackInfoAndHeart(
                     },
             )
         }
+    }
+}
+
+
+@Composable
+private fun LoadButtonWithRing(
+    isLoaded: Boolean,
+    progress: DownloadProgress?,
+    onLoadClick: () -> Unit,
+) {
+    val isDownloading = progress is DownloadProgress.InProgress
+    val percent = (progress as? DownloadProgress.InProgress)?.percent ?: -1
+
+    val animatedProgress by animateFloatAsState(
+        targetValue = if (percent >= 0) percent / 100f else 0f,
+        animationSpec = tween(durationMillis = 200),
+        label = "downloadProgress",
+    )
+
+    val infiniteRotation = rememberInfiniteTransition(label = "spin").animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = LinearEasing),
+        ),
+        label = "rotation",
+    )
+
+    Box(
+        modifier = Modifier
+            .size(36.dp)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+            ) { onLoadClick() },
+        contentAlignment = Alignment.Center,
+    ) {
+        if (isDownloading) {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val iconPadding = 6.dp.toPx()
+                val stroke = 2.dp.toPx()
+                val inset = iconPadding + stroke / 2
+                val arcSize = Size(
+                    width = size.width - inset * 2,
+                    height = size.height - inset * 2,
+                )
+                val topLeft = Offset(inset, inset)
+
+                drawArc(
+                    color = Gray.copy(alpha = 0.25f),
+                    startAngle = -90f,
+                    sweepAngle = 360f,
+                    useCenter = false,
+                    topLeft = topLeft,
+                    size = arcSize,
+                    style = Stroke(width = stroke),
+                )
+
+                if (percent >= 0) {
+                    drawArc(
+                        color = SpotifyGreen,
+                        startAngle = -90f,
+                        sweepAngle = 360f * animatedProgress,
+                        useCenter = false,
+                        topLeft = topLeft,
+                        size = arcSize,
+                        style = Stroke(width = stroke, cap = StrokeCap.Round),
+                    )
+                } else {
+                    rotate(infiniteRotation.value) {
+                        drawArc(
+                            color = SpotifyGreen,
+                            startAngle = 0f,
+                            sweepAngle = 90f,
+                            useCenter = false,
+                            topLeft = topLeft,
+                            size = arcSize,
+                            style = Stroke(width = stroke, cap = StrokeCap.Round),
+                        )
+                    }
+                }
+            }
+        }
+
+        Icon(
+            painter = painterResource(R.drawable.ic_load),
+            contentDescription = null,
+            tint = when {
+                isDownloading || isLoaded -> SpotifyGreen
+                else -> Gray
+            },
+            modifier = Modifier
+                .size(36.dp)
+                .padding(6.dp),
+        )
     }
 }
 
