@@ -1,18 +1,15 @@
 package com.example.musicplayer.domain.repository
 
 import com.example.musicplayer.domain.model.DownloadProgress
-import kotlinx.coroutines.flow.Flow
-import java.io.File
+import com.example.musicplayer.domain.model.Track
+import kotlinx.coroutines.flow.StateFlow
 
 interface FileRepository {
 
-    suspend fun downloadTrackToFile(
-        trackId: String,
-        networkUrl: String,
-    ) : Flow<DownloadProgress>
+    val downloads: StateFlow<Map<String, DownloadProgress>>
 
-    suspend fun deleteTrackFromFile(
-        trackId: String,
-    )
+    fun toggleDownload(track: Track)
+
+    fun cancelDownload(trackId: String)
 
 }
