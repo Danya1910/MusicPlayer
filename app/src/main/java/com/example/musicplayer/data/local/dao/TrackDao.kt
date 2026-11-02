@@ -24,6 +24,9 @@ interface TrackDao {
     @Query("UPDATE tracks_table SET isFavorite = :isFavorite WHERE id = :trackId")
     suspend fun updateFavoriteStatus(trackId: String, isFavorite: Boolean)
 
+    @Query("UPDATE tracks_table SET localAudioPath = :localAudioPath WHERE id = :trackId")
+    suspend fun updateAudioPath(trackId: String, localAudioPath: String?)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTracks(tracks: List<TrackEntity>)
 
