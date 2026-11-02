@@ -64,6 +64,8 @@ fun MainRootPagerScreen(
     val upcomingTracks by mainViewModel.upcomingTracks.collectAsStateWithLifecycle()
     val currentQueue by mainViewModel.currentQueue.collectAsStateWithLifecycle()
 
+    val downloads by mainViewModel.downloads.collectAsStateWithLifecycle()
+
     val tabNavController = rememberNavController()
 
     val backStackEntry by tabNavController.currentBackStackEntryAsState()
@@ -260,17 +262,9 @@ fun MainRootPagerScreen(
 
                         },
                         onLoadClick = {
-
-                            if(track.localAudioPath == null) {
-                                mainViewModel.download(
-                                    trackId = track.id,
-                                    url = track.audioUrl,
-                                )
-                            } else {
-                                mainViewModel.deleteTrackFromFiles(
-                                    track = track,
-                                )
-                            }
+                            mainViewModel.onDownloadClick(
+                                track = track,
+                            )
                         },
                         playerState = playerState,
                         onBitmapLoaded = { bitmap ->
@@ -315,7 +309,8 @@ fun MainRootPagerScreen(
                             mainViewModel.removeTrackFromQueue(
                                 index = index
                             )
-                        }
+                        },
+                        downloads = downloads
                     )
 
                 }
