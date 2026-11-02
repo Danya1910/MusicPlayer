@@ -9,6 +9,7 @@ import androidx.palette.graphics.Palette
 import com.example.musicplayer.domain.model.PlayList
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.domain.model.User
+import com.example.musicplayer.domain.repository.FileRepository
 import com.example.musicplayer.domain.repository.MusicRepository
 import com.example.musicplayer.domain.repository.TrackRepository
 import com.example.musicplayer.domain.repository.UserRepository
@@ -37,6 +38,7 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val trackRepository: TrackRepository,
     private val musicRepository: MusicRepository,
+    private val fileRepository: FileRepository,
     private val userRepository: UserRepository,
 ) : ViewModel() {
 
@@ -381,6 +383,47 @@ class MainViewModel @Inject constructor(
     fun toggleFavorite(track: Track) {
         if (track.isFavorite) unlikeTrack(track.id)
         else likeTrack(track.id)
+    }
+
+    fun loadTrack(
+        track: Track
+    ) {
+        viewModelScope.launch {
+            try {
+                fileRepository.downloadTrackToFile(
+                    trackId = track.id,
+                    networkUrl = track.audioUrl,
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun deleteTrack(
+        track: Track
+    ) {
+        viewModelScope.launch {
+            try {
+                fileRepository.deleteTrackFromFile(
+                    trackId = track.id,
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun toggleFile(
+        track: Track
+    ) {
+        if(track.localAudioPath == null)
+            loadTrack(
+                track = track,
+            )
+        else deleteTrack(
+            track = track,
+        )
     }
 
 
