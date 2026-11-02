@@ -45,10 +45,8 @@ class MainViewModel @Inject constructor(
     private val userRepository: UserRepository,
 ) : ViewModel() {
 
-    private val _downloadState = MutableStateFlow<DownloadProgress?>(null)
-    val downloadState = _downloadState.asStateFlow()
+    val downloads: StateFlow<Map<String, DownloadProgress>> = fileRepository.downloads
 
-    private var downloadJob: Job? = null
 
     val uiState: StateFlow<MainUiState> = combine(
         trackRepository.getAllTrack(),
@@ -392,34 +390,7 @@ class MainViewModel @Inject constructor(
         else likeTrack(track.id)
     }
 
-    fun download(trackId: String, url: String) {
-        downloadJob?.cancel()
-        downloadJob = viewModelScope.launch {
-            fileRepository.downloadTrackToFile(trackId, url)
-                .collect { progress ->
-                    _downloadState.value = progress
-                }
-        }
-    }
-
-    fun cancelDownload() {
-        downloadJob?.cancel()
-        _downloadState.value = null
-    }
-
-    fun deleteTrackFromFiles(
-        track: Track
-    ) {
-        viewModelScope.launch {
-            try {
-                fileRepository.deleteTrackFromFile(
-                    trackId = track.id,
-                )
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
+    fun onDownloadClick(track: Track) = fileRepository.toggleDownload(track)
 
 
 }
