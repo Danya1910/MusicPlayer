@@ -3,6 +3,7 @@ package com.example.musicplayer.presentation.main
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextDecoration.Companion.combine
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
@@ -16,6 +17,7 @@ import com.example.musicplayer.domain.repository.TrackRepository
 import com.example.musicplayer.domain.repository.UserRepository
 import com.example.musicplayer.presentation.main.state.MainUiState
 import com.example.musicplayer.presentation.main.util.PlaylistUi
+import com.example.musicplayer.presentation.main.util.getTracksTotalTime
 import com.example.musicplayer.presentation.player.state.PlayerUiState
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
@@ -30,6 +32,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -47,6 +50,24 @@ class MainViewModel @Inject constructor(
 
     val downloads: StateFlow<Map<String, DownloadProgress>> = fileRepository.downloads
 
+    companion object {
+        private const val FAVORITES_ID = "favorites"
+
+        val EmptyFavorites = PlaylistUi(
+            playlist = PlayList(
+                id = FAVORITES_ID,
+                name = "Liked songs",
+                updatedAt = 0L,
+                imageUrl = "",
+                creatorId = "",
+                creatorName = "",
+                isPrivate = true,
+                tracks = kotlin.collections.emptyList(),
+                duration = ""
+            ),
+            tracks = kotlin.collections.emptyList()
+        )
+    }
 
     val uiState: StateFlow<MainUiState> = combine(
         trackRepository.getAllTrack(),
@@ -106,6 +127,39 @@ class MainViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     ) as StateFlow<List<PlaylistUi>>
+
+    val favoritesPlaylist: StateFlow<PlaylistUi> = uiState
+        .map { mainUiState ->
+            if (mainUiState !is MainUiState.Success) {
+                return@map EmptyFavorites
+            }
+
+            val favoriteTracks = mainUiState.tracks.filter { it.isFavorite }
+
+            val favoritesDuration = getTracksTotalTime(
+                tracks = favoriteTracks,
+            )
+
+            PlaylistUi(
+                playlist = PlayList(
+                    id = FAVORITES_ID,
+                    name = "Liked songs",
+                    updatedAt = 0L,
+                    imageUrl = "",
+                    creatorId = "",
+                    creatorName = "",
+                    isPrivate = true,
+                    tracks = favoriteTracks.map { it.id },
+                    duration = favoritesDuration,
+                ),
+                tracks = favoriteTracks,
+            )
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = EmptyFavorites
+        )
 
     val userState: StateFlow<User> = userRepository.getUserData()
         .catch { exception ->
