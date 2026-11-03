@@ -27,7 +27,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.musicplayer.domain.model.DownloadProgress
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.presentation.main.MainViewModel
 import com.example.musicplayer.presentation.main.component.AddTrackToPlayListWidget
@@ -102,7 +101,6 @@ fun MainRootPagerScreen(
             )
             .haze(hazeState)
     ) {
-
         NavHost(
             navController = tabNavController,
             startDestination = TabScreen.Home,
