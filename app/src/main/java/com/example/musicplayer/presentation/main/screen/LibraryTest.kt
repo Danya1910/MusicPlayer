@@ -59,7 +59,8 @@ import com.example.musicplayer.ui.theme.White
 @Composable
 fun LibraryTest(
     mainViewModel: MainViewModel,
-    navController: NavController
+    navController: NavController,
+    favorites: PlaylistUi,
 ) {
 
     val playlists by mainViewModel.playlistsUiState.collectAsStateWithLifecycle()
@@ -88,6 +89,15 @@ fun LibraryTest(
                     color = DeepBlack
                 )
         ) {
+
+            item {
+                FavoritesItem(
+                    playList = favorites.playlist,
+                    onClick = {
+                        //сделать
+                    }
+                )
+            }
 
             items(playlists) { playlist ->
                 PlayListItem(
