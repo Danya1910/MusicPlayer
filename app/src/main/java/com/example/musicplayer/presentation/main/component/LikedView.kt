@@ -89,7 +89,7 @@ fun LikedView(
                     .fillMaxWidth()
                     .background(brush = bgGradient)
                     .statusBarsPadding()
-                    .padding(top = 12.dp)
+                    .padding(top = 8.dp)
             ) {
                 Box(modifier = Modifier.zIndex(3f)) {
                     BackButton(
@@ -99,7 +99,10 @@ fun LikedView(
                         }
                     )
                 }
-                Column {
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 4.dp)
+                ) {
                     PlaylistHat(
                         creatorAvatarUrl = "",
                         playlistName = playList.playlist.name,
