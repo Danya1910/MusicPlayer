@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import javax.inject.Inject
 
 
@@ -169,7 +170,7 @@ class MusicRepositoryImpl @Inject constructor(
 
         val mediaItem = MediaItem.Builder()
             .setMediaId(track.id)
-            .setUri(track.audioUrl)
+            .setUri(track.playbackUri())
             .setMediaMetadata(mediaMetadata)
             .build()
 
@@ -192,7 +193,7 @@ class MusicRepositoryImpl @Inject constructor(
 
                 MediaItem.Builder()
                     .setMediaId(qTrack.id)
-                    .setUri(qTrack.audioUrl)
+                    .setUri(qTrack.playbackUri())
                     .setMediaMetadata(metadata)
                     .build()
             }
@@ -273,7 +274,7 @@ class MusicRepositoryImpl @Inject constructor(
 
         val mediaItem = MediaItem.Builder()
             .setMediaId(track.id)
-            .setUri(track.audioUrl)
+            .setUri(track.playbackUri())
             .setMediaMetadata(metaData)
             .build()
 
@@ -357,5 +358,11 @@ class MusicRepositoryImpl @Inject constructor(
 //            queue.map { if (it.id == trackId) it.copy(isFavorite = isFavorite) else it }
 //        }
 //    }
+
+    private fun Track.playbackUri(): Uri =
+        localAudioPath
+            ?.takeIf { it.isNotBlank() }
+            ?.let { Uri.fromFile(File(it)) }
+            ?: Uri.parse(audioUrl)
 
 }
