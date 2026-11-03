@@ -47,6 +47,7 @@ import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.SpotifyGreen
 import com.example.musicplayer.ui.theme.White
+import dev.chrisbanes.haze.HazeState
 
 
 @Composable
@@ -59,6 +60,8 @@ fun AlbumView(
     onBitmapLoaded: (Bitmap) -> Unit,
     playerState: PlayerUiState,
 ) {
+
+    val hazeState = remember { HazeState() }
 
     val albumColors = playerState.paletteState[album.id]
 
@@ -130,6 +133,7 @@ fun AlbumView(
             TopBar(
                 title = album.title,
                 onBackClick = { onCancelClick() },
+                hazeState = hazeState,
             )
         }
     }
@@ -139,29 +143,19 @@ fun AlbumView(
 private fun TopBar(
     title: String,
     onBackClick: () -> Unit,
+    hazeState: HazeState,
 ) {
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .height(44.dp)
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 8.dp)
     ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_arrow_left),
-            contentDescription = null,
-            tint = White,
-            modifier = Modifier
-                .size(16.dp)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) {
-                    onBackClick()
-                }
+        BackButton(
+            onClick = onBackClick,
+            hazeState = hazeState
         )
-
     }
 
 }
