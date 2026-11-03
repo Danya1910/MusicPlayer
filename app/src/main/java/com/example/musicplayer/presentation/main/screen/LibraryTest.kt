@@ -72,7 +72,6 @@ fun LibraryTest(
     var currentPlaylistToShow by remember { mutableStateOf<PlaylistUi?>(null) }
     var showPlayList by remember { mutableStateOf(false) }
 
-    Log.d("Library", user.toString())
 
 
     Column(
