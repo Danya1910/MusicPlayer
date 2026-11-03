@@ -201,6 +201,78 @@ private fun PlayListItem(
     }
 }
 
+@Composable
+private fun FavoritesItem(
+    playList: PlayList,
+    onClick: () -> Unit,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(95.dp)
+            .clickable {
+                onClick()
+            }
+            .padding(horizontal = 20.dp)
+    ) {
+        AsyncImage(
+            model = playList.imageUrl,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(70.dp)
+                .clip(
+                    shape = RoundedCornerShape(4.dp)
+                )
+        )
+        Icon(
+            painter = painterResource(R.drawable.ic_liked_songs),
+            contentDescription = null,
+            tint = Color.Unspecified,
+            modifier = Modifier
+                .size(70.dp)
+                .clip(
+                    shape = RoundedCornerShape(4.dp)
+                )
+        )
+        Spacer(modifier = Modifier.width(15.dp))
+        Column(
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Liked Songs",
+                fontWeight = FontWeight.Medium,
+                fontSize = 20.sp,
+                color = White,
+                maxLines = 1,
+                modifier = Modifier
+                    .basicMarquee()
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = songsFormat(
+                    songsCount = playList.tracks?.size ?: 0
+                ),
+                fontWeight = FontWeight.Medium,
+                fontSize = 16.sp,
+                color = Gray,
+                maxLines = 1,
+                modifier = Modifier
+                    .basicMarquee()
+            )
+        }
+    }
+}
+
+private fun songsFormat(
+    songsCount: Int,
+): String {
+    return if (songsCount == 1)
+        "1 song"
+    else "$songsCount songs"
+}
+
 
 @Composable
 private fun LibraryTopBar(
