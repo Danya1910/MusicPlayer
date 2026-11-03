@@ -54,6 +54,7 @@ fun MainRootPagerScreen(
 
     val playerState by mainViewModel.playerState.collectAsStateWithLifecycle()
     val userPlaylists by mainViewModel.playlistsState.collectAsStateWithLifecycle()
+    val favorites by mainViewModel.favoritesPlaylist.collectAsStateWithLifecycle()
 
     val currentTrack = playerState.currentTrack
 
@@ -133,6 +134,7 @@ fun MainRootPagerScreen(
                 LibraryTest(
                     mainViewModel = mainViewModel,
                     navController = rootNavController,
+                    favorites = favorites,
                 )
             }
 
