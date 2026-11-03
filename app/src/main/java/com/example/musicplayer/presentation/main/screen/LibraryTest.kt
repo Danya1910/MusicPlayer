@@ -226,16 +226,6 @@ private fun FavoritesItem(
             }
             .padding(horizontal = 20.dp)
     ) {
-        AsyncImage(
-            model = playList.imageUrl,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(70.dp)
-                .clip(
-                    shape = RoundedCornerShape(4.dp)
-                )
-        )
         Icon(
             painter = painterResource(R.drawable.ic_liked_songs),
             contentDescription = null,
