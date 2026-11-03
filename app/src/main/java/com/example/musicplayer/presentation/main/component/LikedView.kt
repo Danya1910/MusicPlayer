@@ -1,16 +1,15 @@
 package com.example.musicplayer.presentation.main.component
 
-import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -30,13 +29,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import coil.compose.AsyncImage
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.presentation.main.util.PlaylistUi
@@ -60,7 +57,6 @@ fun LikedView(
     onTrackInfoClick: () -> Unit,
     onDownloadClick: () -> Unit,
     onBackClick: () -> Unit,
-    onBitmapLoaded: (Bitmap) -> Unit,
 ) {
 
     Log.d("Playlist", "playlist: $playList")
@@ -68,7 +64,7 @@ fun LikedView(
     val bgGradient = Brush.verticalGradient(
         colors = listOf(
             Color(0xFF7965EB),
-            Color(0xFF3F0AF1),
+            Color(0xFF4815F3),
             DeepBlack,
         )
     )
@@ -83,14 +79,17 @@ fun LikedView(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                ) {}
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.5f)
                     .background(brush = bgGradient)
                     .statusBarsPadding()
-                    .padding(top = 20.dp)
+                    .padding(top = 12.dp)
             ) {
                 Box(modifier = Modifier.zIndex(3f)) {
                     BackButton(
@@ -100,22 +99,25 @@ fun LikedView(
                         }
                     )
                 }
-                PlaylistHat(
-                    creatorAvatarUrl = "",
-                    playlistName = playList.playlist.name,
-                    creatorName = playList.playlist.creatorName ?: "",
-                    playlistDuration = playList.playlist.duration ?: "0 min",
-                )
+                Column {
+                    PlaylistHat(
+                        creatorAvatarUrl = "",
+                        playlistName = playList.playlist.name,
+                        creatorName = playList.playlist.creatorName ?: "",
+                        playlistDuration = playList.playlist.duration ?: "0 min",
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    PlaylistActions(
+                        onDownloadClick = onDownloadClick,
+                        onShuffleClick = onShuffleClick,
+                        onPlayPauseClick = onPlayPauseClick,
+                        isShuffled = isShuffled,
+                        isPlaying = isPlaying,
+                    )
+                }
             }
             Column {
-                Spacer(modifier = Modifier.height(10.dp))
-                PlaylistActions(
-                    onDownloadClick = onDownloadClick,
-                    onShuffleClick = onShuffleClick,
-                    onPlayPauseClick = onPlayPauseClick,
-                    isShuffled = isShuffled,
-                    isPlaying = isPlaying,
-                )
+
                 Spacer(modifier = Modifier.height(20.dp))
                 LazyColumn {
                     itemsIndexed(
@@ -147,7 +149,7 @@ private fun PlaylistHat(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                top = 10.dp
+                top = 40.dp
             )
     ) {
         Spacer(modifier = Modifier.height(15.dp))
@@ -161,33 +163,7 @@ private fun PlaylistHat(
                 .padding(horizontal = 20.dp)
                 .basicMarquee()
         )
-        Spacer(modifier = Modifier.height(10.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .padding(horizontal = 20.dp)
-        ) {
-            AsyncImage(
-                model = creatorAvatarUrl,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(28.dp)
-                    .clip(
-                        shape = CircleShape,
-                    )
-            )
-            Spacer(modifier = Modifier.width(10.dp))
-            Text(
-                text = creatorName,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                color = White,
-                maxLines = 1,
-                modifier = Modifier
-                    .basicMarquee()
-            )
-        }
+        Spacer(modifier = Modifier.height(15.dp))
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
