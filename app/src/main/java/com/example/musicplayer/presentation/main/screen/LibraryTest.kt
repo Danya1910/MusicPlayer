@@ -48,6 +48,7 @@ import com.example.musicplayer.domain.model.PlayList
 import com.example.musicplayer.domain.model.User
 import com.example.musicplayer.presentation.main.MainViewModel
 import com.example.musicplayer.presentation.main.component.BottomBar
+import com.example.musicplayer.presentation.main.component.LikedView
 import com.example.musicplayer.presentation.main.component.ModalRightSheet
 import com.example.musicplayer.presentation.main.component.PlaylistView
 import com.example.musicplayer.presentation.main.util.PlaylistUi
@@ -93,7 +94,8 @@ fun LibraryTest(
                 FavoritesItem(
                     playList = favorites.playlist,
                     onClick = {
-                        //сделать
+                        currentPlaylistToShow = favorites
+                        showPlayList = true
                     }
                 )
             }
@@ -118,39 +120,68 @@ fun LibraryTest(
             },
             content = {
                 currentPlaylistToShow?.let { playList ->
-                    PlaylistView(
-                        playList = playList,
-                        tracks = playList.tracks,
-                        playerState = playerState,
-                        onPlayPauseClick = {
-                            mainViewModel.playTrackWithQueue(
-                                track = playList.tracks[0],
-                                queue = playList.tracks,
-                            )
-                        },
-                        onShuffleClick = {
-                            mainViewModel.toggleShuffleMode()
-                        },
-                        onTrackClick = { track ->
-                            mainViewModel.playTrackWithQueue(
-                                track = track,
-                                queue = playList.tracks,
-                            )
-                        },
-                        onTrackInfoClick = {},
-                        onDownloadClick = {},
-                        onBackClick = {
-                            showPlayList = false
-                            currentPlaylistToShow = null
-                        },
-                        onBitmapLoaded = { bitmap ->
-                            mainViewModel.updateColorsFromBitmap(
-                                id = playList.playlist.id ?: "",
-                                bitmap = bitmap,
-                            )
-                        },
-
+                    if(playList.playlist.id == "favorites") {
+                        LikedView(
+                            playList = playList,
+                            tracks = playList.tracks,
+                            playerState = playerState,
+                            onPlayPauseClick = {
+                                mainViewModel.playTrackWithQueue(
+                                    track = playList.tracks[0],
+                                    queue = playList.tracks,
+                                )
+                            },
+                            onShuffleClick = {
+                                mainViewModel.toggleShuffleMode()
+                            },
+                            onTrackClick = { track ->
+                                mainViewModel.playTrackWithQueue(
+                                    track = track,
+                                    queue = playList.tracks,
+                                )
+                            },
+                            onTrackInfoClick = {},
+                            onDownloadClick = {},
+                            onBackClick = {
+                                showPlayList = false
+                                currentPlaylistToShow = null
+                            },
                         )
+                    } else {
+                        PlaylistView(
+                            playList = playList,
+                            tracks = playList.tracks,
+                            playerState = playerState,
+                            onPlayPauseClick = {
+                                mainViewModel.playTrackWithQueue(
+                                    track = playList.tracks[0],
+                                    queue = playList.tracks,
+                                )
+                            },
+                            onShuffleClick = {
+                                mainViewModel.toggleShuffleMode()
+                            },
+                            onTrackClick = { track ->
+                                mainViewModel.playTrackWithQueue(
+                                    track = track,
+                                    queue = playList.tracks,
+                                )
+                            },
+                            onTrackInfoClick = {},
+                            onDownloadClick = {},
+                            onBackClick = {
+                                showPlayList = false
+                                currentPlaylistToShow = null
+                            },
+                            onBitmapLoaded = { bitmap ->
+                                mainViewModel.updateColorsFromBitmap(
+                                    id = playList.playlist.id ?: "",
+                                    bitmap = bitmap,
+                                )
+                            },
+
+                            )
+                    }
                 }
             }
         )
