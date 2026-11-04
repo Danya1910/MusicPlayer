@@ -76,6 +76,7 @@ fun PlaylistView(
     onDownloadClick: () -> Unit,
     onBackClick: () -> Unit,
     onBitmapLoaded: (Bitmap) -> Unit,
+    toggleFavorite: (Track) -> Unit,
 ) {
 
     val imageColors = playerState.paletteState[playList.playlist.id]
@@ -182,7 +183,13 @@ fun PlaylistView(
                             onTrackClick = {
                                 onTrackClick(track)
                             },
-                            onMoreClick = {}
+                            onMoreClick = {},
+                            toggleFavorite = {
+                                toggleFavorite(track)
+                            },
+                            onDownloadClick = {
+                                onDownloadClick()
+                            }
                         )
                     }
                 }
