@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.Track
+import com.example.musicplayer.ui.theme.SpotifyGreen
 import com.example.musicplayer.ui.theme.White
 
 
@@ -33,6 +34,8 @@ fun TrackItem(
     track: Track,
     onTrackClick: () -> Unit,
     onMoreClick: () -> Unit,
+    toggleFavorite: () -> Unit,
+    onDownloadClick: () -> Unit,
 ) {
 
     Row(
@@ -73,6 +76,32 @@ fun TrackItem(
                 color = Color(0xFFB3B3B3),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+            )
+        }
+        if(track.localAudioPath != null) {
+            Spacer(modifier = Modifier.width(10.dp))
+            Icon(
+                painter = painterResource(R.drawable.ic_load),
+                contentDescription = null,
+                tint = SpotifyGreen,
+                modifier = Modifier
+                    .size(18.dp)
+                    .clickable{
+                        onDownloadClick()
+                    }
+            )
+        }
+        if(track.isFavorite) {
+            Spacer(modifier = Modifier.width(10.dp))
+            Icon(
+                painter = painterResource(R.drawable.ic_tick_circle),
+                contentDescription = null,
+                tint = Color.Unspecified,
+                modifier = Modifier
+                    .size(18.dp)
+                    .clickable{
+                        toggleFavorite()
+                    }
             )
         }
         Spacer(modifier = Modifier.width(10.dp))
