@@ -25,6 +25,8 @@ fun MainScreenColumn(
     onAlbumClick: (Album) -> Unit,
     playerState: PlayerUiState,
     onMoreAboutTrack: (Track) -> Unit,
+    toggleFavorite: (Track) -> Unit,
+    onDownloadClick: (Track) -> Unit,
 ) {
 
     LazyColumn(
@@ -75,6 +77,12 @@ fun MainScreenColumn(
                 },
                 onMoreClick = {
                     onMoreAboutTrack(track)
+                },
+                toggleFavorite = {
+                    toggleFavorite(track)
+                },
+                onDownloadClick = {
+                    onDownloadClick(track)
                 }
             )
         }
