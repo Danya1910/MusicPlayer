@@ -35,7 +35,7 @@ fun MainTest(
     navController: NavController,
     onMoreClick: (Track) -> Unit,
 
-) {
+    ) {
 
     BackHandler(enabled = true) {}
 
@@ -99,6 +99,12 @@ fun MainTest(
                             onMoreAboutTrack = { track ->
                                 onMoreClick(track)
                             },
+                            toggleFavorite = { track ->
+                                mainViewModel.toggleFavorite(track)
+                            },
+                            onDownloadClick = { track ->
+                                mainViewModel.onDownloadClick(track)
+                            }
                         )
 
                     }
