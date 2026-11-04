@@ -7,10 +7,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.example.musicplayer.presentation.main.MainViewModel
-import com.example.musicplayer.presentation.main.screen.LibraryScreen
 import com.example.musicplayer.presentation.main.screen.MainRootPagerScreen
-import com.example.musicplayer.presentation.main.screen.MainScreen
-import com.example.musicplayer.presentation.main.screen.MainTest
 
 fun NavGraphBuilder.mainGraph(
     navController: NavController,
