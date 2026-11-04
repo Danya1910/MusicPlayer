@@ -120,7 +120,7 @@ fun LibraryTest(
             },
             content = {
                 currentPlaylistToShow?.let { playList ->
-                    if(playList.playlist.id == "favorites") {
+                    if (playList.playlist.id == "favorites") {
                         LikedView(
                             playList = playList,
                             tracks = playList.tracks,
@@ -146,6 +146,9 @@ fun LibraryTest(
                                 showPlayList = false
                                 currentPlaylistToShow = null
                             },
+                            toggleFavorite = { track ->
+                                mainViewModel.toggleFavorite(track)
+                            }
                         )
                     } else {
                         PlaylistView(
@@ -179,8 +182,13 @@ fun LibraryTest(
                                     bitmap = bitmap,
                                 )
                             },
+                            toggleFavorite = { track ->
+                                mainViewModel.toggleFavorite(
+                                    track = track,
+                                )
+                            }
 
-                            )
+                        )
                     }
                 }
             }
