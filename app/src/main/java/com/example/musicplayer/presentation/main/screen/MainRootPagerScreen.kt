@@ -52,8 +52,10 @@ fun MainRootPagerScreen(
     val hazeState = remember { HazeState() }
 
     val playerState by mainViewModel.playerState.collectAsStateWithLifecycle()
-    val userPlaylists by mainViewModel.playlistsState.collectAsStateWithLifecycle()
+    val playlists by mainViewModel.playlistsState.collectAsStateWithLifecycle()
     val favorites by mainViewModel.favoritesPlaylist.collectAsStateWithLifecycle()
+
+    val allUsersPlaylists by mainViewModel.allPlaylistsWithFavorites.collectAsStateWithLifecycle()
 
     val currentTrack = playerState.currentTrack
 
@@ -329,7 +331,7 @@ fun MainRootPagerScreen(
             ) {
                 currentTrackForAdd?.let {
                     AddTrackToPlayListWidget(
-                        playLists = userPlaylists,
+                        playLists = allUsersPlaylists,
                         onCancelClick = {
                             isPlayListSelectionVisible = false
                             currentTrackForAdd = null
