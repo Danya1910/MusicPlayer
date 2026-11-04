@@ -316,16 +316,29 @@ private fun PlayListItem(
                 isAdded = !isAdded
             }
     ) {
-        AsyncImage(
-            model = playList.imageUrl,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(70.dp)
-                .clip(
-                    shape = RoundedCornerShape(4.dp)
-                )
-        )
+        if(playList.id == "favorites") {
+            Icon(
+                painter = painterResource(R.drawable.ic_liked_songs),
+                contentDescription = null,
+                tint = Color.Unspecified,
+                modifier = Modifier
+                    .size(70.dp)
+                    .clip(
+                        shape = RoundedCornerShape(4.dp)
+                    )
+            )
+        } else {
+            AsyncImage(
+                model = playList.imageUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(70.dp)
+                    .clip(
+                        shape = RoundedCornerShape(4.dp)
+                    )
+            )
+        }
         Spacer(modifier = Modifier.width(15.dp))
         Column(
             verticalArrangement = Arrangement.Center,
