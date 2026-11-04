@@ -161,6 +161,17 @@ class MainViewModel @Inject constructor(
             initialValue = EmptyFavorites
         )
 
+    val allPlaylistsWithFavorites: StateFlow<List<PlayList>> = combine(
+        favoritesPlaylist,
+        playlistsUiState
+    ) { favorites, playlists ->
+        listOf(favorites.playlist) + playlists.map { it.playlist }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = listOf(EmptyFavorites.playlist)
+    )
+
     val userState: StateFlow<User> = userRepository.getUserData()
         .catch { exception ->
             exception.printStackTrace()
