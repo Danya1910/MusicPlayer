@@ -154,6 +154,9 @@ fun MainTest(
                                 )
                             },
                             playerState = playerState,
+                            onMoreClick = { track ->
+                                onMoreClick(track)
+                            }
                         )
                     }
                 }
