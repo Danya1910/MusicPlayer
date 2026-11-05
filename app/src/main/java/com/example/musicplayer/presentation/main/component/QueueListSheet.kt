@@ -261,11 +261,6 @@ fun QueueListSheet(
                                         scaleY = if (isCurrentDraggingItem) 1.02f else 1f
                                         shadowElevation = if (isCurrentDraggingItem) 15f else 0f
                                     }
-                                    .background(
-                                        color = if (draggingIndex == localFullQueue.indexOfFirst { it.id == item.id })
-                                            White.copy(alpha = 0.08f) else DeepBlack.copy(alpha = 0.4f),
-                                        shape = RoundedCornerShape(8.dp)
-                                    )
                             ) {
                                 TrackInQueue(
                                     track = item.track,
