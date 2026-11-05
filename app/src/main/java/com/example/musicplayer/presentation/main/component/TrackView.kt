@@ -673,7 +673,7 @@ private fun PlayerSlider(
             Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = if (showTotalDuration)
-                    formatDuration(ms = currentPosition)
+                    formatDuration(ms = duration)
                 else {
                     val remainingTime = duration - currentPosition
                     "-${formatDuration(ms = remainingTime)}"
