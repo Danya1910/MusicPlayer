@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -77,6 +76,7 @@ fun PlaylistView(
     onBackClick: () -> Unit,
     onBitmapLoaded: (Bitmap) -> Unit,
     toggleFavorite: (Track) -> Unit,
+    onMoreClick: (Track) -> Unit,
 ) {
 
     val imageColors = playerState.paletteState[playList.playlist.id]
@@ -131,7 +131,6 @@ fun PlaylistView(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.5f)
                     .background(brush = bgGradient)
                     .statusBarsPadding()
                     .padding(top = 20.dp)
@@ -183,7 +182,11 @@ fun PlaylistView(
                             onTrackClick = {
                                 onTrackClick(track)
                             },
-                            onMoreClick = {},
+                            onMoreClick = {
+                                onMoreClick(
+                                    track
+                                )
+                            },
                             toggleFavorite = {
                                 toggleFavorite(track)
                             },
@@ -285,10 +288,11 @@ private fun PlaylistHat(
         Column(
             modifier = Modifier
                 .alpha(uiElementsAlpha)
+                .zIndex(1f)
         ) {
 
 
-            Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(9.dp))
             Text(
                 text = playlistName,
                 fontWeight = FontWeight.Bold,
@@ -299,7 +303,7 @@ private fun PlaylistHat(
                     .padding(horizontal = 20.dp)
                     .basicMarquee()
             )
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(9.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
@@ -318,7 +322,7 @@ private fun PlaylistHat(
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
                     text = creatorName,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp,
                     color = White,
                     maxLines = 1,
@@ -326,6 +330,7 @@ private fun PlaylistHat(
                         .basicMarquee()
                 )
             }
+            Spacer(modifier = Modifier.height(4.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
