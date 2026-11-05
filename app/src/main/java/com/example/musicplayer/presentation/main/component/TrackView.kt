@@ -227,12 +227,16 @@ fun TrackView(
             )
             Spacer(modifier = Modifier.height(30.dp))
         }
-        if (showQueue) {
+        if (showQueue || isTrackInfoVisible) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .graphicsLayer {
-                        val offset = runCatching { sheetState.requireOffset() }.getOrNull() ?: 0f
+                        val offset = if (showQueue) {
+                            runCatching { sheetState.requireOffset() }.getOrNull() ?: 0f
+                        } else {
+                            runCatching { trackInfoSheetState.requireOffset() }.getOrNull() ?: 0f
+                        }
 
                         val alphaProgress = if (offset > 0f) {
                             (1f - (offset / 2300f)).coerceIn(0f, 0.7f)
