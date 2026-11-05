@@ -487,9 +487,22 @@ private fun LoadButtonWithRing(
             ) { onLoadClick() },
         contentAlignment = Alignment.Center,
     ) {
+
+        Icon(
+            painter = painterResource(R.drawable.ic_load),
+            contentDescription = null,
+            tint = when {
+                isLoaded -> SpotifyGreen
+                else -> Gray
+            },
+            modifier = Modifier
+                .size(36.dp)
+                .padding(6.dp),
+        )
+
         if (isDownloading) {
             Canvas(modifier = Modifier.fillMaxSize()) {
-                val iconPadding = 6.dp.toPx()
+                val iconPadding = 6.5.dp.toPx()
                 val stroke = 2.dp.toPx()
                 val inset = iconPadding + stroke / 2
                 val arcSize = Size(
@@ -533,18 +546,6 @@ private fun LoadButtonWithRing(
                 }
             }
         }
-
-        Icon(
-            painter = painterResource(R.drawable.ic_load),
-            contentDescription = null,
-            tint = when {
-                isDownloading || isLoaded -> SpotifyGreen
-                else -> Gray
-            },
-            modifier = Modifier
-                .size(36.dp)
-                .padding(6.dp),
-        )
     }
 }
 
