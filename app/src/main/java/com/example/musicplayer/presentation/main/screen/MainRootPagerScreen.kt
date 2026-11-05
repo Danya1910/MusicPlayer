@@ -302,6 +302,15 @@ fun MainRootPagerScreen(
                         onRepeatClick = {
                             mainViewModel.toggleRepeatMode()
                         },
+                        playNext = {track ->
+                            mainViewModel.playNext(
+                                track = track
+                            )
+                        },
+                        addToNextPlay = {
+                            currentTrackForAdd = track
+                            isPlayListSelectionVisible = true
+                        },
                         isShuffled = playerState.isShuffleEnabled,
                         repeatMode = playerState.repeatMode,
                         upcomingTracks = upcomingTracks,
@@ -323,7 +332,7 @@ fun MainRootPagerScreen(
                                 index = index
                             )
                         },
-                        downloads = downloads
+                        downloads = downloads,
                     )
 
                 }
