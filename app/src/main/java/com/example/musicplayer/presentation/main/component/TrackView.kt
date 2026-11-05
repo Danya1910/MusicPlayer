@@ -237,7 +237,6 @@ fun TrackView(
                         } else {
                             runCatching { trackInfoSheetState.requireOffset() }.getOrNull() ?: 0f
                         }
-
                         val alphaProgress = if (offset > 0f) {
                             (1f - (offset / 2300f)).coerceIn(0f, 0.7f)
                         } else {
