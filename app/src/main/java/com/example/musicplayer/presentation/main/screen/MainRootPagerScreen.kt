@@ -135,6 +135,10 @@ fun MainRootPagerScreen(
                     mainViewModel = mainViewModel,
                     navController = rootNavController,
                     favorites = favorites,
+                    onMoreClick = { track ->
+                        currentInfoToShow = track
+                        isTrackInfoVisible = true
+                    }
                 )
             }
 
