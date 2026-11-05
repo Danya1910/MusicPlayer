@@ -307,7 +307,7 @@ fun MainRootPagerScreen(
                                 track = track
                             )
                         },
-                        addToNextPlay = {
+                        addToPlaylist = {
                             currentTrackForAdd = track
                             isPlayListSelectionVisible = true
                         },

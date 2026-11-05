@@ -103,7 +103,7 @@ fun TrackView(
     onShuffleClick: () -> Unit,
     onRepeatClick: () -> Unit,
     playNext: (Track) -> Unit,
-    addToNextPlay: (Track) -> Unit,
+    addToPlaylist: (Track) -> Unit,
     isShuffled: Boolean,
     repeatMode: Int,
     upcomingTracks: List<Track>,
@@ -265,7 +265,7 @@ fun TrackView(
                             )
                         },
                         addToPlayList = {
-                            addToNextPlay(track)
+                            addToPlaylist(track)
                             isTrackInfoVisible = false
                         }
                     )
