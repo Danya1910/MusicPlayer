@@ -156,7 +156,19 @@ fun MainTest(
                             playerState = playerState,
                             onMoreClick = { track ->
                                 onMoreClick(track)
-                            }
+                            },
+                            onTrackClick = { track ->
+                                mainViewModel.playTrackWithQueue(
+                                    track = track,
+                                    queue = clickedAlbum!!.tracks,
+                                )
+                            },
+                            toggleFavorite = { track ->
+                                mainViewModel.toggleFavorite(track)
+                            },
+                            onDownloadClick = { track ->
+                                mainViewModel.onDownloadClick(track)
+                            },
                         )
                     }
                 }
