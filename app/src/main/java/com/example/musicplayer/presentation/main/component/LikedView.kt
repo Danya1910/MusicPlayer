@@ -58,6 +58,7 @@ fun LikedView(
     onDownloadClick: () -> Unit,
     onBackClick: () -> Unit,
     toggleFavorite: (Track) -> Unit,
+    onMoreClick: (Track) -> Unit,
 ) {
 
     Log.d("Playlist", "playlist: $playList")
@@ -133,7 +134,11 @@ fun LikedView(
                             onTrackClick = {
                                 onTrackClick(track)
                             },
-                            onMoreClick = {},
+                            onMoreClick = {
+                                onMoreClick(
+                                    track
+                                )
+                            },
                             toggleFavorite = {
                                 toggleFavorite(track)
                             },
