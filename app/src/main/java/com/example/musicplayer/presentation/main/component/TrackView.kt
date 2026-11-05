@@ -102,6 +102,7 @@ fun TrackView(
     onSeekTo: (Long) -> Unit,
     onShuffleClick: () -> Unit,
     onRepeatClick: () -> Unit,
+    playNext: (Track) -> Unit,
     isShuffled: Boolean,
     repeatMode: Int,
     upcomingTracks: List<Track>,
@@ -109,7 +110,7 @@ fun TrackView(
     onTrackInQueueClick: (Track) -> Unit,
     onMoveTrack: (fromIndex: Int, toIndex: Int) -> Unit,
     removeFromQueue: (Int) -> Unit,
-    downloads:  Map<String, DownloadProgress>,
+    downloads: Map<String, DownloadProgress>,
 ) {
 
     val bgGradient = Brush.verticalGradient(
@@ -122,7 +123,10 @@ fun TrackView(
     val hazeState = remember { HazeState() }
 
     var showQueue by remember { mutableStateOf(false) }
+    var isTrackInfoVisible by remember { mutableStateOf(false) }
 
+
+    val trackInfoSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = false
     )
@@ -236,6 +240,37 @@ fun TrackView(
                     }
                     .background(Color.Black) // Делаем глубокое кастомное затемнение
             )
+        }
+
+        if (isTrackInfoVisible) {
+
+            ModalBottomSheet(
+                onDismissRequest = { isTrackInfoVisible = false },
+                sheetState = trackInfoSheetState,
+                containerColor = Color.Transparent,
+                dragHandle = null, // добавить
+                scrimColor = Color.Transparent,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+
+                track.let {
+                    TrackInfo(
+                        track = track,
+                        hazeState = hazeState,
+                        playNext = {
+                            playNext(
+                                track
+                            )
+                        },
+                        addToPlayList = {
+                            currentTrackForAdd = currentInfoToShow!!
+                            isTrackInfoVisible = false
+                            isPlayListSelectionVisible = true
+                        }
+                    )
+                }
+            }
         }
     }
 
@@ -438,7 +473,7 @@ private fun TrackInfoAndHeart(
                     else R.drawable.ic_circle_plus
                 ),
                 contentDescription = null,
-                tint = if(isFavorite) Color.Unspecified else Gray,
+                tint = if (isFavorite) Color.Unspecified else Gray,
                 modifier = Modifier
                     .size(36.dp)
                     .padding(6.dp)
