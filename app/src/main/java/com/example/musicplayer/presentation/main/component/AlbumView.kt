@@ -43,6 +43,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import coil.compose.AsyncImage
@@ -69,6 +70,9 @@ fun AlbumView(
     onBitmapLoaded: (Bitmap) -> Unit,
     playerState: PlayerUiState,
     onMoreClick: (Track) -> Unit,
+    onTrackClick: (Track) -> Unit,
+    toggleFavorite: (Track) -> Unit,
+    onDownloadClick: (Track) -> Unit,
 ) {
 
     val hazeState = remember { HazeState() }
@@ -133,7 +137,16 @@ fun AlbumView(
                     track = track,
                     onMoreClick = {
                         onMoreClick(track)
-                    }
+                    },
+                    onTrackClick = {
+                        onTrackClick(track)
+                    },
+                    toggleFavorite = {
+                        toggleFavorite(track)
+                    },
+                    onDownloadClick = {
+                        onDownloadClick(track)
+                    },
                 )
             }
 
@@ -190,7 +203,7 @@ private fun AlbumImage(
             model = url,
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            onSuccess = {successResult ->
+            onSuccess = { successResult ->
                 val bitmap = successResult.result.drawable.toBitmap()
                 onBitmapLoaded(bitmap)
             },
@@ -343,6 +356,9 @@ private fun AlbumInfo(
 @Composable
 private fun AlbumTrackItem(
     track: Track,
+    onTrackClick: () -> Unit,
+    toggleFavorite: () -> Unit,
+    onDownloadClick: () -> Unit,
     onMoreClick: () -> Unit,
 ) {
     Row(
@@ -350,6 +366,9 @@ private fun AlbumTrackItem(
         modifier = Modifier
             .height(58.dp)
             .fillMaxWidth()
+            .clickable {
+                onTrackClick()
+            }
     ) {
         Column(
             verticalArrangement = Arrangement.SpaceBetween,
@@ -366,40 +385,44 @@ private fun AlbumTrackItem(
                 modifier = Modifier
                     .basicMarquee()
             )
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (track.localAudioPath != null) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .size(21.dp)
-                            .clip(
-                                shape = CircleShape
-                            )
-                            .background(
-                                color = SpotifyGreen
-                            )
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_arrow_down),
-                            contentDescription = null,
-                            tint = Black,
-                            modifier = Modifier
-                                .width(5.dp)
-                                .height(3.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(6.dp))
-                }
-                Text(
-                    text = track.artist,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 14.sp,
-                    color = Gray,
-                )
-            }
+
+            Text(
+                text = track.artist,
+                fontWeight = FontWeight.Medium,
+                fontSize = 14.sp,
+                color = Gray,
+                maxLines = 1,
+                modifier = Modifier
+                    .basicMarquee()
+            )
         }
+        if(track.localAudioPath != null) {
+            Spacer(modifier = Modifier.width(10.dp))
+            Icon(
+                painter = painterResource(R.drawable.ic_load),
+                contentDescription = null,
+                tint = SpotifyGreen,
+                modifier = Modifier
+                    .size(18.dp)
+                    .clickable{
+                        onDownloadClick()
+                    }
+            )
+        }
+        if(track.isFavorite) {
+            Spacer(modifier = Modifier.width(10.dp))
+            Icon(
+                painter = painterResource(R.drawable.ic_tick_circle),
+                contentDescription = null,
+                tint = Color.Unspecified,
+                modifier = Modifier
+                    .size(18.dp)
+                    .clickable{
+                        toggleFavorite()
+                    }
+            )
+        }
+        Spacer(modifier = Modifier.width(10.dp))
         Icon(
             painter = painterResource(R.drawable.ic_ellipsis),
             contentDescription = null,
