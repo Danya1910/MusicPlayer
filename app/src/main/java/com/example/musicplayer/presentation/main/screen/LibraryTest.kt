@@ -45,6 +45,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.PlayList
+import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.domain.model.User
 import com.example.musicplayer.presentation.main.MainViewModel
 import com.example.musicplayer.presentation.main.component.BottomBar
@@ -62,6 +63,7 @@ fun LibraryTest(
     mainViewModel: MainViewModel,
     navController: NavController,
     favorites: PlaylistUi,
+    onMoreClick: (Track) -> Unit,
 ) {
 
     val playlists by mainViewModel.playlistsUiState.collectAsStateWithLifecycle()
@@ -148,6 +150,9 @@ fun LibraryTest(
                             },
                             toggleFavorite = { track ->
                                 mainViewModel.toggleFavorite(track)
+                            },
+                            onMoreClick = { track ->
+                                onMoreClick(track)
                             }
                         )
                     } else {
@@ -186,8 +191,10 @@ fun LibraryTest(
                                 mainViewModel.toggleFavorite(
                                     track = track,
                                 )
+                            },
+                            onMoreClick = { track ->
+                                onMoreClick(track)
                             }
-
                         )
                     }
                 }
