@@ -418,20 +418,6 @@ private fun TrackInfoAndHeart(
             progress = downloads[trackId],
             onLoadClick = onLoadClick,
         )
-//        Icon(
-//            painter = painterResource(R.drawable.ic_load),
-//            contentDescription = null,
-//            tint = if(isLoaded) SpotifyGreen else Gray,
-//            modifier = Modifier
-//                .size(36.dp)
-//                .padding(6.dp)
-//                .clickable(
-//                    interactionSource = remember { MutableInteractionSource() },
-//                    indication = null
-//                ) {
-//                    onLoadClick()
-//                },
-//        )
         AnimatedContent(
             targetState = isFavorite,
             transitionSpec = {
