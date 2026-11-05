@@ -182,6 +182,13 @@ fun MainRootPagerScreen(
                     isPlaying = isPlaying,
                     currentPosition = playerState.currentPosition,
                     duration = track.duration,
+                    bgColor = playerState.bgColor,
+                    onBitmapLoaded = { bitmap ->
+                        mainViewModel.updateColorsFromBitmap(
+                            id = track.id,
+                            bitmap = bitmap,
+                        )
+                    }
                 )
             }
         }
@@ -262,9 +269,9 @@ fun MainRootPagerScreen(
                             mainViewModel.togglePlayPause()
                         },
                         onHeartClick = {
-                           mainViewModel.toggleFavorite(
-                               track = track,
-                               )
+                            mainViewModel.toggleFavorite(
+                                track = track,
+                            )
 
                         },
                         onLoadClick = {
