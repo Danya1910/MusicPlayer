@@ -1,7 +1,9 @@
 package com.example.musicplayer.presentation.main.component
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,12 +28,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.drawable.toBitmap
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.ui.theme.Gray
@@ -48,6 +53,8 @@ fun NowPlayingBar(
     isPlaying: Boolean,
     currentPosition: Long,
     duration: Long,
+    bgColor: Color,
+    onBitmapLoaded: (Bitmap) -> Unit,
 ) {
 
     val totalDurationSeconds = (duration / 1000).coerceAtLeast(0)
@@ -71,7 +78,7 @@ fun NowPlayingBar(
                 shape = RoundedCornerShape(12.dp)
             )
             .background(
-                color = Gray.copy(alpha = 0.6f),
+                color = bgColor,
             )
             .clickable{
                 onCardClick()
@@ -88,14 +95,21 @@ fun NowPlayingBar(
                 )
         ) {
             AsyncImage(
-                model = track.imageUrl,
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(track.imageUrl)
+                    .allowHardware(false)
+                    .build(),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(37.dp)
+                    .size(40.dp)
                     .clip(
                         shape = RoundedCornerShape(7.dp)
-                    )
+                    ),
+                onSuccess = { successResult ->
+                    val bitmap = successResult.result.drawable.toBitmap()
+                    onBitmapLoaded(bitmap)
+                }
             )
             Spacer(modifier = Modifier.width(11.dp))
             Column(
@@ -108,7 +122,8 @@ fun NowPlayingBar(
                     fontSize = 14.sp,
                     color = White,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,//добавить прокрутку
+                    modifier = Modifier
+                        .basicMarquee()
                 )
                 Row(
                     verticalAlignment = Alignment.CenterVertically
