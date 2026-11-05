@@ -164,6 +164,9 @@ fun TrackView(
                     onCancelClick()
                 },
                 title = track.title,
+                onMoreClick = {
+                    isTrackInfoVisible = true
+                },
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -332,7 +335,8 @@ private fun TopBarPreview() {
     ) {
         PlayerHead(
             onCancelClick = {},
-            title = "?"
+            title = "?",
+            onMoreClick = {},
         )
     }
 }
@@ -341,6 +345,7 @@ private fun TopBarPreview() {
 private fun PlayerHead(
     onCancelClick: () -> Unit,
     title: String,
+    onMoreClick: () -> Unit,
 ) {
 
     Row(
@@ -353,7 +358,10 @@ private fun PlayerHead(
             contentDescription = null,
             tint = White,
             modifier = Modifier
-                .clickable {
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
                     onCancelClick()
                 }
         )
@@ -370,7 +378,14 @@ private fun PlayerHead(
             painter = painterResource(R.drawable.ic_ellipsis),
             contentDescription = null,
             tint = White,
-            modifier = Modifier.size(27.dp)
+            modifier = Modifier
+                .size(27.dp)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    onMoreClick()
+                }
         )
     }
 
