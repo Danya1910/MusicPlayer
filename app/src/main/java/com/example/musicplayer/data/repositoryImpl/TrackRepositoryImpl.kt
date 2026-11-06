@@ -106,32 +106,30 @@ class TrackRepositoryImpl @Inject constructor(
     }.flowOn(Dispatchers.IO)
 
     override fun getAlbums(): Flow<List<Album>> = flow {
-
-        val cachedAlbums = albumDao.getAllAlbumsWithTracksOnce().map { it.toDomain() }
-        emit(cachedAlbums)
-
         try {
-            if (firebaseAuth.currentUser == null) throw Exception(
-                "Пользователь не авторизирован"
-            )
+            if (firebaseAuth.currentUser != null) {
+                val allAlbumsSnapshot = firestore.collection("albums").get().await()
 
-            val allAlbumsSnapshot = firestore.collection("albums").get().await()
+                val remoteAlbumsEntities = allAlbumsSnapshot.documents.map { document ->
+                    AlbumEntity(
+                        albumId = document.id,
+                        title = document.getString("title") ?: "Без названия",
+                        artist = document.getString("artist") ?: "Неизвестный исполнитель",
+                        imageUrl = document.getString("imageUrl") ?: ""
+                    )
+                }
 
-
-            val remoteAlbumsEntities = allAlbumsSnapshot.documents.map { document ->
-                AlbumEntity(
-                    albumId = document.id,
-                    title = document.getString("title") ?: "Без названия",
-                    artist = document.getString("artist") ?: "Неизвестный исполнитель",
-                    imageUrl = document.getString("imageUrl") ?: ""
-                )
+                albumDao.insertAlbums(remoteAlbumsEntities)
             }
-
-            Log.d("Album", remoteAlbumsEntities.toString())
-            albumDao.insertAlbums(remoteAlbumsEntities)
         } catch (e: Exception) {
             e.printStackTrace()
         }
+
+        emitAll(
+            albumDao.getAllAlbumsWithTracks().map { albums ->
+                albums.map { it.toDomain() }
+            }
+        )
     }.flowOn(Dispatchers.IO)
 
     override suspend fun createPlayList(
@@ -397,9 +395,11 @@ private fun formatDuration(durationMs: Long): String {
                 String.format("%d h", hours)
             }
         }
+
         minutes > 0 -> {
             String.format("%d min", minutes)
         }
+
         else -> {
             if (seconds > 0) {
                 String.format("%d sec", seconds)
