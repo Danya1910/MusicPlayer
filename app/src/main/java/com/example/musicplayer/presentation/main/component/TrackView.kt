@@ -190,7 +190,18 @@ fun TrackView(
                 },
             )
 
-            Spacer(modifier = Modifier.weight(1f))
+           Box(
+               modifier = Modifier
+                   .weight(1f)
+                   .padding(vertical = 7.dp)
+           ) {
+               lyrics?.let {
+                   LyricsLinesRow(
+                       lyrics = lyrics.lines,
+                       currentPosition = playerState.currentPosition,
+                   )
+               }
+           }
 
             TrackInfoAndHeart(
                 trackId = track.id,
@@ -414,6 +425,7 @@ private fun TrackImage(
     ) {
     Box(
         modifier = Modifier
+            .padding(horizontal = 10.dp)
             .fillMaxWidth()
             .aspectRatio(1f)
     ) {
@@ -460,19 +472,19 @@ private fun TrackInfoAndHeart(
             Text(
                 text = title,
                 fontWeight = FontWeight.Bold,
-                fontSize = 22.sp,
+                fontSize = 26.sp,
                 color = titleColor,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .basicMarquee()
             )
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(5.dp))
             Text(
                 text = artist,
                 fontWeight = FontWeight.Medium,
-                fontSize = 16.sp,
-                color = bodyColor,
+                fontSize = 18.sp,
+                color = Gray,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
