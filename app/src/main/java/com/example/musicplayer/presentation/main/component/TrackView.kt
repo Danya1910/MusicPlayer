@@ -1,6 +1,7 @@
 package com.example.musicplayer.presentation.main.component
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
@@ -75,6 +76,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.DownloadProgress
+import com.example.musicplayer.domain.model.Lyrics
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.presentation.main.util.formatDuration
 import com.example.musicplayer.presentation.player.state.PlayerUiState
@@ -112,7 +114,13 @@ fun TrackView(
     onMoveTrack: (fromIndex: Int, toIndex: Int) -> Unit,
     removeFromQueue: (Int) -> Unit,
     downloads: Map<String, DownloadProgress>,
+    getLyrics: () -> Unit,
+    lyrics: Lyrics?,
 ) {
+
+    LaunchedEffect(lyrics) {
+        Log.d("Track View", lyrics.toString())
+    }
 
     val bgGradient = Brush.verticalGradient(
         colors = listOf(
