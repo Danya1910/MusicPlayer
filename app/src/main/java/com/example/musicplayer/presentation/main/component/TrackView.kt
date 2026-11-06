@@ -118,6 +118,10 @@ fun TrackView(
     lyrics: Lyrics?,
 ) {
 
+    LaunchedEffect(Unit) {
+        getLyrics()
+    }
+
     LaunchedEffect(lyrics) {
         Log.d("Track View", lyrics.toString())
     }
