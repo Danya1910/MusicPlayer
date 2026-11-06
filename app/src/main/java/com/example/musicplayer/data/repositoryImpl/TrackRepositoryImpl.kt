@@ -1,7 +1,9 @@
 package com.example.musicplayer.data.repositoryImpl
 
 import android.util.Log
+import android.util.Log.e
 import com.example.musicplayer.data.local.dao.AlbumDao
+import com.example.musicplayer.data.local.dao.LyricDao
 import com.example.musicplayer.data.local.dao.PlayListDao
 import com.example.musicplayer.data.local.dao.TrackDao
 import com.example.musicplayer.data.local.entity.AlbumEntity
@@ -9,12 +11,15 @@ import com.example.musicplayer.data.local.entity.toDomain
 import com.example.musicplayer.data.local.entity.toEntity
 import com.example.musicplayer.data.wrapper.toDomain
 import com.example.musicplayer.domain.model.Album
+import com.example.musicplayer.domain.model.LyricLine
+import com.example.musicplayer.domain.model.Lyrics
 import com.example.musicplayer.domain.model.PlayList
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.domain.repository.TrackRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.awaitClose
@@ -29,6 +34,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 
 class TrackRepositoryImpl @Inject constructor(
@@ -37,6 +43,7 @@ class TrackRepositoryImpl @Inject constructor(
     private val trackDao: TrackDao,
     private val albumDao: AlbumDao,
     private val playListDao: PlayListDao,
+    private val lyricDao: LyricDao,
 ) : TrackRepository {
 
     override fun getAllTrack(): Flow<List<Track>> = flow {
@@ -104,6 +111,28 @@ class TrackRepositoryImpl @Inject constructor(
         emitAll(trackDao.getAllTracksFlow().map { list -> list.map { it.toDomain() } })
 
     }.flowOn(Dispatchers.IO)
+
+    override suspend fun getLyrics(trackId: String): Lyrics? {
+        val cachedLyrics = lyricDao.getLyricsOnce(trackId)
+
+        if (cachedLyrics != null) {
+            return cachedLyrics.toDomain()
+        }
+
+        val remoteLyrics = firestore
+            .collection("lyrics")
+            .document(trackId)
+            .get()
+            .await()
+
+        if (!remoteLyrics.exists()) return null
+
+        val lyrics = remoteLyrics.toObject<Lyrics>() ?: return null
+
+        lyricDao.insertLyrics(lyrics.toEntity())
+
+        return lyrics
+    }
 
     override fun getAlbums(): Flow<List<Album>> = flow {
         try {
