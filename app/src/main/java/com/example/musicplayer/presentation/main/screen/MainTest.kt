@@ -127,6 +127,11 @@ fun MainTest(
                 },
                 content = {
                     clickedAlbum?.let { album ->
+                        val album = uiState.let { currentState ->
+                            (currentState as? MainUiState.Success)
+                                ?.albums
+                                ?.find { it.id == clickedAlbum!!.id }
+                        } ?: clickedAlbum!!
                         AlbumView(
                             album = album,
                             onHeartClick = {
