@@ -1,7 +1,6 @@
 package com.example.musicplayer.data.repositoryImpl
 
 import android.util.Log
-import android.util.Log.e
 import com.example.musicplayer.data.local.dao.AlbumDao
 import com.example.musicplayer.data.local.dao.LyricDao
 import com.example.musicplayer.data.local.dao.PlayListDao
@@ -11,7 +10,6 @@ import com.example.musicplayer.data.local.entity.toDomain
 import com.example.musicplayer.data.local.entity.toEntity
 import com.example.musicplayer.data.wrapper.toDomain
 import com.example.musicplayer.domain.model.Album
-import com.example.musicplayer.domain.model.LyricLine
 import com.example.musicplayer.domain.model.Lyrics
 import com.example.musicplayer.domain.model.PlayList
 import com.example.musicplayer.domain.model.Track
@@ -35,7 +33,6 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import kotlin.coroutines.cancellation.CancellationException
 
 
 class TrackRepositoryImpl @Inject constructor(
@@ -311,16 +308,7 @@ class TrackRepositoryImpl @Inject constructor(
     }
 
     private suspend fun getCurrentUserName(): String? {
-        val uid = firebaseAuth.currentUser?.uid
-        if (uid == null) {
-            Log.e(
-                "TrackRepo",
-                "getCurrentUserName: currentUser.uid IS NULL! Пользователь не авторизован в Auth."
-            )
-            return null
-        }
-
-        Log.d("TrackRepo", "getCurrentUserName: Начинаем запрос в Firestore для UID: $uid")
+        val uid = firebaseAuth.currentUser?.uid ?: return null
 
         return try {
             val document = firestore
@@ -334,29 +322,17 @@ class TrackRepositoryImpl @Inject constructor(
                 Log.d("TrackRepo", "getCurrentUserName: Документ найден! Имя в БД: '$name'")
                 name
             } else {
-                Log.e(
-                    "TrackRepo",
-                    "getCurrentUserName: Документ с UID $uid НЕ НАЙДЕН в коллекции 'users'!"
-                )
                 null
             }
         } catch (e: Exception) {
-            Log.e(
-                "TrackRepo",
-                "getCurrentUserName: Исключение при запросе к Firestore для UID: $uid",
-                e
-            )
+            e.printStackTrace()
             null
         }
     }
 
     override suspend fun likeTrack(trackId: String) {
 
-        val currentUserUid = firebaseAuth.currentUser?.uid
-
-        if (currentUserUid == null) {
-            return
-        }
+        val currentUserUid = firebaseAuth.currentUser?.uid ?: return
 
         trackDao.updateFavoriteStatus(trackId = trackId, isFavorite = true)
 
@@ -385,11 +361,7 @@ class TrackRepositoryImpl @Inject constructor(
 
     override suspend fun unlikeTrack(trackId: String) {
 
-        val currentUserUid = firebaseAuth.currentUser?.uid
-
-        if (currentUserUid == null) {
-            return
-        }
+        val currentUserUid = firebaseAuth.currentUser?.uid ?: return
 
         trackDao.updateFavoriteStatus(trackId = trackId, isFavorite = false)
 
