@@ -55,6 +55,8 @@ fun MainRootPagerScreen(
     val playlists by mainViewModel.playlistsState.collectAsStateWithLifecycle()
     val favorites by mainViewModel.favoritesPlaylist.collectAsStateWithLifecycle()
 
+    val lyrics by mainViewModel.lyrics.collectAsStateWithLifecycle()
+
     val allUsersPlaylists by mainViewModel.allPlaylistsWithFavorites.collectAsStateWithLifecycle()
 
     val currentTrack = playerState.currentTrack
@@ -333,6 +335,12 @@ fun MainRootPagerScreen(
                             )
                         },
                         downloads = downloads,
+                        getLyrics = {
+                            mainViewModel.getLyrics(
+                                trackId = track.id
+                            )
+                        },
+                        lyrics = lyrics,
                     )
 
                 }
