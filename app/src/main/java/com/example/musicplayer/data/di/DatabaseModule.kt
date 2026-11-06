@@ -5,7 +5,9 @@ import androidx.room.Room
 import com.example.musicplayer.data.local.AppDatabase
 import com.example.musicplayer.data.local.MIGRATION_1_2
 import com.example.musicplayer.data.local.MIGRATION_2_3
+import com.example.musicplayer.data.local.MIGRATION_3_4
 import com.example.musicplayer.data.local.dao.AlbumDao
+import com.example.musicplayer.data.local.dao.LyricDao
 import com.example.musicplayer.data.local.dao.PlayListDao
 import com.example.musicplayer.data.local.dao.TrackDao
 import dagger.Module
@@ -30,7 +32,11 @@ object DatabaseModule {
             AppDatabase::class.java,
             "music_player_db"
         )
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+            .addMigrations(
+                MIGRATION_1_2,
+                MIGRATION_2_3,
+                MIGRATION_3_4,
+            )
             .build()
 
     }
@@ -51,6 +57,12 @@ object DatabaseModule {
     @Singleton
     fun providePlayListDao(database: AppDatabase): PlayListDao {
         return database.playListDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideLyricsDao(database: AppDatabase): LyricDao {
+        return database.lyricsDao()
     }
 
 }
