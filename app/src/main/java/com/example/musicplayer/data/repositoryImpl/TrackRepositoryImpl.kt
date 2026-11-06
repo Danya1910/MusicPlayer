@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
@@ -112,27 +113,28 @@ class TrackRepositoryImpl @Inject constructor(
 
     }.flowOn(Dispatchers.IO)
 
-    override suspend fun getLyrics(trackId: String): Lyrics? {
-        val cachedLyrics = lyricDao.getLyricsOnce(trackId)
+    override suspend fun getLyrics(trackId: String): Lyrics? =
+        withContext(Dispatchers.IO) {
+            val cachedLyrics = lyricDao.getLyricsOnce(trackId)
 
-        if (cachedLyrics != null) {
-            return cachedLyrics.toDomain()
+            if (cachedLyrics != null) {
+                return@withContext cachedLyrics.toDomain()
+            }
+
+            val remoteLyrics = firestore
+                .collection("lyrics")
+                .document(trackId)
+                .get()
+                .await()
+
+            if (!remoteLyrics.exists()) return@withContext null
+
+            val lyrics = remoteLyrics.toObject<Lyrics>() ?: return@withContext null
+
+            lyricDao.insertLyrics(lyrics.toEntity())
+
+            lyrics
         }
-
-        val remoteLyrics = firestore
-            .collection("lyrics")
-            .document(trackId)
-            .get()
-            .await()
-
-        if (!remoteLyrics.exists()) return null
-
-        val lyrics = remoteLyrics.toObject<Lyrics>() ?: return null
-
-        lyricDao.insertLyrics(lyrics.toEntity())
-
-        return lyrics
-    }
 
     override fun getAlbums(): Flow<List<Album>> = flow {
         try {
