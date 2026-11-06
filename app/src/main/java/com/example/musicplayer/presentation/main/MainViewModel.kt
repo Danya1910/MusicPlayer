@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
 import com.example.musicplayer.domain.model.DownloadProgress
+import com.example.musicplayer.domain.model.Lyrics
 import com.example.musicplayer.domain.model.PlayList
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.domain.model.User
@@ -37,6 +38,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 
 @Suppress("UNCHECKED_CAST")
@@ -49,6 +51,11 @@ class MainViewModel @Inject constructor(
 ) : ViewModel() {
 
     val downloads: StateFlow<Map<String, DownloadProgress>> = fileRepository.downloads
+
+    private val _lyrics = MutableStateFlow<Lyrics?>(null)
+    val lyrics = _lyrics.asStateFlow()
+
+    private var lyricsJob: Job? = null
 
     companion object {
         private const val FAVORITES_ID = "favorites"
@@ -456,6 +463,26 @@ class MainViewModel @Inject constructor(
     }
 
     fun onDownloadClick(track: Track) = fileRepository.toggleDownload(track)
+
+    fun getLyrics(
+        trackId: String,
+    ) {
+        lyricsJob?.cancel()
+
+        _lyrics.value = null
+
+        lyricsJob = viewModelScope.launch {
+            try {
+                _lyrics.value = trackRepository.getLyrics(
+                    trackId = trackId
+                )
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e("Lyrics", "Failed to load lyrics", e)
+            }
+        }
+    }
 
 
 }
