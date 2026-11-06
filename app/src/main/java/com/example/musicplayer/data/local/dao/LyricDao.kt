@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 interface LyricDao {
 
     @Query("SELECT * FROM lyrics WHERE trackId =:trackId")
-    fun getLyricsOnce(trackId: String): LyricsEntity?
+    suspend fun getLyricsOnce(trackId: String): LyricsEntity?
 
     @Query("SELECT * FROM lyrics WHERE trackId =:trackId")
     fun getLyrics(trackId: String): Flow<LyricsEntity>
