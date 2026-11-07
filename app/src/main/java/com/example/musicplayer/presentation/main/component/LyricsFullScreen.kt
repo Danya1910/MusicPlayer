@@ -41,6 +41,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -52,8 +53,6 @@ import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.LyricLine
 import com.example.musicplayer.presentation.main.util.formatDuration
 import com.example.musicplayer.ui.theme.Black
-import com.example.musicplayer.ui.theme.DeepBlack
-import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.White
 
 
@@ -165,12 +164,14 @@ fun LyricsFullScreen(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = 20.dp),
+            bgColor = bgColor,
         )
         Spacer(modifier = Modifier.height(5.dp))
         PlayButton(
             onStartStopClick = onStartStopClick,
             isPlaying = isPlaying,
+            color = bgColor
         )
         Spacer(modifier = Modifier.height(40.dp))
     }
@@ -245,6 +246,7 @@ private fun PlayerSlider(
     duration: Long,
     onSeekFinished: (Long) -> Unit,
     modifier: Modifier,
+    bgColor: Color,
 ) {
 
     var showTotalDuration by remember { mutableStateOf(true) }
@@ -262,11 +264,17 @@ private fun PlayerSlider(
         }
     }
 
+    val isLightBackground = bgColor.luminance() > 0.5f
+
+    val trackBase = if (isLightBackground) Color.Black else Color.White
+
     val sliderColors = SliderDefaults.colors(
-        thumbColor = Color.White,
-        activeTrackColor = White,
-        inactiveTrackColor = Gray
+        thumbColor = Color.Transparent,
+        activeTrackColor = trackBase.copy(alpha = 0.55f),
+        inactiveTrackColor = trackBase.copy(alpha = 0.18f),
     )
+
+
 
     Column(
         modifier = modifier
@@ -287,16 +295,15 @@ private fun PlayerSlider(
                 .fillMaxWidth()
                 .height(16.dp),
             thumb = {
-                if (totalDurationSeconds > 0) {
-                    SliderDefaults.Thumb(
-                        interactionSource = remember { MutableInteractionSource() },
-                        colors = sliderColors,
-                        modifier = Modifier
-                            .padding(top = 1.5.dp)
-                            .size(12.dp)
-                            .minimumInteractiveComponentSize()
-                    )
-                }
+                SliderDefaults.Thumb(
+                    interactionSource = remember { MutableInteractionSource() },
+                    colors = sliderColors.copy(
+                        thumbColor = Color.Transparent
+                    ),
+                    modifier = Modifier
+                        .size(12.dp)
+                        .minimumInteractiveComponentSize()
+                )
             },
             track = { sliderState ->
                 Canvas(
@@ -342,7 +349,7 @@ private fun PlayerSlider(
                 text = formatDuration(ms = currentPosition),
                 fontWeight = FontWeight.Medium,
                 fontSize = 10.sp,
-                color = Gray,
+                color = sliderColors.activeTrackColor,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -356,7 +363,7 @@ private fun PlayerSlider(
                 },
                 fontWeight = FontWeight.Medium,
                 fontSize = 10.sp,
-                color = Gray,
+                color = sliderColors.activeTrackColor,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
@@ -375,6 +382,7 @@ private fun PlayerSlider(
 private fun PlayButton(
     onStartStopClick: () -> Unit,
     isPlaying: Boolean,
+    color: Color,
 ) {
 
     Row(
@@ -402,7 +410,7 @@ private fun PlayButton(
                     else R.drawable.ic_play
                 ),
                 contentDescription = null,
-                tint = DeepBlack,
+                tint = color,
                 modifier = Modifier
                     .width(21.dp)
                     .height(26.dp)
