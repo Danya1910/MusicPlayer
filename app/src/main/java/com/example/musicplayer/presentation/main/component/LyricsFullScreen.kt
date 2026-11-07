@@ -1,6 +1,7 @@
 package com.example.musicplayer.presentation.main.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -148,7 +150,9 @@ private fun Head(
 ) {
 
     Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
+            .height(40.dp)
             .fillMaxWidth()
             .padding(horizontal = 26.dp)
     ) {
@@ -173,7 +177,10 @@ private fun Head(
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 15.sp,
                 color = White,
-                modifier = Modifier.weight(1f)
+                maxLines = 1,
+                modifier = Modifier
+                    .weight(1f)
+                    .basicMarquee()
             )
             Text(
                 textAlign = TextAlign.Center,
@@ -181,7 +188,11 @@ private fun Head(
                 fontWeight = FontWeight.Medium,
                 fontSize = 15.sp,
                 color = White,
-                modifier = Modifier.weight(1f)
+                maxLines = 1,
+                modifier = Modifier
+                    .weight(1f)
+                    .basicMarquee()
+
             )
         }
         Box(
