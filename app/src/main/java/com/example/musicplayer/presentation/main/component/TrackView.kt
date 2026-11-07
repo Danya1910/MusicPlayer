@@ -350,6 +350,10 @@ fun TrackView(
                         },
                         onLineClick = {},
                         bgColor = increasedBgColor,
+                        isPlaying = isPlaying,
+                        onSeekFinished = { ms ->
+                            onSeekTo(ms)
+                        },
                     )
                 }
             }
