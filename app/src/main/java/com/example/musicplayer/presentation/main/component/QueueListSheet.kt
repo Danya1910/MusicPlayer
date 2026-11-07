@@ -167,6 +167,11 @@ fun QueueListSheet(
                 }
             }
 
+
+            item {
+                Spacer(modifier = Modifier.height(5.dp))
+            }
+
             if (!upcomingTracks.isEmpty()) {
                 itemsIndexed(
                     items = visibleQueue,
@@ -185,9 +190,10 @@ fun QueueListSheet(
                                 positionalThreshold = { distance -> distance * 0.5f },
                                 velocityThreshold = { with(density) { 100.dp.toPx() } },
                                 snapAnimationSpec = tween(durationMillis = 250),
-                                decayAnimationSpec = androidx.compose.animation.core.Animatable(0f).run {
-                                    androidx.compose.animation.core.exponentialDecay()
-                                }
+                                decayAnimationSpec = androidx.compose.animation.core.Animatable(0f)
+                                    .run {
+                                        androidx.compose.animation.core.exponentialDecay()
+                                    }
                             )
                         }.apply {
                             updateAnchors(
@@ -216,7 +222,10 @@ fun QueueListSheet(
                                 .fillMaxWidth()
                                 .height(58.dp)
                                 .animateItem()
-                                .anchoredDraggable(state = dragState, orientation = Orientation.Horizontal)
+                                .anchoredDraggable(
+                                    state = dragState,
+                                    orientation = Orientation.Horizontal
+                                )
                         ) {
                             val swipeWidthPx = (-dragState.offset).coerceAtLeast(0f)
                             val swipeWidthDp = with(density) { swipeWidthPx.toDp() }
@@ -228,11 +237,15 @@ fun QueueListSheet(
                                     .fillMaxHeight()
                                     .background(
                                         color = Color(0xFFFF0000),
-                                        shape = RoundedCornerShape(topEnd = 12.dp, bottomEnd = 12.dp)
+                                        shape = RoundedCornerShape(
+                                            topEnd = 12.dp,
+                                            bottomEnd = 12.dp
+                                        )
                                     )
                                     .clickable {
                                         val fromList = localFullQueue.toMutableList()
-                                        val actualGlobalIndex = fromList.indexOfFirst { it.id == item.id }
+                                        val actualGlobalIndex =
+                                            fromList.indexOfFirst { it.id == item.id }
                                         if (actualGlobalIndex != -1) {
                                             fromList.removeAt(actualGlobalIndex)
                                             localFullQueue = fromList
@@ -256,10 +269,13 @@ fun QueueListSheet(
                                     .fillMaxSize()
                                     .offset { IntOffset(dragState.offset.roundToInt(), 0) }
                                     .graphicsLayer {
-                                        val currentTrackIndex = localFullQueue.indexOfFirst { it.id == item.id }
-                                        val isCurrentDraggingItem = draggingIndex == currentTrackIndex
+                                        val currentTrackIndex =
+                                            localFullQueue.indexOfFirst { it.id == item.id }
+                                        val isCurrentDraggingItem =
+                                            draggingIndex == currentTrackIndex
 
-                                        translationY = if (isCurrentDraggingItem) itemTranslationY else 0f
+                                        translationY =
+                                            if (isCurrentDraggingItem) itemTranslationY else 0f
                                         scaleX = if (isCurrentDraggingItem) 1.02f else 1f
                                         scaleY = if (isCurrentDraggingItem) 1.02f else 1f
                                         shadowElevation = if (isCurrentDraggingItem) 15f else 0f
@@ -271,18 +287,25 @@ fun QueueListSheet(
                                     dragHandleModifier = Modifier.pointerInput(item.id) {
                                         detectDragGesturesAfterLongPress(
                                             onDragStart = {
-                                                draggingIndex = localFullQueue.indexOfFirst { it.id == item.id }
+                                                draggingIndex =
+                                                    localFullQueue.indexOfFirst { it.id == item.id }
                                                 itemTranslationY = 0f
                                             },
                                             onDragEnd = {
                                                 if (draggingIndex != -1) {
-                                                    val indexOffset = (itemTranslationY / itemHeightPx).roundToInt()
+                                                    val indexOffset =
+                                                        (itemTranslationY / itemHeightPx).roundToInt()
                                                     val targetIndex = (draggingIndex + indexOffset)
-                                                        .coerceIn(currentPlayingIndex + 1, localFullQueue.lastIndex)
+                                                        .coerceIn(
+                                                            currentPlayingIndex + 1,
+                                                            localFullQueue.lastIndex
+                                                        )
 
                                                     if (targetIndex != draggingIndex) {
-                                                        val fromList = localFullQueue.toMutableList()
-                                                        val movedItem = fromList.removeAt(draggingIndex)
+                                                        val fromList =
+                                                            localFullQueue.toMutableList()
+                                                        val movedItem =
+                                                            fromList.removeAt(draggingIndex)
                                                         fromList.add(targetIndex, movedItem)
                                                         localFullQueue = fromList
                                                         onMoveTrack(draggingIndex, targetIndex)
