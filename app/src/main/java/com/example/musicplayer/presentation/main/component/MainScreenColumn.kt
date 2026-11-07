@@ -1,6 +1,7 @@
 package com.example.musicplayer.presentation.main.component
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,7 +31,7 @@ fun MainScreenColumn(
 ) {
 
     LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(5.dp)
+        verticalArrangement = Arrangement.spacedBy(5.dp),
     ) {
 
         item {
@@ -85,6 +86,13 @@ fun MainScreenColumn(
                     onDownloadClick(track)
                 }
             )
+        }
+        item {
+            if(playerState.currentTrack != null) {
+                Box(
+                    modifier = Modifier.height(30.dp)
+                )
+            }
         }
     }
 }
