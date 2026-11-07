@@ -129,7 +129,7 @@ fun QueueListSheet(
             .padding(bottom = 16.dp)
     ) {
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(5.dp),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 12.dp)
