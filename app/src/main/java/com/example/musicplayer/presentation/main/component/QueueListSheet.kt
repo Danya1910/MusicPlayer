@@ -96,6 +96,11 @@ fun QueueListSheet(
 
     val itemHeightPx = remember(density) { with(density) { 58.dp.toPx() } }
 
+    val visibleQueue = remember(localFullQueue, currentPlayingIndex) {
+        localFullQueue.withIndex()
+            .filter { (index, _) -> index > currentPlayingIndex }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -149,7 +154,7 @@ fun QueueListSheet(
             }
 
             item {
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(5.dp))
             }
 
             item {
@@ -162,15 +167,13 @@ fun QueueListSheet(
                 }
             }
 
-            item {
-                Spacer(modifier = Modifier.height(15.dp))
-            }
-
             if (!upcomingTracks.isEmpty()) {
                 itemsIndexed(
-                    items = localFullQueue,
-                    key = { _, item -> item.id }
-                ) { globalIndex, item ->
+                    items = visibleQueue,
+                    key = { _, item -> item.value.id }
+                ) { _, indexedItem ->
+                    val globalIndex = indexedItem.index
+                    val item = indexedItem.value
 
                     if (globalIndex > currentPlayingIndex) {
 
