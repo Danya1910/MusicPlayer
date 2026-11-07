@@ -165,6 +165,7 @@ fun LyricsFullScreen(
             },
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(horizontal = 20.dp)
         )
         Spacer(modifier = Modifier.height(5.dp))
         PlayButton(
