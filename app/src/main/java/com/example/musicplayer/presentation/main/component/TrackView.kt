@@ -262,7 +262,7 @@ fun TrackView(
                 }
             )
             Spacer(modifier = Modifier.height(10.dp))
-            if(lyrics != null) {
+            if (lyrics != null) {
                 LyricsButton(
                     onClick = {
                         isLyricsVisible = true
@@ -346,7 +346,7 @@ fun TrackView(
                             isLyricsVisible = false
                         },
                         onStartStopClick = {
-
+                            onPauseClick()
                         },
                         onLineClick = {},
                         bgColor = increasedBgColor,
