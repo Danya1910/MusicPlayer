@@ -118,7 +118,7 @@ fun TrackView(
     lyrics: Lyrics?,
 ) {
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(track) {
         getLyrics()
     }
 
