@@ -177,7 +177,6 @@ fun TrackView(
                     horizontal = 24.dp
                 )
                 .statusBarsPadding()
-                .navigationBarsPadding()
                 .padding(top = 10.dp)
         ) {
             PlayerHead(
@@ -190,18 +189,21 @@ fun TrackView(
                 },
             )
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            TrackImage(
-                url = track.imageUrl,
-                onBitmapLoaded = { bitmap ->
-                    onBitmapLoaded(bitmap)
-                },
-            )
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .weight(1f)
+            ) {
+                TrackImage(
+                    url = track.imageUrl,
+                    onBitmapLoaded = { bitmap ->
+                        onBitmapLoaded(bitmap)
+                    },
+                )
+            }
 
             Box(
                 modifier = Modifier
-                    .weight(1f)
                     .padding(vertical = 7.dp)
             ) {
                 lyrics?.let {
@@ -929,8 +931,11 @@ private fun LyricsButton(
             }
             .padding(
                 horizontal = 18.dp,
-                vertical = 8.dp,
             )
+            .padding(
+                top = 8.dp
+            )
+            .navigationBarsPadding()
     ) {
         Text(
             text = "Lyrics preview",
