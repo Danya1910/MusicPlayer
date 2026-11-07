@@ -145,9 +145,11 @@ fun TrackView(
 
     var showQueue by remember { mutableStateOf(false) }
     var isTrackInfoVisible by remember { mutableStateOf(false) }
+    var isLyricsVisible by remember { mutableStateOf(false) }
 
 
     val trackInfoSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val lyricsSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = false
     )
@@ -260,12 +262,14 @@ fun TrackView(
                 }
             )
             Spacer(modifier = Modifier.height(10.dp))
-            LyricsButton(
-                onClick = {
-
-                },
-                bgColor = increasedBgColor,
-            )
+            if(lyrics != null) {
+                LyricsButton(
+                    onClick = {
+                        isLyricsVisible = true
+                    },
+                    bgColor = increasedBgColor,
+                )
+            }
         }
         if (showQueue || isTrackInfoVisible) {
             Box(
@@ -318,6 +322,40 @@ fun TrackView(
                 }
             }
         }
+
+        if (isLyricsVisible) {
+
+            ModalBottomSheet(
+                onDismissRequest = { isLyricsVisible = false },
+                sheetState = lyricsSheetState,
+                containerColor = Color.Transparent,
+                dragHandle = null, // добавить
+                scrimColor = Color.Transparent,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+
+                lyrics?.let {
+                    LyricsFullScreen(
+                        lyrics = lyrics.lines,
+                        title = track.title,
+                        artist = track.artist,
+                        currentPosition = playerState.currentPosition,
+                        duration = track.duration,
+                        onCancelClick = {
+                            isLyricsVisible = false
+                        },
+                        onStartStopClick = {
+
+                        },
+                        onLineClick = {},
+                        bgColor = increasedBgColor,
+                    )
+                }
+            }
+        }
+
+
     }
 
 
@@ -926,7 +964,7 @@ private fun LyricsButton(
             .background(
                 color = bgColor,
             )
-            .clickable{
+            .clickable {
                 onClick()
             }
             .padding(
