@@ -15,9 +15,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
@@ -35,7 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusModifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -50,6 +52,7 @@ import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.LyricLine
 import com.example.musicplayer.presentation.main.util.formatDuration
 import com.example.musicplayer.ui.theme.Black
+import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.White
 
@@ -61,6 +64,7 @@ fun LyricsFullScreen(
     artist: String,
     currentPosition: Long,
     duration: Long,
+    isPlaying: Boolean,
     onCancelClick: () -> Unit,
     onStartStopClick: () -> Unit,
     onLineClick: (Long) -> Unit,
@@ -156,14 +160,17 @@ fun LyricsFullScreen(
         PlayerSlider(
             currentPosition = currentPosition,
             duration = duration,
-            onSeekFinished = { time ->
-                onSeekFinished(time)
+            onSeekFinished = { ms ->
+                onSeekFinished(ms)
             },
             modifier = Modifier
                 .fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(5.dp))
-
+        PlayButton(
+            onStartStopClick = onStartStopClick,
+            isPlaying = isPlaying,
+        )
         Spacer(modifier = Modifier.height(40.dp))
     }
 
@@ -364,6 +371,41 @@ private fun PlayerSlider(
 }
 
 @Composable
-private fun PlayButton() {
+private fun PlayButton(
+    onStartStopClick: () -> Unit,
+    isPlaying: Boolean,
+) {
 
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(67.dp)
+                .clip(
+                    shape = CircleShape
+                )
+                .background(
+                    color = White
+                )
+                .clickable {
+                    onStartStopClick()
+                }
+        ) {
+            Icon(
+                painter = painterResource(
+                    if (isPlaying) R.drawable.ic_pause
+                    else R.drawable.ic_play
+                ),
+                contentDescription = null,
+                tint = DeepBlack,
+                modifier = Modifier
+                    .width(21.dp)
+                    .height(26.dp)
+            )
+        }
+    }
 }
