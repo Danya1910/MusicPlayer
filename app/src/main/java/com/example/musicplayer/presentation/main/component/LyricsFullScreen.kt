@@ -1,5 +1,6 @@
 package com.example.musicplayer.presentation.main.component
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,11 +18,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,16 +35,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusModifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.LyricLine
+import com.example.musicplayer.presentation.main.util.formatDuration
 import com.example.musicplayer.ui.theme.Black
+import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.White
 
 
@@ -51,6 +64,7 @@ fun LyricsFullScreen(
     onCancelClick: () -> Unit,
     onStartStopClick: () -> Unit,
     onLineClick: (Long) -> Unit,
+    onSeekFinished: (Long) -> Unit,
     bgColor: Color,
 ) {
 
@@ -94,7 +108,7 @@ fun LyricsFullScreen(
         }
     }
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(
@@ -110,7 +124,7 @@ fun LyricsFullScreen(
             state = listState,
             verticalArrangement = Arrangement.spacedBy(20.dp),
             modifier = Modifier
-                .fillMaxSize()
+                .weight(1f)
                 .padding(
                     top = 50.dp
                 )
@@ -138,6 +152,19 @@ fun LyricsFullScreen(
                 )
             }
         }
+        Spacer(modifier = Modifier.height(50.dp))
+        PlayerSlider(
+            currentPosition = currentPosition,
+            duration = duration,
+            onSeekFinished = { time ->
+                onSeekFinished(time)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(5.dp))
+
+        Spacer(modifier = Modifier.height(40.dp))
     }
 
 }
@@ -200,5 +227,143 @@ private fun Head(
                 .size(21.dp)
         )
     }
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PlayerSlider(
+    currentPosition: Long,
+    duration: Long,
+    onSeekFinished: (Long) -> Unit,
+    modifier: Modifier,
+) {
+
+    var showTotalDuration by remember { mutableStateOf(true) }
+
+
+    val totalDurationSeconds = (duration / 1000).coerceAtLeast(0)
+    val currentPosSeconds = (currentPosition / 1000).coerceAtLeast(0)
+
+    var sliderPosition by remember { mutableFloatStateOf(0f) }
+    var isUserDragging by remember { mutableStateOf(false) }
+
+    LaunchedEffect(currentPosSeconds, isUserDragging) {
+        if (!isUserDragging) {
+            sliderPosition = currentPosSeconds.toFloat()
+        }
+    }
+
+    val sliderColors = SliderDefaults.colors(
+        thumbColor = Color.White,
+        activeTrackColor = White,
+        inactiveTrackColor = Gray
+    )
+
+    Column(
+        modifier = modifier
+    ) {
+        Slider(
+            value = sliderPosition,
+            onValueChange = { newValue ->
+                isUserDragging = true
+                sliderPosition = newValue
+            },
+            onValueChangeFinished = {
+                isUserDragging = false
+                onSeekFinished(sliderPosition.toLong() * 1000L)
+            },
+            valueRange = 0f..if (totalDurationSeconds > 0) totalDurationSeconds.toFloat() else 1f,
+            colors = sliderColors,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(16.dp),
+            thumb = {
+                if (totalDurationSeconds > 0) {
+                    SliderDefaults.Thumb(
+                        interactionSource = remember { MutableInteractionSource() },
+                        colors = sliderColors,
+                        modifier = Modifier
+                            .padding(top = 1.5.dp)
+                            .size(12.dp)
+                            .minimumInteractiveComponentSize()
+                    )
+                }
+            },
+            track = { sliderState ->
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    val progress = (sliderState.value - sliderState.valueRange.start) /
+                            (sliderState.valueRange.endInclusive - sliderState.valueRange.start)
+
+                    val width = size.width
+                    val height = size.height
+
+                    val strokeWidthPx = 4.dp.toPx()
+
+                    val progressX = width * progress
+                    val centerY = height / 2
+
+                    drawLine(
+                        color = sliderColors.inactiveTrackColor,
+                        start = Offset(0f, centerY),
+                        end = Offset(width, centerY),
+                        strokeWidth = strokeWidthPx,
+                        cap = StrokeCap.Round
+                    )
+
+                    drawLine(
+                        color = sliderColors.activeTrackColor,
+                        start = Offset(0f, centerY),
+                        end = Offset(progressX, centerY),
+                        strokeWidth = strokeWidthPx,
+                        cap = StrokeCap.Round
+                    )
+                }
+            }
+        )
+        Spacer(modifier = Modifier.height(5.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Text(
+                text = formatDuration(ms = currentPosition),
+                fontWeight = FontWeight.Medium,
+                fontSize = 10.sp,
+                color = Gray,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = if (showTotalDuration)
+                    formatDuration(ms = duration)
+                else {
+                    val remainingTime = duration - currentPosition
+                    "-${formatDuration(ms = remainingTime)}"
+                },
+                fontWeight = FontWeight.Medium,
+                fontSize = 10.sp,
+                color = Gray,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        showTotalDuration = !showTotalDuration
+                    }
+            )
+        }
+    }
+}
+
+@Composable
+private fun PlayButton() {
 
 }
