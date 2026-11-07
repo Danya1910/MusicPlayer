@@ -80,6 +80,7 @@ import com.example.musicplayer.domain.model.DownloadProgress
 import com.example.musicplayer.domain.model.Lyrics
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.presentation.main.util.formatDuration
+import com.example.musicplayer.presentation.main.util.increaseSaturation
 import com.example.musicplayer.presentation.player.state.PlayerUiState
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
@@ -132,6 +133,12 @@ fun TrackView(
             playerState.bgColor,
             DeepBlack,
         )
+    )
+
+    val increasedBgColor = playerState.bgColor.increaseSaturation(
+        saturationFactor = 1.4f,
+        valueFactor = 1.5f,
+        minValue = 0.25f
     )
 
     val hazeState = remember { HazeState() }
@@ -192,18 +199,18 @@ fun TrackView(
                 },
             )
 
-           Box(
-               modifier = Modifier
-                   .weight(1f)
-                   .padding(vertical = 7.dp)
-           ) {
-               lyrics?.let {
-                   LyricsLinesRow(
-                       lyrics = lyrics.lines,
-                       currentPosition = playerState.currentPosition,
-                   )
-               }
-           }
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(vertical = 7.dp)
+            ) {
+                lyrics?.let {
+                    LyricsLinesRow(
+                        lyrics = lyrics.lines,
+                        currentPosition = playerState.currentPosition,
+                    )
+                }
+            }
 
             TrackInfoAndHeart(
                 trackId = track.id,
@@ -250,7 +257,13 @@ fun TrackView(
                     showQueue = true
                 }
             )
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(10.dp))
+            LyricsButton(
+                onClick = {
+
+                },
+                bgColor = increasedBgColor,
+            )
         }
         if (showQueue || isTrackInfoVisible) {
             Box(
@@ -892,6 +905,38 @@ private fun TrackUtilityBar(
                 .clickable {
                     onQueueClick()
                 }
+        )
+    }
+}
+
+
+@Composable
+private fun LyricsButton(
+    onClick: () -> Unit,
+    bgColor: Color,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(
+                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+            )
+            .background(
+                color = bgColor,
+            )
+            .clickable{
+                onClick()
+            }
+            .padding(
+                horizontal = 18.dp,
+                vertical = 8.dp,
+            )
+    ) {
+        Text(
+            text = "Lyrics preview",
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 22.sp,
+            color = White,
         )
     }
 }
