@@ -328,7 +328,7 @@ fun TrackView(
             ModalBottomSheet(
                 onDismissRequest = { isLyricsVisible = false },
                 sheetState = lyricsSheetState,
-                containerColor = Color.Transparent,
+                containerColor = increasedBgColor,
                 dragHandle = null, // добавить
                 scrimColor = Color.Transparent,
                 modifier = Modifier
