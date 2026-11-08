@@ -2,6 +2,7 @@ package com.example.musicplayer.presentation.main
 
 import android.graphics.Bitmap
 import android.util.Log
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextDecoration.Companion.combine
 import androidx.lifecycle.ViewModel
@@ -18,6 +19,8 @@ import com.example.musicplayer.domain.repository.TrackRepository
 import com.example.musicplayer.domain.repository.UserRepository
 import com.example.musicplayer.presentation.main.state.MainUiState
 import com.example.musicplayer.presentation.main.util.PlaylistUi
+import com.example.musicplayer.presentation.main.util.ToastData
+import com.example.musicplayer.presentation.main.util.ToastType
 import com.example.musicplayer.presentation.main.util.getTracksTotalTime
 import com.example.musicplayer.presentation.player.state.PlayerUiState
 import com.example.musicplayer.ui.theme.DeepBlack
@@ -51,6 +54,9 @@ class MainViewModel @Inject constructor(
 ) : ViewModel() {
 
     val downloads: StateFlow<Map<String, DownloadProgress>> = fileRepository.downloads
+
+    private val _toast = MutableStateFlow<ToastData?>(null)
+    val toast = _toast.asStateFlow()
 
     private val _lyrics = MutableStateFlow<Lyrics?>(null)
     val lyrics = _lyrics.asStateFlow()
@@ -433,9 +439,22 @@ class MainViewModel @Inject constructor(
                 trackRepository.likeTrack(
                     trackId = trackId,
                 )
+                _toast.value = ToastData(
+                    title = "Favorites",
+                    message = "Added to Liked Songs",
+                    type = ToastType.SUCCESS,
+                )
+                Log.d("Like", "Liked success")
             } catch (e: Exception) {
                 Log.e("TrackVM", e.toString())
                 musicRepository.updateFavoriteStatus(trackId, isFavorite = false)
+                _toast.value = ToastData(
+                    title = "Favorites",
+                    message = "Fail Adding to Liked Songs",
+                    type = ToastType.ERROR,
+                )
+                Log.d("Like", "Liked exception")
+
             }
         }
     }
@@ -484,5 +503,9 @@ class MainViewModel @Inject constructor(
         }
     }
 
+
+    fun resetToast() {
+        _toast.value = null
+    }
 
 }
