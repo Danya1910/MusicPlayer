@@ -241,6 +241,11 @@ fun MainRootPagerScreen(
                             currentTrackForAdd = currentInfoToShow!!
                             isTrackInfoVisible = false
                             isPlayListSelectionVisible = true
+                        },
+                        addToFavorites = {
+                            currentTrackForAdd = currentInfoToShow!!
+                            isTrackInfoVisible = false
+                            isPlayListSelectionVisible = true
                         }
                     )
                 }
