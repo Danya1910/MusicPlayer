@@ -348,7 +348,9 @@ fun TrackView(
                         onStartStopClick = {
                             onPauseClick()
                         },
-                        onLineClick = {},
+                        onLineClick = { startMs ->
+                            onSeekTo(startMs)
+                        },
                         bgColor = increasedBgColor,
                         isPlaying = isPlaying,
                         onSeekFinished = { ms ->
