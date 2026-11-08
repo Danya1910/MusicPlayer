@@ -334,7 +334,41 @@ fun QueueListSheet(
 
             }
         }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(70.dp)
+        ) {
+            BottomActionButton(
+                title = "Shuffle",
+                icon = R.drawable.ic_random,
+                onClick = {
 
+                },
+                modifier = Modifier
+                    .weight(1f)
+            )
+            BottomActionButton(
+                title = "Repeat",
+                icon = R.drawable.ic_random,
+                onClick = {
+
+                },
+                modifier = Modifier
+                    .weight(1f)
+            )
+            BottomActionButton(
+                title = "Timer",
+                icon = R.drawable.ic_random,
+                onClick = {
+
+                },
+                modifier = Modifier
+                    .weight(1f)
+            )
+        }
     }
 }
 
