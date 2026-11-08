@@ -1,10 +1,13 @@
 package com.example.musicplayer.presentation.main.component
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
@@ -15,7 +18,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -44,25 +46,33 @@ fun ToastHost(
     toast: ToastData?,
     onDismiss: () -> Unit,
     onChangeClick: () -> Unit,
+    modifier: Modifier,
 ) {
 
     AnimatedVisibility(
         visible = toast != null,
-        enter = slideInVertically(
-            initialOffsetY = { -it }
-        ) + fadeIn(),
-        exit = slideOutVertically(
-            targetOffsetY = { -it }
-        ) + fadeOut(),
-        modifier = Modifier
+        enter = scaleIn(
+            initialScale = 0.85f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMedium
+            )
+        ) + fadeIn(
+            animationSpec = tween(250)
+        ),
+        exit = scaleOut(
+            targetScale = 0.85f,
+            animationSpec = tween(200)
+        ) + fadeOut(
+            animationSpec = tween(200)
+        ),
+        modifier = modifier
             .fillMaxWidth()
-            .statusBarsPadding()
-            .padding(horizontal = 16.dp)
     ) {
         toast?.let { data ->
             ToastContent(
                 toastData = data,
-                onChangeClick = onChangeClick,
+                onChangeClick = onChangeClick
             )
         }
     }
@@ -87,9 +97,6 @@ private fun ToastContent(
         modifier = Modifier
             .fillMaxWidth()
             .height(60.dp)
-            .padding(
-                horizontal = 6.dp
-            )
             .clip(
                 shape = RoundedCornerShape(12.dp)
             )
