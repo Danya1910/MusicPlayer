@@ -317,6 +317,10 @@ fun TrackView(
                         addToPlayList = {
                             addToPlaylist(track)
                             isTrackInfoVisible = false
+                        },
+                        addToFavorites = {
+                            isTrackInfoVisible = false
+                            onHeartClick()
                         }
                     )
                 }

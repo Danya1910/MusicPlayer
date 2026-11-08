@@ -245,7 +245,9 @@ fun MainRootPagerScreen(
                         addToFavorites = {
                             currentTrackForAdd = currentInfoToShow!!
                             isTrackInfoVisible = false
-                            isPlayListSelectionVisible = true
+                            mainViewModel.toggleFavorite(
+                                track = currentInfoToShow!!
+                            )
                         }
                     )
                 }
