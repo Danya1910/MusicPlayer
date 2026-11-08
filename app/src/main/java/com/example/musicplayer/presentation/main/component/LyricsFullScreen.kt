@@ -8,6 +8,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,9 +39,14 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
@@ -111,69 +117,90 @@ fun LyricsFullScreen(
         }
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 color = bgColor,
             )
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            LazyColumn(
+                state = listState,
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+                contentPadding = PaddingValues(top = 100.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .onSizeChanged { viewportHeightPx = it.height }
+                    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                    .drawWithContent {
+                        drawContent()
+                        val headPx = 80.dp.toPx()
+                        val fadeEndPx = headPx + 60.dp.toPx()
+                        drawRect(
+                            brush = Brush.verticalGradient(
+                                0f to Color.Transparent,
+                                (headPx / size.height) to Color.Transparent,
+                                (fadeEndPx / size.height) to Color.Black,
+                                ((size.height - 80.dp.toPx()) / size.height) to Color.Black,
+                                1f to Color.Transparent,
+                            ),
+                            blendMode = BlendMode.DstIn
+                        )
+                    }
+            ) {
+
+                items(
+                    items = lyrics,
+                    key = { it.startTime }
+                ) { line ->
+                    val isPlayed = currentPosition >= line.startTime
+                    Text(
+                        text = line.line,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 26.sp,
+                        color = if (isPlayed) White else Black,
+                        modifier = Modifier
+                            .padding(horizontal = 20.dp)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                userScrolled = false
+                                onLineClick(line.startTime)
+                            }
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(50.dp))
+            PlayerSlider(
+                currentPosition = currentPosition,
+                duration = duration,
+                onSeekFinished = { ms ->
+                    onSeekFinished(ms)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                bgColor = bgColor,
+            )
+            Spacer(modifier = Modifier.height(5.dp))
+            PlayButton(
+                onStartStopClick = onStartStopClick,
+                isPlaying = isPlaying,
+                color = bgColor
+            )
+            Spacer(modifier = Modifier.height(40.dp))
+        }
         Head(
             onCancelClick = onCancelClick,
             title = title,
             artist = artist,
-        )
-        LazyColumn(
-            state = listState,
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-            modifier = Modifier
-                .weight(1f)
-                .padding(
-                    top = 50.dp
-                )
-                .onSizeChanged { viewportHeightPx = it.height }
-        ) {
-            items(
-                items = lyrics,
-                key = { it.startTime }
-            ) { line ->
-                val isPlayed = currentPosition >= line.startTime
-                Text(
-                    text = line.line,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 26.sp,
-                    color = if (isPlayed) White else Black,
-                    modifier = Modifier
-                        .padding(horizontal = 20.dp)
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null
-                        ) {
-                            userScrolled = false
-                            onLineClick(line.startTime)
-                        }
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(50.dp))
-        PlayerSlider(
-            currentPosition = currentPosition,
-            duration = duration,
-            onSeekFinished = { ms ->
-                onSeekFinished(ms)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
             bgColor = bgColor,
         )
-        Spacer(modifier = Modifier.height(5.dp))
-        PlayButton(
-            onStartStopClick = onStartStopClick,
-            isPlaying = isPlaying,
-            color = bgColor
-        )
-        Spacer(modifier = Modifier.height(40.dp))
     }
 
 }
@@ -183,13 +210,27 @@ private fun Head(
     onCancelClick: () -> Unit,
     title: String,
     artist: String,
+    bgColor: Color,
 ) {
+
+    val gradient = Brush.verticalGradient(
+        colors = listOf(
+            bgColor,
+            bgColor.copy(alpha = 0.5f),
+            bgColor.copy(alpha = 0.2f),
+            bgColor.copy(alpha = 0.1f),
+        )
+    )
+
 
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
-            .height(40.dp)
+            .height(80.dp)
             .fillMaxWidth()
+            .background(
+                brush = gradient,
+            )
             .padding(horizontal = 26.dp)
     ) {
         Icon(
@@ -215,7 +256,6 @@ private fun Head(
                 color = White,
                 maxLines = 1,
                 modifier = Modifier
-                    .weight(1f)
                     .basicMarquee()
             )
             Text(
@@ -226,7 +266,6 @@ private fun Head(
                 color = White,
                 maxLines = 1,
                 modifier = Modifier
-                    .weight(1f)
                     .basicMarquee()
 
             )
