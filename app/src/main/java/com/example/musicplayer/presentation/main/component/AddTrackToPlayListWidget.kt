@@ -50,15 +50,19 @@ import coil.compose.AsyncImage
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.PlayList
 import com.example.musicplayer.domain.model.Track
+import com.example.musicplayer.presentation.main.util.PlaylistUi
 import com.example.musicplayer.ui.theme.Black
 import com.example.musicplayer.ui.theme.DarkGray
 import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.SpotifyGreen
 import com.example.musicplayer.ui.theme.White
 
+private const val FAVORITES_ID = "favorites"
+
 @Composable
 fun AddTrackToPlayListWidget(
     playLists: List<PlayList>,
+    favoritesUi: PlaylistUi,
     currentTrackToSave: Track,
     onCancelClick: () -> Unit,
     onDoneClick: () -> Unit,
@@ -67,14 +71,27 @@ fun AddTrackToPlayListWidget(
     onRemoveFromPlayList: (String) -> Unit,
 ) {
 
-    val initialPlaylistIdsWithTrack = remember(currentTrackToSave.id) {
-        playLists.filter { it.tracks?.contains(currentTrackToSave.id) == true }
+    val actualPlayLists = remember(playLists, favoritesUi) {
+        playLists.map { pl ->
+            if (pl.id == FAVORITES_ID) favoritesUi.playlist else pl
+        }
+    }
+
+    val initialPlaylistIdsWithTrack = remember(currentTrackToSave.id, actualPlayLists) {
+        actualPlayLists
+            .filter { it.tracks?.contains(currentTrackToSave.id) == true }
             .mapNotNull { it.id }
     }
 
     val wasTrackInAnyPlaylist = initialPlaylistIdsWithTrack.isNotEmpty()
 
-    val bottomPlaylists = playLists.filter { !initialPlaylistIdsWithTrack.contains(it.id) }
+    val bottomPlaylists = remember(actualPlayLists, initialPlaylistIdsWithTrack) {
+        actualPlayLists.filter { !initialPlaylistIdsWithTrack.contains(it.id) }
+    }
+
+    val topPlaylists = remember(actualPlayLists, initialPlaylistIdsWithTrack) {
+        actualPlayLists.filter { initialPlaylistIdsWithTrack.contains(it.id) }
+    }
 
     Box(
         modifier = Modifier
@@ -104,23 +121,20 @@ fun AddTrackToPlayListWidget(
                 onCreateClick = onCreateClick,
             )
             if (wasTrackInAnyPlaylist) {
-                val topPlaylists = playLists.filter { initialPlaylistIdsWithTrack.contains(it.id) }
-
                 LazyColumn(modifier = Modifier.padding(horizontal = 20.dp)) {
-                    items(topPlaylists) { playList ->
+                    items(
+                        items = topPlaylists,
+                        key = { it.id ?: it.name }
+                    ) { playList ->
                         PlayListItem(
                             playList = playList,
+                            currentTrackId = currentTrackToSave.id,
                             onAddInPlayListClick = {
-                                playList.id?.let {
-                                    onAddInPlayListClick(it)
-                                }
+                                playList.id?.let { onAddInPlayListClick(it) }
                             },
                             onRemoveFromPlayList = {
-                                playList.id?.let {
-                                    onRemoveFromPlayList(it)
-                                }
+                                playList.id?.let { onRemoveFromPlayList(it) }
                             },
-                            isInPlayList = playList.tracks?.contains(currentTrackToSave.id) == true,
                         )
                     }
                 }
@@ -140,24 +154,19 @@ fun AddTrackToPlayListWidget(
                     .fillMaxSize()
                     .padding(horizontal = 20.dp)
             ) {
-                items(bottomPlaylists) { playList ->
+                items(
+                    items = bottomPlaylists,
+                    key = { it.id ?: it.name }
+                ) { playList ->
                     PlayListItem(
                         playList = playList,
+                        currentTrackId = currentTrackToSave.id,
                         onAddInPlayListClick = {
-                            playList.id?.let {
-                                onAddInPlayListClick(
-                                    it
-                                )
-                            }
+                            playList.id?.let { onAddInPlayListClick(it) }
                         },
                         onRemoveFromPlayList = {
-                            playList.id?.let {
-                                onRemoveFromPlayList(
-                                    it
-                                )
-                            }
+                            playList.id?.let { onRemoveFromPlayList(it) }
                         },
-                        isInPlayList = playList.tracks?.contains(currentTrackToSave.id) == true,
                     )
                 }
             }
@@ -297,14 +306,23 @@ private fun CreatePlayList(
 @Composable
 private fun PlayListItem(
     playList: PlayList,
+    currentTrackId: String,
     onAddInPlayListClick: () -> Unit,
     onRemoveFromPlayList: () -> Unit,
-    isInPlayList: Boolean,
 ) {
 
     val songsCount = playList.tracks?.size?.toSongsString()
 
-    var isAdded by remember { mutableStateOf(isInPlayList) }
+    // Источник правды — сам playList.tracks (уже актуальный, т.к. favorites подменён).
+    val isInPlayList = playList.tracks?.contains(currentTrackId) == true
+
+    // Локальный оптимистичный стейт: нужен, чтобы галочка переключалась
+    // мгновенно, до прихода обновления из БД.
+    // Ключи (playList.id, currentTrackId, isInPlayList) гарантируют,
+    // что при обновлении playList из БД стейт синхронизируется.
+    var isAdded by remember(playList.id, currentTrackId, isInPlayList) {
+        mutableStateOf(isInPlayList)
+    }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -316,7 +334,7 @@ private fun PlayListItem(
                 isAdded = !isAdded
             }
     ) {
-        if(playList.id == "favorites") {
+        if (playList.id == FAVORITES_ID) {
             Icon(
                 painter = painterResource(R.drawable.ic_liked_songs),
                 contentDescription = null,
@@ -383,7 +401,7 @@ private fun PlayListItem(
                     else R.drawable.ic_circle_plus
                 ),
                 contentDescription = null,
-                tint = if(isAdded) Color.Unspecified else Gray,
+                tint = if (favoriteState) Color.Unspecified else Gray,
                 modifier = Modifier
                     .size(36.dp)
                     .padding(6.dp)
