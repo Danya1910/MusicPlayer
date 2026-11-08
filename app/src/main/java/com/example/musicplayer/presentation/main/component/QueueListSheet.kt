@@ -54,6 +54,7 @@ import coil.compose.AsyncImage
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.ui.theme.Black
+import com.example.musicplayer.ui.theme.DarkGray
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.SpotifyGreen
@@ -131,7 +132,8 @@ fun QueueListSheet(
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(5.dp),
             modifier = Modifier
-                .fillMaxSize()
+                .weight(1f)
+                .fillMaxWidth()
                 .padding(horizontal = 12.dp)
                 .padding(top = 10.dp)
         ) {
@@ -332,6 +334,7 @@ fun QueueListSheet(
 
             }
         }
+
     }
 }
 
@@ -473,6 +476,48 @@ private fun TrackInQueue(
                 .padding(6.dp),
         )
     }
+}
+
+@Composable
+private fun BottomActionButton(
+    title: String,
+    icon: Int,
+    onClick: () -> Unit,
+    modifier: Modifier,
+) {
+
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .height(66.dp)
+            .clip(
+                shape = RoundedCornerShape(8.dp)
+            )
+            .background(
+                color = DarkGray,
+            )
+            .clickable {
+                onClick()
+            }
+    ) {
+        Icon(
+            painter = painterResource(icon),
+            contentDescription = null,
+            tint = Gray,
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(
+            text = title,
+            fontWeight = FontWeight.Medium,
+            fontSize = 16.sp,
+            color = Gray,
+            maxLines = 1,
+            modifier = Modifier
+                .basicMarquee()
+        )
+    }
+
 }
 
 data class QueueItem(
