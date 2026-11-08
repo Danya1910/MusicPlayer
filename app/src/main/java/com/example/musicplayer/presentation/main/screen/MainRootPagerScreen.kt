@@ -22,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -377,6 +376,7 @@ fun MainRootPagerScreen(
                 currentTrackForAdd?.let {
                     AddTrackToPlayListWidget(
                         playLists = allUsersPlaylists,
+                        favoritesUi = favorites,
                         onCancelClick = {
                             isPlayListSelectionVisible = false
                             currentTrackForAdd = null
