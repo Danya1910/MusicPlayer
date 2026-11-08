@@ -1,5 +1,6 @@
 package com.example.musicplayer.presentation.main.screen
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -11,6 +12,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -33,6 +36,7 @@ import com.example.musicplayer.presentation.main.component.AddTrackToPlayListWid
 import com.example.musicplayer.presentation.main.component.BottomBarTest
 import com.example.musicplayer.presentation.main.component.NowPlayingBar
 import com.example.musicplayer.presentation.main.component.PlayListNameInput
+import com.example.musicplayer.presentation.main.component.ToastHost
 import com.example.musicplayer.presentation.main.component.TrackInfo
 import com.example.musicplayer.presentation.main.component.TrackView
 import com.example.musicplayer.presentation.navigation.TabScreen
@@ -54,6 +58,12 @@ fun MainRootPagerScreen(
     val playerState by mainViewModel.playerState.collectAsStateWithLifecycle()
     val playlists by mainViewModel.playlistsState.collectAsStateWithLifecycle()
     val favorites by mainViewModel.favoritesPlaylist.collectAsStateWithLifecycle()
+
+    val toast by mainViewModel.toast.collectAsStateWithLifecycle()
+
+    LaunchedEffect(toast) {
+        Log.d("TOAST_DEBUG", "Current toast: $toast")
+    }
 
     val lyrics by mainViewModel.lyrics.collectAsStateWithLifecycle()
 
@@ -422,6 +432,24 @@ fun MainRootPagerScreen(
                 }
             }
         }
+
+        ToastHost(
+            toast = toast,
+            onDismiss = {
+                mainViewModel.resetToast()
+            },
+            onChangeClick = {
+                isPlayListSelectionVisible = true
+            },
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp)
+                .padding(
+                    bottom = if(currentTrack != null) 150.dp else 90.dp
+                )
+                .navigationBarsPadding()
+        )
 
     }
 
