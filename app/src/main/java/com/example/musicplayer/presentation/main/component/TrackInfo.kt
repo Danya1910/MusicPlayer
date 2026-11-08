@@ -47,6 +47,7 @@ fun TrackInfo(
     hazeState: HazeState,
     playNext: () -> Unit,
     addToPlayList: () -> Unit,
+    addToFavorites: () -> Unit,
 ) {
 
     val actionsList = listOf(
@@ -63,7 +64,7 @@ fun TrackInfo(
         ActionButtonData(
             icon = R.drawable.ic_apple_logo,
             title = "Add to Liked Songs",
-            onClick = {}
+            onClick = addToFavorites,
         ),
         ActionButtonData(
             icon = R.drawable.ic_add_queue,
