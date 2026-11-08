@@ -86,6 +86,10 @@ class MainViewModel @Inject constructor(
         trackRepository.getAllTrack(),
         trackRepository.getAlbums(),
     ) { tracks, albums ->
+        Log.d(
+            "TracksDebug",
+            "Tracks emitted: ${tracks.count { it.isFavorite }}"
+        )
         MainUiState.Success(tracks = tracks, albums = albums) as MainUiState
     }
         .catch { exception ->
@@ -148,6 +152,9 @@ class MainViewModel @Inject constructor(
             }
 
             val favoriteTracks = mainUiState.tracks.filter { it.isFavorite }
+
+            Log.d("FavoritesDebug", "Favorites count: ${favoriteTracks.size}")
+
 
             val favoritesDuration = getTracksTotalTime(
                 tracks = favoriteTracks,
@@ -399,9 +406,13 @@ class MainViewModel @Inject constructor(
         playListId: String,
         trackId: String,
     ) {
+        if (playListId == FAVORITES_ID) {
+            likeTrack(trackId = trackId)
+            return
+        }
+
         viewModelScope.launch {
             try {
-
                 trackRepository.addTrackToPlayList(
                     playListId = playListId,
                     trackId = trackId,
@@ -416,6 +427,10 @@ class MainViewModel @Inject constructor(
         playListId: String,
         trackId: String,
     ) {
+        if (playListId == FAVORITES_ID) {
+            unlikeTrack(trackId = trackId)
+            return
+        }
         viewModelScope.launch {
             try {
 
