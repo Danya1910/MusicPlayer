@@ -106,7 +106,9 @@ class TrackRepositoryImpl @Inject constructor(
             e.printStackTrace()
         }
 
-        emitAll(trackDao.getAllTracksFlow().map { list -> list.map { it.toDomain() } })
+        emitAll(trackDao.getAllTracksFlow().map { list ->
+            list.map { it.toDomain() }
+        })
 
     }.flowOn(Dispatchers.IO)
 
