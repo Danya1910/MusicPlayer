@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.musicplayer.R
 import com.example.musicplayer.presentation.main.util.ToastData
+import com.example.musicplayer.presentation.main.util.ToastType
 import com.example.musicplayer.ui.theme.Black
 import com.example.musicplayer.ui.theme.SpotifyGreen
 import com.example.musicplayer.ui.theme.White
@@ -106,7 +107,10 @@ private fun ToastContent(
             .padding(horizontal = 13.dp)
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_liked_songs),
+            painter = painterResource(
+                if (toastData.type == ToastType.ERROR) R.drawable.ic_error_favorites
+                else R.drawable.ic_liked_songs
+            ),
             contentDescription = null,
             tint = Color.Unspecified,
             modifier = Modifier
