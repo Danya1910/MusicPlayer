@@ -405,7 +405,9 @@ fun TrackView(
                     hazeState = hazeState,
                     removeFromQueue = { index ->
                         removeFromQueue(index)
-                    }
+                    },
+                    repeatMode = repeatMode,
+                    onRepeatClick = onRepeatClick,
                 )
             }
         }
