@@ -365,7 +365,7 @@ fun QueueListSheet(
             )
             BottomActionButton(
                 title = "Timer",
-                icon = R.drawable.ic_random,
+                icon = R.drawable.ic_timer,
                 onClick = {
 
                 },
@@ -594,6 +594,9 @@ private fun BottomActionButton(
             painter = painterResource(icon),
             contentDescription = null,
             tint = Gray,
+            modifier = Modifier.then(
+                if (title == "Shuffle") Modifier.size(30.dp) else Modifier
+            )
         )
         Spacer(modifier = Modifier.height(3.dp))
         Text(
