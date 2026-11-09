@@ -350,14 +350,11 @@ fun QueueListSheet(
                 .fillMaxWidth()
                 .height(70.dp)
         ) {
-            BottomActionButton(
+            ShuffleButton(
                 title = "Shuffle",
-                icon = R.drawable.ic_random,
-                onClick = {
-
-                },
-                modifier = Modifier
-                    .weight(1f)
+                onClick = onShuffleClick,
+                isShuffled = isShuffled,
+                modifier = Modifier.weight(1f)
             )
             RepeatButton(
                 title = "Repeat",
@@ -600,7 +597,6 @@ private fun ShuffleButton(
             tint = color,
             modifier = Modifier
                 .size(30.dp)
-        )
         )
         Spacer(modifier = Modifier.height(3.dp))
         Text(
