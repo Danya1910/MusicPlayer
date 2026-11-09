@@ -530,7 +530,7 @@ private fun RepeatButton(
         else -> R.drawable.ic_repeat_default
     }
 
-    val repeatColor = if (repeatMode == 0) White else SpotifyGreen
+    val repeatColor = if (repeatMode == 0) Gray else SpotifyGreen
 
     Column(
         verticalArrangement = Arrangement.Center,
@@ -551,8 +551,10 @@ private fun RepeatButton(
             painter = painterResource(icon),
             contentDescription = null,
             tint = repeatColor,
+            modifier = Modifier
+                .size(30.dp)
         )
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(3.dp))
         Text(
             text = title,
             fontWeight = FontWeight.Medium,
@@ -593,7 +595,7 @@ private fun BottomActionButton(
             contentDescription = null,
             tint = Gray,
         )
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(3.dp))
         Text(
             text = title,
             fontWeight = FontWeight.Medium,
