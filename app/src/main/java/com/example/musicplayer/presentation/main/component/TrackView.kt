@@ -407,7 +407,9 @@ fun TrackView(
                         removeFromQueue(index)
                     },
                     repeatMode = repeatMode,
+                    isShuffled = isShuffled,
                     onRepeatClick = onRepeatClick,
+                    onShuffleClick = onShuffleClick,
                 )
             }
         }
