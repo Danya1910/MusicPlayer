@@ -357,7 +357,12 @@ fun QueueListSheet(
                 modifier = Modifier
                     .weight(1f)
             )
-
+            RepeatButton(
+                title = "Repeat",
+                onClick = onRepeatClick,
+                repeatMode = repeatMode,
+                modifier = Modifier.weight(1f)
+            )
             BottomActionButton(
                 title = "Timer",
                 icon = R.drawable.ic_random,
