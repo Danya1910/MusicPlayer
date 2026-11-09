@@ -83,7 +83,9 @@ fun QueueListSheet(
     onMoveTrack: (fromIndex: Int, toIndex: Int) -> Unit,
     removeFromQueue: (Int) -> Unit,
     repeatMode: Int,
+    isShuffled: Boolean,
     onRepeatClick: () -> Unit,
+    onShuffleClick: () -> Unit,
     hazeState: HazeState,
 ) {
 
@@ -565,6 +567,53 @@ private fun RepeatButton(
                 .basicMarquee()
         )
     }
+}
+
+@Composable
+private fun ShuffleButton(
+    title: String,
+    onClick: () -> Unit,
+    isShuffled: Boolean,
+    modifier: Modifier,
+) {
+
+    val color = if (isShuffled) SpotifyGreen else Gray
+
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .height(66.dp)
+            .clip(
+                shape = RoundedCornerShape(8.dp)
+            )
+            .background(
+                color = DarkGray,
+            )
+            .clickable {
+                onClick()
+            }
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_random),
+            contentDescription = null,
+            tint = color,
+            modifier = Modifier
+                .size(30.dp)
+        )
+        )
+        Spacer(modifier = Modifier.height(3.dp))
+        Text(
+            text = title,
+            fontWeight = FontWeight.Medium,
+            fontSize = 16.sp,
+            color = Gray,
+            maxLines = 1,
+            modifier = Modifier
+                .basicMarquee()
+        )
+    }
+
 }
 
 @Composable
