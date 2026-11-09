@@ -1,5 +1,7 @@
 package com.example.musicplayer.presentation.main.component
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.exponentialDecay
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -10,6 +12,7 @@ import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +26,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsEndWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
@@ -63,6 +67,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeChild
+import java.util.UUID
 import kotlin.math.roundToInt
 
 
@@ -77,6 +82,8 @@ fun QueueListSheet(
     onPlayPauseClick: () -> Unit,
     onMoveTrack: (fromIndex: Int, toIndex: Int) -> Unit,
     removeFromQueue: (Int) -> Unit,
+    repeatMode: Int,
+    onRepeatClick: () -> Unit,
     hazeState: HazeState,
 ) {
 
@@ -192,9 +199,9 @@ fun QueueListSheet(
                                 positionalThreshold = { distance -> distance * 0.5f },
                                 velocityThreshold = { with(density) { 100.dp.toPx() } },
                                 snapAnimationSpec = tween(durationMillis = 250),
-                                decayAnimationSpec = androidx.compose.animation.core.Animatable(0f)
+                                decayAnimationSpec = Animatable(0f)
                                     .run {
-                                        androidx.compose.animation.core.exponentialDecay()
+                                        exponentialDecay()
                                     }
                             )
                         }.apply {
@@ -350,15 +357,7 @@ fun QueueListSheet(
                 modifier = Modifier
                     .weight(1f)
             )
-            BottomActionButton(
-                title = "Repeat",
-                icon = R.drawable.ic_random,
-                onClick = {
 
-                },
-                modifier = Modifier
-                    .weight(1f)
-            )
             BottomActionButton(
                 title = "Timer",
                 icon = R.drawable.ic_random,
@@ -513,8 +512,52 @@ private fun TrackInQueue(
 }
 
 @Composable
-private fun RepeatButton() {
+private fun RepeatButton(
+    title: String,
+    onClick: () -> Unit,
+    repeatMode: Int,
+    modifier: Modifier,
+) {
 
+    val icon = when (repeatMode) {
+        1 -> R.drawable.ic_repeat_track
+        2 -> R.drawable.ic_repeat_list
+        else -> R.drawable.ic_repeat_default
+    }
+
+    val repeatColor = if (repeatMode == 0) White else SpotifyGreen
+
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .height(66.dp)
+            .clip(
+                shape = RoundedCornerShape(8.dp)
+            )
+            .background(
+                color = DarkGray,
+            )
+            .clickable {
+                onClick()
+            }
+    ) {
+        Icon(
+            painter = painterResource(icon),
+            contentDescription = null,
+            tint = repeatColor,
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(
+            text = title,
+            fontWeight = FontWeight.Medium,
+            fontSize = 16.sp,
+            color = Gray,
+            maxLines = 1,
+            modifier = Modifier
+                .basicMarquee()
+        )
+    }
 }
 
 @Composable
@@ -560,6 +603,6 @@ private fun BottomActionButton(
 }
 
 data class QueueItem(
-    val id: String = java.util.UUID.randomUUID().toString(), // Уникальный UUID строчки
+    val id: String = UUID.randomUUID().toString(), // Уникальный UUID строчки
     val track: Track
 )
