@@ -17,6 +17,8 @@ interface MusicRepository {
 
     val repeatMode: StateFlow<Int>
 
+    val sleepTimerRemainingSec: StateFlow<Long?>
+
     fun playTrack(track: Track)
 
     fun playTrackWithQueue(track: Track, queue: List<Track>)
@@ -40,5 +42,11 @@ interface MusicRepository {
     fun removeTrackFromQueue(index: Int)
 
     fun updateFavoriteStatus(trackId: String, isFavorite: Boolean)
+
+    fun setSleepTimer(minutes: Int)
+
+    fun setSleepTimerToTrackEnd()
+
+    fun cancelSleepTimer()
 
 }
