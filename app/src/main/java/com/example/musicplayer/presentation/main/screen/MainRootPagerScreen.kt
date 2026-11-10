@@ -35,6 +35,7 @@ import com.example.musicplayer.presentation.main.component.AddTrackToPlayListWid
 import com.example.musicplayer.presentation.main.component.BottomBarTest
 import com.example.musicplayer.presentation.main.component.NowPlayingBar
 import com.example.musicplayer.presentation.main.component.PlayListNameInput
+import com.example.musicplayer.presentation.main.component.SleepTimerWidget
 import com.example.musicplayer.presentation.main.component.ToastHost
 import com.example.musicplayer.presentation.main.component.TrackInfo
 import com.example.musicplayer.presentation.main.component.TrackView
@@ -93,12 +94,14 @@ fun MainRootPagerScreen(
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val trackInfoSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val timerSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val playListSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val nameInputSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
 
     var isTrackViewVisible by remember { mutableStateOf(false) }
     var isTrackInfoVisible by remember { mutableStateOf(false) }
+    var showTimer by remember { mutableStateOf(false) }
     var isPlayListSelectionVisible by remember { mutableStateOf(false) }
 
     var currentInfoToShow by remember { mutableStateOf<Track?>(null) }
@@ -257,9 +260,35 @@ fun MainRootPagerScreen(
                             mainViewModel.toggleFavorite(
                                 track = currentInfoToShow!!
                             )
+                        },
+                        setTimer = {
+                            showTimer = true
                         }
                     )
                 }
+            }
+        }
+
+        if (showTimer) {
+
+            ModalBottomSheet(
+                onDismissRequest = { showTimer = false },
+                sheetState = timerSheetState,
+                containerColor = Color.Transparent,
+                dragHandle = null,
+                scrimColor = Color.Transparent,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                SleepTimerWidget(
+                    onTimeClick = { minutes ->
+                        mainViewModel.setSleepTime(minutes)
+                    },
+                    onEndClick = {
+                        mainViewModel.stopOnTrackEnd()
+                    },
+                    hazeState = hazeState,
+                )
             }
         }
 
@@ -320,7 +349,7 @@ fun MainRootPagerScreen(
                         onRepeatClick = {
                             mainViewModel.toggleRepeatMode()
                         },
-                        playNext = {track ->
+                        playNext = { track ->
                             mainViewModel.playNext(
                                 track = track
                             )
@@ -357,6 +386,12 @@ fun MainRootPagerScreen(
                             )
                         },
                         lyrics = lyrics,
+                        setSleepTimer = { minutes ->
+                            mainViewModel.setSleepTime(minutes)
+                        },
+                        endAtTrackEnd = {
+                            mainViewModel.stopOnTrackEnd()
+                        }
                     )
 
                 }
@@ -446,7 +481,7 @@ fun MainRootPagerScreen(
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
                 .padding(
-                    bottom = if(currentTrack != null) 150.dp else 90.dp
+                    bottom = if (currentTrack != null) 150.dp else 90.dp
                 )
                 .navigationBarsPadding()
         )
