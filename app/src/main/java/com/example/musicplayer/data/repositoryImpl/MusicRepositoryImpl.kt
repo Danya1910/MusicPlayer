@@ -18,6 +18,7 @@ import com.google.common.util.concurrent.MoreExecutors
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,6 +42,13 @@ class MusicRepositoryImpl @Inject constructor(
 ) : MusicRepository {
 
     private val repositoryScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+
+    private val _sleepTimerRemainingSec = MutableStateFlow<Long?>(null)
+    override val sleepTimerRemainingSec = _sleepTimerRemainingSec.asStateFlow()
+
+    private var sleepTimerJob: Job? = null
+
+    private var stopAtTrackEnd = false
 
     private var mediaController: MediaController? = null
 
@@ -348,6 +356,45 @@ class MusicRepositoryImpl @Inject constructor(
         repositoryScope.launch(Dispatchers.IO) {
             trackDao.updateFavoriteStatus(trackId, isFavorite)
         }
+    }
+
+    override fun setSleepTimer(minutes: Int) {
+        cancelSleepTimer()
+        stopAtTrackEnd = false
+        val totalMs = minutes * 60_000L
+
+        _sleepTimerRemainingSec.value = totalMs / 1000
+
+        sleepTimerJob = repositoryScope.launch {
+            val start = System.currentTimeMillis()
+            while (true) {
+                val elapsed = System.currentTimeMillis() - start
+                val remaining = totalMs - elapsed
+                if(remaining <= 0L) {
+                    _sleepTimerRemainingSec.value = null
+                    withContext(Dispatchers.Main) {
+                        mediaController?.pause()
+                    }
+                    break
+                }
+                _sleepTimerRemainingSec.value = remaining / 1000
+                delay(1000)
+            }
+        }
+
+    }
+
+    override fun setSleepTimerToTrackEnd() {
+        cancelSleepTimer()
+        stopAtTrackEnd = true
+        _sleepTimerRemainingSec.value = null
+    }
+
+    override fun cancelSleepTimer() {
+        sleepTimerJob?.cancel()
+        sleepTimerJob = null
+        stopAtTrackEnd = false
+        _sleepTimerRemainingSec.value = null
     }
 
 //    override fun updateFavoriteStatus(trackId: String, isFavorite: Boolean) {
