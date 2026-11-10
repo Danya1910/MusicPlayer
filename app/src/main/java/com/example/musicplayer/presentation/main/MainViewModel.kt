@@ -542,6 +542,16 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun cancelSleepTimer() {
+        viewModelScope.launch {
+            try {
+                musicRepository.cancelSleepTimer()
+            } catch (e: Exception) {
+                Log.d("TrackVM", e.toString())
+            }
+        }
+    }
+
     fun resetToast() {
         _toast.value = null
     }
