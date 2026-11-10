@@ -325,6 +325,9 @@ fun TrackView(
                         addToFavorites = {
                             isTrackInfoVisible = false
                             onHeartClick()
+                        },
+                        setTimer = {
+                            showTimer = true
                         }
                     )
                 }
