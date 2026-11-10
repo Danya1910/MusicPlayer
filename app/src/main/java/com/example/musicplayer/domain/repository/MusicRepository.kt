@@ -19,6 +19,8 @@ interface MusicRepository {
 
     val sleepTimerRemainingSec: StateFlow<Long?>
 
+    val stopAtTrackEnd: StateFlow<Boolean>
+
     fun playTrack(track: Track)
 
     fun playTrackWithQueue(track: Track, queue: List<Track>)
