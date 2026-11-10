@@ -120,6 +120,7 @@ fun TrackView(
     downloads: Map<String, DownloadProgress>,
     getLyrics: () -> Unit,
     lyrics: Lyrics?,
+    isTimerActive: Boolean,
 ) {
 
     LaunchedEffect(track) {
@@ -258,6 +259,10 @@ fun TrackView(
                 onRepeatClick = onRepeatClick,
                 isShuffled = isShuffled,
                 repeatMode = repeatMode,
+                isTimerActive = isTimerActive,
+                onTimerClick = {
+                    showTimer = true
+                },
             )
             Spacer(modifier = Modifier.height(15.dp))
             TrackUtilityBar(
@@ -869,6 +874,8 @@ private fun PlayerControl(
     onRepeatClick: () -> Unit,
     isShuffled: Boolean,
     repeatMode: Int,
+    isTimerActive: Boolean,
+    onTimerClick: () -> Unit,
 ) {
 
 
@@ -955,18 +962,33 @@ private fun PlayerControl(
             modifier = Modifier
                 .size(44.dp)
         ) {
-            Icon(
-                painter = painterResource(icon),
-                contentDescription = null,
-                tint = repeatColor,
-                modifier = Modifier
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null
-                    ) {
-                        onRepeatClick()
-                    }
-            )
+            if(isTimerActive) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_timer),
+                    contentDescription = null,
+                    tint = White,
+                    modifier = Modifier
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            onRepeatClick()
+                        }
+                )
+            } else {
+                Icon(
+                    painter = painterResource(icon),
+                    contentDescription = null,
+                    tint = repeatColor,
+                    modifier = Modifier
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            onRepeatClick()
+                        }
+                )
+            }
         }
     }
 
