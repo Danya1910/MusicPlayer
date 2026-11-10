@@ -59,6 +59,8 @@ fun MainRootPagerScreen(
     val playlists by mainViewModel.playlistsState.collectAsStateWithLifecycle()
     val favorites by mainViewModel.favoritesPlaylist.collectAsStateWithLifecycle()
 
+    val isTimerActive by mainViewModel.isSleepTimerActive.collectAsStateWithLifecycle()
+
     val toast by mainViewModel.toast.collectAsStateWithLifecycle()
 
     LaunchedEffect(toast) {
@@ -392,7 +394,8 @@ fun MainRootPagerScreen(
                         },
                         endAtTrackEnd = {
                             mainViewModel.stopOnTrackEnd()
-                        }
+                        },
+                        isTimerActive = isTimerActive,
                     )
 
                 }
