@@ -139,6 +139,11 @@ class MusicRepositoryImpl @Inject constructor(
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 _currentTrackId.value = mediaItem?.mediaId
                 _duration.value = 0L
+
+                if (stopAtTrackEnd && reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) {
+                    stopAtTrackEnd = false
+                    mediaController?.pause()
+                }
             }
 
 //            override fun onPlaybackStateChanged(playbackState: Int) {
