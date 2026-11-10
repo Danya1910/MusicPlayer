@@ -518,6 +518,20 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun setSleepTime(
+        minutes: Int,
+    ) {
+        viewModelScope.launch {
+            try {
+                musicRepository.setSleepTimer(
+                    minutes = minutes,
+                )
+            } catch (e: Exception) {
+                Log.d("TrackVM", e.toString())
+            }
+        }
+    }
+
 
     fun resetToast() {
         _toast.value = null
