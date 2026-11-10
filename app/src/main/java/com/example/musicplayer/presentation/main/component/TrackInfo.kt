@@ -48,6 +48,7 @@ fun TrackInfo(
     playNext: () -> Unit,
     addToPlayList: () -> Unit,
     addToFavorites: () -> Unit,
+    setTimer: () -> Unit,
 ) {
 
     val actionsList = listOf(
@@ -76,10 +77,15 @@ fun TrackInfo(
             title = "Go to album",
             onClick = {}
         ),
+//        ActionButtonData(
+//            icon = R.drawable.ic_artist,
+//            title = "Go to artist",
+//            onClick = {  }
+//        ),
         ActionButtonData(
             icon = R.drawable.ic_artist,
-            title = "Go to artist",
-            onClick = {  }
+            title = "Set timer",
+            onClick = setTimer,
         ),
     )
 
