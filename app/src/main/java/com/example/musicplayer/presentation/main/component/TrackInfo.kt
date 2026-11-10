@@ -114,7 +114,10 @@ fun TrackInfo(
                 ),
                 shape = RoundedCornerShape(40.dp)
             )
-            .padding(top = 5.dp)
+            .padding(
+                top = 5.dp,
+                bottom = 16.dp
+            )
     ) {
         CurrentTrack(
             track = track,
