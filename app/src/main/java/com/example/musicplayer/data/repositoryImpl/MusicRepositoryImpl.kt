@@ -29,7 +29,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -48,7 +47,9 @@ class MusicRepositoryImpl @Inject constructor(
 
     private var sleepTimerJob: Job? = null
 
-    private var stopAtTrackEnd = false
+    private val _stopAtTrackEnd = MutableStateFlow(false)
+
+    override val stopAtTrackEnd = _stopAtTrackEnd.asStateFlow()
 
     private var mediaController: MediaController? = null
 
@@ -123,8 +124,8 @@ class MusicRepositoryImpl @Inject constructor(
                 _currentTrackId.value = mediaItem?.mediaId
                 _duration.value = 0L
 
-                if (stopAtTrackEnd && reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) {
-                    stopAtTrackEnd = false
+                if (_stopAtTrackEnd.value && reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) {
+                    _stopAtTrackEnd.value = false
                     mediaController?.pause()
                 }
             }
@@ -340,7 +341,7 @@ class MusicRepositoryImpl @Inject constructor(
 
     override fun setSleepTimer(minutes: Int) {
         cancelSleepTimer()
-        stopAtTrackEnd = false
+        _stopAtTrackEnd.value = false
         val totalMs = minutes * 60_000L
 
         _sleepTimerRemainingSec.value = totalMs / 1000
@@ -366,14 +367,14 @@ class MusicRepositoryImpl @Inject constructor(
 
     override fun setSleepTimerToTrackEnd() {
         cancelSleepTimer()
-        stopAtTrackEnd = true
+        _stopAtTrackEnd.value = true
         _sleepTimerRemainingSec.value = null
     }
 
     override fun cancelSleepTimer() {
         sleepTimerJob?.cancel()
         sleepTimerJob = null
-        stopAtTrackEnd = false
+        _stopAtTrackEnd.value = false
         _sleepTimerRemainingSec.value = null
     }
 
