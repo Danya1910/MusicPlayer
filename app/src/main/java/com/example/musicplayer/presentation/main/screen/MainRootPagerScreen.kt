@@ -263,6 +263,7 @@ fun MainRootPagerScreen(
                         },
                         setTimer = {
                             showTimer = true
+                            isTrackInfoVisible = false
                         }
                     )
                 }
