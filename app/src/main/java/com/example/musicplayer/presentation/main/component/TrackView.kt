@@ -423,6 +423,9 @@ fun TrackView(
                     isShuffled = isShuffled,
                     onRepeatClick = onRepeatClick,
                     onShuffleClick = onShuffleClick,
+                    onTimerClick = {
+                        showTimer = true
+                    }
                 )
             }
         }
@@ -962,7 +965,7 @@ private fun PlayerControl(
             modifier = Modifier
                 .size(44.dp)
         ) {
-            if(isTimerActive) {
+            if (isTimerActive) {
                 Icon(
                     painter = painterResource(R.drawable.ic_timer),
                     contentDescription = null,

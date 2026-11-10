@@ -86,6 +86,7 @@ fun QueueListSheet(
     isShuffled: Boolean,
     onRepeatClick: () -> Unit,
     onShuffleClick: () -> Unit,
+    onTimerClick: () -> Unit,
     hazeState: HazeState,
 ) {
 
@@ -365,9 +366,7 @@ fun QueueListSheet(
             BottomActionButton(
                 title = "Timer",
                 icon = R.drawable.ic_timer,
-                onClick = {
-
-                },
+                onClick = onTimerClick,
                 modifier = Modifier
                     .weight(1f)
             )
