@@ -55,6 +55,18 @@ class MainViewModel @Inject constructor(
 
     val downloads: StateFlow<Map<String, DownloadProgress>> = fileRepository.downloads
 
+    val isSleepTimerActive: StateFlow<Boolean> =
+        combine(
+            musicRepository.sleepTimerRemainingSec,
+            musicRepository.stopAtTrackEnd
+        ) { remaining, atEnd ->
+            remaining != null || atEnd
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = false
+        )
+
     private val _toast = MutableStateFlow<ToastData?>(null)
     val toast = _toast.asStateFlow()
 
