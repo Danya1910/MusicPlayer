@@ -108,6 +108,8 @@ fun TrackView(
     onRepeatClick: () -> Unit,
     playNext: (Track) -> Unit,
     addToPlaylist: (Track) -> Unit,
+    setSleepTimer: (Int) -> Unit,
+    endAtTrackEnd: () -> Unit,
     isShuffled: Boolean,
     repeatMode: Int,
     upcomingTracks: List<Track>,
@@ -144,11 +146,13 @@ fun TrackView(
     val hazeState = remember { HazeState() }
 
     var showQueue by remember { mutableStateOf(false) }
+    var showTimer by remember { mutableStateOf(false) }
     var isTrackInfoVisible by remember { mutableStateOf(false) }
     var isLyricsVisible by remember { mutableStateOf(false) }
 
 
     val trackInfoSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val timerSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val lyricsSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = false
@@ -410,6 +414,29 @@ fun TrackView(
                     isShuffled = isShuffled,
                     onRepeatClick = onRepeatClick,
                     onShuffleClick = onShuffleClick,
+                )
+            }
+        }
+
+        if (showTimer) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    showTimer = false
+                },
+                sheetState = timerSheetState,
+                containerColor = Color.Transparent,
+                scrimColor = Color.Transparent,
+                shape = RoundedCornerShape(40.dp),
+                dragHandle = null,
+                modifier = Modifier
+                    .padding(horizontal = 12.dp)
+            ) {
+                SleepTimerWidget(
+                    onTimeClick = { minutes ->
+                        setSleepTimer(minutes)
+                    },
+                    onEndClick = endAtTrackEnd,
+                    hazeState = hazeState,
                 )
             }
         }
