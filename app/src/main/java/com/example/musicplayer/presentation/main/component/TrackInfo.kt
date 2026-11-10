@@ -92,7 +92,6 @@ fun TrackInfo(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.5f)
             .clip(
                 shape = RoundedCornerShape(40.dp)
             )
