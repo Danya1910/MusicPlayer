@@ -118,23 +118,6 @@ class MusicRepositoryImpl @Inject constructor(
                 _repeatMode.value = repeatMode
             }
 
-//            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-//                val trackId = mediaItem?.mediaId
-//
-//                if (trackId != null) {
-//                    repositoryScope.launch(Dispatchers.IO) {
-//                        val trackEntity = trackDao.getTrackById(trackId)
-//
-//                        val fullTrack = trackEntity?.toDomain()
-//
-//                        launch(Dispatchers.Main) {
-//                            _currentTrackId.value = fullTrack
-//                        }
-//                    }
-//                } else {
-//                    _currentTrack.value = null
-//                }
-//            }
 
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 _currentTrackId.value = mediaItem?.mediaId
@@ -145,14 +128,6 @@ class MusicRepositoryImpl @Inject constructor(
                     mediaController?.pause()
                 }
             }
-
-//            override fun onPlaybackStateChanged(playbackState: Int) {
-//                if (playbackState == Player.STATE_READY) {
-//                    _currentTrack.value = _currentTrack.value?.copy(
-//                        duration = mediaController?.duration?.coerceAtLeast(0L) ?: 0L
-//                    )
-//                }
-//            }
 
             override fun onPlaybackStateChanged(playbackState: Int) {
                 if (playbackState == Player.STATE_READY) {
@@ -401,15 +376,6 @@ class MusicRepositoryImpl @Inject constructor(
         stopAtTrackEnd = false
         _sleepTimerRemainingSec.value = null
     }
-
-//    override fun updateFavoriteStatus(trackId: String, isFavorite: Boolean) {
-//        _currentTrack.update { cur ->
-//            if (cur?.id == trackId) cur.copy(isFavorite = isFavorite) else cur
-//        }
-//        _currentQueue.update { queue ->
-//            queue.map { if (it.id == trackId) it.copy(isFavorite = isFavorite) else it }
-//        }
-//    }
 
     private fun Track.playbackUri(): Uri =
         localAudioPath
