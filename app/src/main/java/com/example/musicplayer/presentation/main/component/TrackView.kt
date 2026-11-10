@@ -446,8 +446,12 @@ fun TrackView(
                 SleepTimerWidget(
                     onTimeClick = { minutes ->
                         setSleepTimer(minutes)
+                        showTimer = false
                     },
-                    onEndClick = endAtTrackEnd,
+                    onEndClick = {
+                        endAtTrackEnd()
+                        showTimer = false
+                    },
                     hazeState = hazeState,
                 )
             }
