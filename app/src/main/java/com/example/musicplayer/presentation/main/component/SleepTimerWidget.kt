@@ -44,7 +44,6 @@ fun SleepTimerWidget(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.5f)
             .clip(shape = RoundedCornerShape(40.dp))
             .hazeChild(
                 state = hazeState,
@@ -65,7 +64,6 @@ fun SleepTimerWidget(
                 ),
                 shape = RoundedCornerShape(40.dp)
             )
-            .padding(horizontal = 16.dp)
             .padding(
                 top = 10.dp,
                 bottom = 16.dp
@@ -181,7 +179,7 @@ private fun Item(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .height(60.dp)
+            .height(50.dp)
             .clickable {
                 onClick()
             }
@@ -191,7 +189,7 @@ private fun Item(
     ) {
         Text(
             text = title,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Normal,
             fontSize = 18.sp,
             color = White,
             maxLines = 1,
