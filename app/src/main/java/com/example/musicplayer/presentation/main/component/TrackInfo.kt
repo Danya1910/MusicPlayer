@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -115,10 +116,11 @@ fun TrackInfo(
                 shape = RoundedCornerShape(40.dp)
             )
             .padding(
-                top = 5.dp,
+                top = 10.dp,
                 bottom = 16.dp
             )
     ) {
+        DragHandle()
         CurrentTrack(
             track = track,
         )
@@ -136,6 +138,27 @@ fun TrackInfo(
                 data = actionButtonData
             )
         }
+    }
+}
+
+@Composable
+private fun DragHandle() {
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.2f)
+                .height(4.dp)
+                .clip(
+                    shape = CircleShape
+                )
+                .background(
+                    color = Gray
+                )
+        )
     }
 }
 
