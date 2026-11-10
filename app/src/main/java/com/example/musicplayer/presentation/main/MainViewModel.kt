@@ -532,7 +532,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun stopOnNextTrack() {
+    fun stopOnTrackEnd() {
         viewModelScope.launch {
             try {
                 musicRepository.setSleepTimerToTrackEnd()
