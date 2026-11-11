@@ -56,6 +56,8 @@ fun TrackItem(
     onMoreClick: () -> Unit,
     toggleFavorite: () -> Unit,
     onDownloadClick: () -> Unit,
+    isLoaded: Boolean,
+    downloads: Map<String, DownloadProgress>,
 ) {
 
     Row(
@@ -98,19 +100,11 @@ fun TrackItem(
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        if (track.localAudioPath != null) {
-            Spacer(modifier = Modifier.width(10.dp))
-            Icon(
-                painter = painterResource(R.drawable.ic_load),
-                contentDescription = null,
-                tint = SpotifyGreen,
-                modifier = Modifier
-                    .size(18.dp)
-                    .clickable {
-                        onDownloadClick()
-                    }
-            )
-        }
+        LoadIndicator(
+            isLoaded = isLoaded,
+            progress = downloads[track.id],
+            onLoadClick = onDownloadClick,
+        )
         if (track.isFavorite) {
             Spacer(modifier = Modifier.width(10.dp))
             Icon(
@@ -167,7 +161,7 @@ private fun LoadIndicator(
 
     Box(
         modifier = Modifier
-            .size(36.dp)
+            .size(30.dp)
             .alpha(if (shouldShow) 1f else 0f)
             .then(
                 if (shouldShow) {
@@ -188,14 +182,14 @@ private fun LoadIndicator(
                     else -> Gray
                 },
                 modifier = Modifier
-                    .size(36.dp)
-                    .padding(6.dp),
+                    .size(30.dp)
+                    .padding(5.dp),
             )
 
             if (isDownloading) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
-                    val iconPadding = 6.5.dp.toPx()
-                    val stroke = 2.dp.toPx()
+                    val iconPadding = 5.4.dp.toPx()
+                    val stroke = 1.7.dp.toPx()
                     val inset = iconPadding + stroke / 2
                     val arcSize = Size(
                         width = size.width - inset * 2,
