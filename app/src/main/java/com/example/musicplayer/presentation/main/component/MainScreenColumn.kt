@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.musicplayer.domain.model.Album
+import com.example.musicplayer.domain.model.DownloadProgress
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.presentation.player.state.PlayerUiState
 import com.example.musicplayer.ui.theme.White
@@ -28,6 +29,7 @@ fun MainScreenColumn(
     onMoreAboutTrack: (Track) -> Unit,
     toggleFavorite: (Track) -> Unit,
     onDownloadClick: (Track) -> Unit,
+    downloads: Map<String, DownloadProgress>,
 ) {
 
     LazyColumn(
@@ -84,7 +86,9 @@ fun MainScreenColumn(
                 },
                 onDownloadClick = {
                     onDownloadClick(track)
-                }
+                },
+                isLoaded = !track.localAudioPath.isNullOrBlank(),
+                downloads = downloads,
             )
         }
         item {
