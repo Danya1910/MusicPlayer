@@ -266,6 +266,11 @@ fun MainRootPagerScreen(
                         setTimer = {
                             showTimer = true
                             isTrackInfoVisible = false
+                        },
+                        onDownloadClick = {
+                            mainViewModel.onDownloadClick(
+                                track = currentInfoToShow!!
+                            )
                         }
                     )
                 }

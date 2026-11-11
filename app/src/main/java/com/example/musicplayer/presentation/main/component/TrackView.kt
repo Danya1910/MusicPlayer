@@ -334,7 +334,8 @@ fun TrackView(
                         setTimer = {
                             showTimer = true
                             isTrackInfoVisible = false
-                        }
+                        },
+                        onDownloadClick = onLoadClick,
                     )
                 }
             }
