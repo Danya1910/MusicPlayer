@@ -42,6 +42,7 @@ fun MainTest(
 
     val uiState by mainViewModel.uiState.collectAsStateWithLifecycle()
 
+    val downloads by mainViewModel.downloads.collectAsStateWithLifecycle()
 
     var isAlbumViewVisible by remember { mutableStateOf(false) }
 
@@ -104,7 +105,8 @@ fun MainTest(
                             },
                             onDownloadClick = { track ->
                                 mainViewModel.onDownloadClick(track)
-                            }
+                            },
+                            downloads = downloads,
                         )
 
                     }
