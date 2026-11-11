@@ -322,6 +322,7 @@ fun TrackView(
                             playNext(
                                 track
                             )
+                            isTrackInfoVisible = false
                         },
                         addToPlayList = {
                             addToPlaylist(track)
@@ -335,7 +336,10 @@ fun TrackView(
                             showTimer = true
                             isTrackInfoVisible = false
                         },
-                        onDownloadClick = onLoadClick,
+                        onDownloadClick = {
+                            onLoadClick()
+                            isTrackInfoVisible = false
+                        },
                     )
                 }
             }
