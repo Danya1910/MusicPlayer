@@ -84,11 +84,6 @@ class MusicRepositoryImpl @Inject constructor(
     private val _currentPosition = MutableStateFlow(0L)
     override val currentPosition = _currentPosition.asStateFlow()
 
-//    override val duration: StateFlow<Long>
-//        get() = MutableStateFlow(
-//            mediaController?.duration?.coerceAtLeast(0L) ?: 0L
-//        )
-
     private val _duration = MutableStateFlow(0L)
     override val duration: StateFlow<Long> = _duration.asStateFlow()
 
@@ -184,7 +179,6 @@ class MusicRepositoryImpl @Inject constructor(
 
     override fun playTrackWithQueue(track: Track, queue: List<Track>) {
         _trackCache.value = _trackCache.value + queue.associateBy { it.id }
-//        _currentQueue.value = queue
 
         repositoryScope.launch(Dispatchers.Default) {
             val mediaItems = queue.map { qTrack ->
