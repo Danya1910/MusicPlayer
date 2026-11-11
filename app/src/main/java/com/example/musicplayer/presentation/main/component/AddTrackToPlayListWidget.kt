@@ -185,13 +185,13 @@ fun AddTrackToPlayListWidget(
                 .background(
                     color = SpotifyGreen
                 )
+                .clickable {
+                    onDoneClick()
+                }
                 .padding(
                     horizontal = 28.dp,
                     vertical = 14.dp
                 )
-                .clickable {
-                    onDoneClick()
-                }
         ) {
             Text(
                 text = "Done",
