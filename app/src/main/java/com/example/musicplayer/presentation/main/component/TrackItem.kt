@@ -139,7 +139,7 @@ fun TrackItem(
 }
 
 @Composable
-private fun LoadButtonWithRing(
+private fun LoadIndicator(
     isLoaded: Boolean,
     progress: DownloadProgress?,
     onLoadClick: () -> Unit,
