@@ -297,9 +297,12 @@ private fun FavoritesItem(
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = songsFormat(
-                    songsCount = playList.tracks?.size ?: 0
-                ),
+                text =
+                    if (playList.tracks?.size == 0) "Empty"
+                    else
+                        songsFormat(
+                            songsCount = playList.tracks?.size ?: 0
+                        ),
                 fontWeight = FontWeight.Medium,
                 fontSize = 16.sp,
                 color = Gray,
