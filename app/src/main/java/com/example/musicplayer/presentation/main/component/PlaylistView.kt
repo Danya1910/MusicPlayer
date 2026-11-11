@@ -52,6 +52,7 @@ import androidx.compose.ui.zIndex
 import androidx.core.graphics.drawable.toBitmap
 import coil.compose.AsyncImage
 import com.example.musicplayer.R
+import com.example.musicplayer.domain.model.DownloadProgress
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.presentation.main.util.PlaylistUi
 import com.example.musicplayer.presentation.player.state.PlayerUiState
@@ -77,6 +78,7 @@ fun PlaylistView(
     onBitmapLoaded: (Bitmap) -> Unit,
     toggleFavorite: (Track) -> Unit,
     onMoreClick: (Track) -> Unit,
+    downloads: Map<String, DownloadProgress>,
 ) {
 
     val imageColors = playerState.paletteState[playList.playlist.id]
@@ -192,7 +194,9 @@ fun PlaylistView(
                             },
                             onDownloadClick = {
                                 onDownloadClick()
-                            }
+                            },
+                            isLoaded = !track.localAudioPath.isNullOrBlank(),
+                            downloads = downloads,
                         )
                     }
                 }
