@@ -35,6 +35,7 @@ import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
+import com.example.musicplayer.ui.theme.SpotifyGreen
 import com.example.musicplayer.ui.theme.White
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
@@ -49,6 +50,7 @@ fun TrackInfo(
     playNext: () -> Unit,
     addToPlayList: () -> Unit,
     addToFavorites: () -> Unit,
+    onDownloadClick: () -> Unit,
     setTimer: () -> Unit,
 ) {
 
@@ -74,15 +76,13 @@ fun TrackInfo(
             onClick = playNext
         ),
         ActionButtonData(
-            icon = R.drawable.ic_album,
-            title = "Go to album",
-            onClick = {}
+            icon = R.drawable.ic_load,
+            title =
+                if (!track.localAudioPath.isNullOrBlank()) "Remove download"
+                else "Download",
+            onClick = onDownloadClick,
+            color = if(!track.localAudioPath.isNullOrBlank()) SpotifyGreen else null,
         ),
-//        ActionButtonData(
-//            icon = R.drawable.ic_artist,
-//            title = "Go to artist",
-//            onClick = {  }
-//        ),
         ActionButtonData(
             icon = R.drawable.ic_artist,
             title = "Set timer",
@@ -228,7 +228,7 @@ private fun ActionButton(
         Icon(
             painter = painterResource(data.icon),
             contentDescription = null,
-            tint = Gray,
+            tint = data.color ?: Gray,
         )
         Spacer(modifier = Modifier.width(15.dp))
         Text(
@@ -247,4 +247,5 @@ data class ActionButtonData(
     val icon: Int,
     val title: String,
     val onClick: () -> Unit,
+    val color: Color? = null,
 )
