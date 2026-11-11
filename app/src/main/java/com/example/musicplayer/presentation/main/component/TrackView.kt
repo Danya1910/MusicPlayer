@@ -979,7 +979,7 @@ private fun PlayerControl(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
                         ) {
-                            onRepeatClick()
+                            onTimerClick()
                         }
                 )
             } else {
