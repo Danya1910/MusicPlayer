@@ -425,7 +425,8 @@ fun TrackView(
                     onShuffleClick = onShuffleClick,
                     onTimerClick = {
                         showTimer = true
-                    }
+                    },
+                    isTimerActive = isTimerActive,
                 )
             }
         }
