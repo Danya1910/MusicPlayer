@@ -250,6 +250,7 @@ fun MainRootPagerScreen(
                             mainViewModel.playNext(
                                 track = currentInfoToShow!!
                             )
+                            isTrackInfoVisible = false
                         },
                         addToPlayList = {
                             currentTrackForAdd = currentInfoToShow!!
@@ -271,6 +272,7 @@ fun MainRootPagerScreen(
                             mainViewModel.onDownloadClick(
                                 track = currentInfoToShow!!
                             )
+                            isTrackInfoVisible = false
                         }
                     )
                 }
