@@ -6,6 +6,7 @@ import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,6 +32,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -61,6 +64,7 @@ fun LikedView(
     toggleFavorite: (Track) -> Unit,
     onMoreClick: (Track) -> Unit,
     downloads: Map<String, DownloadProgress>,
+    navigateToHome: () -> Unit,
 ) {
 
     Log.d("Playlist", "playlist: $playList")
@@ -123,37 +127,93 @@ fun LikedView(
                     )
                 }
             }
-            Column {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+            ) {
 
                 Spacer(modifier = Modifier.height(20.dp))
-                LazyColumn {
-                    itemsIndexed(
-                        items = tracks,
-                        key = { index, track -> "${track.id}_$index" }
-                    ) { index, track ->
-                        TrackItem(
-                            track = track,
-                            onTrackClick = {
-                                onTrackClick(track)
-                            },
-                            onMoreClick = {
-                                onMoreClick(
-                                    track
-                                )
-                            },
-                            toggleFavorite = {
-                                toggleFavorite(track)
-                            },
-                            onDownloadClick = {
-                                onDownloadClick()
-                            },
-                            isLoaded = !track.localAudioPath.isNullOrBlank(),
-                            downloads = downloads,
-                        )
+                if(tracks.isEmpty()) {
+                    EmptyLikedWidget(
+                        onHelpClick = navigateToHome,
+                    )
+                } else {
+                    LazyColumn {
+                        itemsIndexed(
+                            items = tracks,
+                            key = { index, track -> "${track.id}_$index" }
+                        ) { index, track ->
+                            TrackItem(
+                                track = track,
+                                onTrackClick = {
+                                    onTrackClick(track)
+                                },
+                                onMoreClick = {
+                                    onMoreClick(
+                                        track
+                                    )
+                                },
+                                toggleFavorite = {
+                                    toggleFavorite(track)
+                                },
+                                onDownloadClick = {
+                                    onDownloadClick()
+                                },
+                                isLoaded = !track.localAudioPath.isNullOrBlank(),
+                                downloads = downloads,
+                            )
+                        }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun EmptyLikedWidget(
+    onHelpClick: () -> Unit,
+) {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Text(
+            textAlign = TextAlign.Center,
+            text = "Songs you like will appear here",
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 20.sp,
+            color = White,
+        )
+        Spacer(modifier = Modifier.height(30.dp))
+        Text(
+            textAlign = TextAlign.Center,
+            text = "Tap the plus on any song to save it to your Liked Songs.",
+            fontWeight = FontWeight.Medium,
+            fontSize = 18.sp,
+            color = White,
+            modifier = Modifier.padding(
+                horizontal = 50.dp
+            )
+        )
+        Spacer(modifier = Modifier.height(30.dp))
+        Text(
+            textAlign = TextAlign.Center,
+            text = "Find something to like",
+            fontWeight = FontWeight.Medium,
+            fontSize = 18.sp,
+            textDecoration = TextDecoration.Underline,
+            color = White,
+            modifier = Modifier
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                ) {
+                    onHelpClick()
+                }
+        )
     }
 }
 
