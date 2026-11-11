@@ -4,9 +4,11 @@ import android.content.ComponentName
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
+import androidx.media3.common.Timeline
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.example.musicplayer.data.local.dao.TrackDao
@@ -43,9 +45,11 @@ class MusicRepositoryImpl @Inject constructor(
     private val repositoryScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     private val _sleepTimerRemainingSec = MutableStateFlow<Long?>(null)
-    override val sleepTimerRemainingSec = _sleepTimerRemainingSec.asStateFlow()
 
+    override val sleepTimerRemainingSec = _sleepTimerRemainingSec.asStateFlow()
     private var sleepTimerJob: Job? = null
+
+    private val _trackCache = MutableStateFlow<Map<String, Track>>(emptyMap())
 
     private val _stopAtTrackEnd = MutableStateFlow(false)
 
@@ -113,6 +117,7 @@ class MusicRepositoryImpl @Inject constructor(
 
             override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
                 _isShuffleModeEnabled.value = shuffleModeEnabled
+                syncQueueFromController()
             }
 
             override fun onRepeatModeChanged(repeatMode: Int) {
@@ -124,6 +129,8 @@ class MusicRepositoryImpl @Inject constructor(
                 _currentTrackId.value = mediaItem?.mediaId
                 _duration.value = 0L
 
+                syncQueueFromController()
+
                 if (_stopAtTrackEnd.value && reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) {
                     _stopAtTrackEnd.value = false
                     mediaController?.pause()
@@ -134,6 +141,10 @@ class MusicRepositoryImpl @Inject constructor(
                 if (playbackState == Player.STATE_READY) {
                     _duration.value = mediaController?.duration?.coerceAtLeast(0L) ?: 0L
                 }
+            }
+
+            override fun onTimelineChanged(timeline: Timeline, reason: Int) {
+                syncQueueFromController()
             }
         })
     }
@@ -151,6 +162,8 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
     override fun playTrack(track: Track) {
+        _trackCache.value = _trackCache.value + (track.id to track)
+
         val mediaMetadata = MediaMetadata.Builder()
             .setTitle(track.title)
             .setArtist(track.artist)
@@ -170,7 +183,8 @@ class MusicRepositoryImpl @Inject constructor(
 
 
     override fun playTrackWithQueue(track: Track, queue: List<Track>) {
-        _currentQueue.value = queue
+        _trackCache.value = _trackCache.value + queue.associateBy { it.id }
+//        _currentQueue.value = queue
 
         repositoryScope.launch(Dispatchers.Default) {
             val mediaItems = queue.map { qTrack ->
@@ -235,6 +249,7 @@ class MusicRepositoryImpl @Inject constructor(
     override fun toggleShuffleMode() {
         mediaController?.let { player ->
             player.shuffleModeEnabled = !player.shuffleModeEnabled
+            syncQueueFromController()
         }
     }
 
@@ -250,7 +265,7 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
     override fun addTrackToPlayNext(track: Track) {
-
+        _trackCache.value = _trackCache.value + (track.id to track)
         val controller = mediaController ?: return
 
         val currentIndex = mediaController?.currentMediaItemIndex ?: 0
@@ -271,65 +286,25 @@ class MusicRepositoryImpl @Inject constructor(
 
         controller.addMediaItem(targetIndex, mediaItem)
 
-        val updatedQueue = _currentQueue.value.toMutableList().apply {
-            if (targetIndex <= size) {
-                add(targetIndex, track)
-            } else {
-                add(track)
-            }
-        }
-        _currentQueue.value = updatedQueue
     }
 
     override fun moveTrackInQueue(fromIndex: Int, toIndex: Int) {
         val controller = mediaController ?: return
-        val currentQueueData = _currentQueue.value
+        if (controller.shuffleModeEnabled) return   // при shuffle индексы UI не совпадают с timeline
         val totalItems = controller.mediaItemCount
-
         if (fromIndex in 0 until totalItems && toIndex in 0 until totalItems) {
-            val isShuffleWasEnabled = controller.shuffleModeEnabled
-
-            if (isShuffleWasEnabled) {
-                controller.shuffleModeEnabled = false
-            }
-
             controller.moveMediaItem(fromIndex, toIndex)
-
-            if (isShuffleWasEnabled) {
-                controller.shuffleModeEnabled = true
-            }
-
-            val updatedQueue = currentQueueData.toMutableList()
-            if (fromIndex in updatedQueue.indices && toIndex in updatedQueue.indices) {
-                val movedItem = updatedQueue.removeAt(fromIndex)
-                updatedQueue.add(toIndex, movedItem)
-                _currentQueue.value = updatedQueue
-            }
         }
     }
 
     override fun removeTrackFromQueue(index: Int) {
         val controller = mediaController ?: return
-        val currentQueueData = _currentQueue.value
+        if (controller.shuffleModeEnabled) return   // или маппинг индексом
         val totalItemsInPlayer = controller.mediaItemCount
-
         if (index in 0 until totalItemsInPlayer) {
-            val trackToBeRemoved = controller.getMediaItemAt(index)
-            Log.d("MusicPlayer_Repo", "Плеер УДАЛЯЕТ трек: ${trackToBeRemoved.mediaMetadata.title}")
-
             controller.removeMediaItem(index)
         } else {
-            Log.e(
-                "MusicPlayer_Repo",
-                "ОШИБКА: Индекс $index вышел за границы плеера (0..${totalItemsInPlayer - 1})"
-            )
-        }
-
-        if (index in currentQueueData.indices) {
-            val updatedQueue = currentQueueData.toMutableList()
-
-            updatedQueue.removeAt(index)
-            _currentQueue.value = updatedQueue
+            Log.e("MusicPlayer_Repo", "Индекс $index вне границ (0..${totalItemsInPlayer - 1})")
         }
     }
 
@@ -376,6 +351,34 @@ class MusicRepositoryImpl @Inject constructor(
         sleepTimerJob = null
         _stopAtTrackEnd.value = false
         _sleepTimerRemainingSec.value = null
+    }
+
+    private fun syncQueueFromController() {
+        val controller = mediaController ?: return
+        val idToTrack = _trackCache.value
+        val timeline = controller.currentTimeline
+        val shuffle = controller.shuffleModeEnabled
+
+        if (timeline.isEmpty) {
+            _currentQueue.value = emptyList()
+            _currentTrackId.value = controller.currentMediaItem?.mediaId
+            return
+        }
+
+        val order = mutableListOf<Track>()
+        var windowIndex = timeline.getFirstWindowIndex(shuffle)
+        while (windowIndex != C.INDEX_UNSET) {
+            val mediaId = timeline.getWindow(windowIndex, Timeline.Window()).mediaItem.mediaId
+            idToTrack[mediaId]?.let(order::add)
+            windowIndex = timeline.getNextWindowIndex(
+                windowIndex,
+                Player.REPEAT_MODE_OFF,
+                shuffle
+            )
+        }
+
+        _currentQueue.value = order
+        _currentTrackId.value = controller.currentMediaItem?.mediaId
     }
 
     private fun Track.playbackUri(): Uri =
