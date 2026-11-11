@@ -12,7 +12,6 @@ import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,7 +25,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsEndWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
@@ -86,6 +84,7 @@ fun QueueListSheet(
     isShuffled: Boolean,
     onRepeatClick: () -> Unit,
     onShuffleClick: () -> Unit,
+    isTimerActive: Boolean,
     onTimerClick: () -> Unit,
     hazeState: HazeState,
 ) {
@@ -363,10 +362,11 @@ fun QueueListSheet(
                 repeatMode = repeatMode,
                 modifier = Modifier.weight(1f)
             )
-            BottomActionButton(
+            TimerButton(
                 title = "Timer",
                 icon = R.drawable.ic_timer,
                 onClick = onTimerClick,
+                isTimerActive = isTimerActive,
                 modifier = Modifier
                     .weight(1f)
             )
@@ -612,12 +612,15 @@ private fun ShuffleButton(
 }
 
 @Composable
-private fun BottomActionButton(
+private fun TimerButton(
     title: String,
     icon: Int,
     onClick: () -> Unit,
+    isTimerActive: Boolean,
     modifier: Modifier,
 ) {
+
+    val color = if(isTimerActive) SpotifyGreen else Gray
 
     Column(
         verticalArrangement = Arrangement.Center,
@@ -637,7 +640,7 @@ private fun BottomActionButton(
         Icon(
             painter = painterResource(icon),
             contentDescription = null,
-            tint = Gray,
+            tint = color,
             modifier = Modifier.then(
                 if (title == "Shuffle") Modifier.size(30.dp) else Modifier
             )
