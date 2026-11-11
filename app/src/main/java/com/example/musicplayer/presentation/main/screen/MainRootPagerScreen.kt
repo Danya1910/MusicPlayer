@@ -150,6 +150,7 @@ fun MainRootPagerScreen(
                 LibraryTest(
                     mainViewModel = mainViewModel,
                     navController = rootNavController,
+                    tabController = tabNavController,
                     favorites = favorites,
                     onMoreClick = { track ->
                         currentInfoToShow = track
