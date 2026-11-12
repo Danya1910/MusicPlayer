@@ -22,7 +22,7 @@ import com.example.musicplayer.data.local.entity.TrackEntity
         PlaylistEntity::class,
         LyricsEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = false,
 )
 
@@ -76,6 +76,17 @@ val MIGRATION_3_4 = object : Migration(3, 4) {
                 trackId TEXT NOT NULL PRIMARY KEY,
                 lines TEXT NOT NULL
             )
+            """.trimIndent()
+        )
+    }
+}
+
+val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            ALTER TABLE albums
+            ADD COLUMN isFavorite INTEGER NOT NULL DEFAULT 0
             """.trimIndent()
         )
     }
