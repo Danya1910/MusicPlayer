@@ -141,30 +141,52 @@ class TrackRepositoryImpl @Inject constructor(
         emit(savedAlbums)
 
         try {
-            if (firebaseAuth.currentUser != null) {
-                val allAlbumsSnapshot = firestore.collection("albums").get().await()
+            val currentUserId = firebaseAuth.currentUser?.uid
+                ?: throw Exception("Пользователь не авторизирован")
+
+            coroutineScope {
+                val favoriteDeferred = async {
+                    firestore.collection("favorites")
+                        .document(currentUserId)
+                        .collection("albums")
+                        .get()
+                        .await()
+                        .map { it.id }
+                        .toSet()
+                }
+                val albumsDeferred = async {
+                    firestore.collection("albums").get().await()
+                }
+
+                val favoriteAlbumIds = favoriteDeferred.await()
+                val allAlbumsSnapshot = albumsDeferred.await()
 
                 val currentCache = albumDao.getAllAlbumsOnce()
                 val cacheMap = currentCache.associateBy { it.albumId }
 
                 val remoteAlbumsEntities = allAlbumsSnapshot.documents.map { document ->
+                    val albumId = document.id
+                    val cached = cacheMap[albumId]
+
+                    val isFavorite = cached?.isFavorite
+                        ?: favoriteAlbumIds.contains(albumId)
+
+                    Log.d(
+                        "AlbumDebug",
+                        "merge album=$albumId cached=${cached?.isFavorite} " +
+                                "remote=${favoriteAlbumIds.contains(albumId)} -> $isFavorite"
+                    )
+
                     AlbumEntity(
-                        albumId = document.id,
+                        albumId = albumId,
                         title = document.getString("title") ?: "Без названия",
                         artist = document.getString("artist") ?: "Неизвестный исполнитель",
                         imageUrl = document.getString("imageUrl") ?: "",
-                        isFavorite = false,
+                        isFavorite = isFavorite,
                     )
                 }
 
-                val entitiesToInsert = remoteAlbumsEntities.map { remoteAlbum ->
-                    val cachedAlbum = cacheMap[remoteAlbum.albumId]
-                    remoteAlbum.copy(
-                        isFavorite = cachedAlbum?.isFavorite ?: false
-                    )
-                }
-
-                albumDao.insertAlbums(entitiesToInsert)
+                albumDao.insertAlbums(remoteAlbumsEntities)
             }
         } catch (e: Exception) {
             e.printStackTrace()
