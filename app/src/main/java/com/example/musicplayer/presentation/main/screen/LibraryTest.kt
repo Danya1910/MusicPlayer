@@ -202,6 +202,11 @@ fun LibraryTest(
                                 onMoreClick(track)
                             },
                             downloads = downloads,
+                            toggleLoadPlaylist = {
+                                mainViewModel.toggleListOfTracks(
+                                    tracks = playList.tracks,
+                                )
+                            }
                         )
                     }
                 }
