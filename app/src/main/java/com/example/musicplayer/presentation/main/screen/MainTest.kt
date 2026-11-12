@@ -48,8 +48,11 @@ fun MainTest(
 
     var clickedAlbum by remember { mutableStateOf<Album?>(null) }
 
-
     val playerState by mainViewModel.playerState.collectAsStateWithLifecycle()
+
+    val albumToPass = if (clickedAlbum != null) {
+        (uiState as MainUiState.Success).albums.find { it.id == clickedAlbum!!.id }
+    } else null
 
     Box(
         modifier = Modifier
@@ -128,16 +131,13 @@ fun MainTest(
                     clickedAlbum = null
                 },
                 content = {
-                    clickedAlbum?.let { album ->
-                        val album = uiState.let { currentState ->
-                            (currentState as? MainUiState.Success)
-                                ?.albums
-                                ?.find { it.id == clickedAlbum!!.id }
-                        } ?: clickedAlbum!!
+                    albumToPass?.let { album ->
                         AlbumView(
                             album = album,
                             onHeartClick = {
-
+                                mainViewModel.toggleAlbumLike(
+                                    album = album,
+                                )
                             },
                             onCancelClick = {
                                 isAlbumViewVisible = false
