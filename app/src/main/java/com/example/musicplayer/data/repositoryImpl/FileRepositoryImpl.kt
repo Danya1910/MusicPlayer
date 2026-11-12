@@ -57,6 +57,27 @@ class FileRepositoryImpl @Inject constructor(
         startDownload(id, track.audioUrl)
     }
 
+    override fun toggleDownloadList(tracks: List<Track>) {
+        if (tracks.isEmpty()) return
+
+        val hasActive = tracks.any { track ->
+            jobs.containsKey(track.id) ||
+                    _downloads.value[track.id] is DownloadProgress.InProgress
+        }
+
+        if (hasActive) {
+            tracks.forEach { track ->
+                if (jobs.containsKey(track.id) ||
+                    _downloads.value[track.id] is DownloadProgress.InProgress
+                ) {
+                    cancelDownload(track.id)
+                }
+            }
+        } else {
+            downloadList(tracks)
+        }
+    }
+
     override fun cancelDownload(trackId: String) {
         jobs.remove(trackId)?.cancel()
         _downloads.update { it - trackId }
