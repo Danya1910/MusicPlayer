@@ -76,11 +76,6 @@ fun LibraryTest(
     var currentPlaylistToShow by remember { mutableStateOf<PlaylistUi?>(null) }
     var showPlayList by remember { mutableStateOf(false) }
 
-    val playlistToPass = if (currentPlaylistToShow != null) {
-        if (currentPlaylistToShow!!.playlist.id == favorites.playlist.id) favorites
-        else playlists.find { it.playlist.id == currentPlaylistToShow!!.playlist.id }
-    } else null
-
 
 
     Column(
@@ -127,7 +122,7 @@ fun LibraryTest(
                 currentPlaylistToShow = null
             },
             content = {
-                playlistToPass?.let { playList ->
+                currentPlaylistToShow?.let { playList ->
                     if (playList.playlist.id == "favorites") {
                         LikedView(
                             playList = playList,
@@ -149,9 +144,7 @@ fun LibraryTest(
                                 )
                             },
                             onTrackInfoClick = {},
-                            onDownloadClick = { track ->
-                                mainViewModel.onDownloadClick(track)
-                            },
+                            onDownloadClick = {},
                             onBackClick = {
                                 showPlayList = false
                                 currentPlaylistToShow = null
@@ -193,9 +186,7 @@ fun LibraryTest(
                                 )
                             },
                             onTrackInfoClick = {},
-                            onDownloadClick = { track ->
-                                mainViewModel.onDownloadClick(track)
-                            },
+                            onDownloadClick = {},
                             onBackClick = {
                                 showPlayList = false
                                 currentPlaylistToShow = null
