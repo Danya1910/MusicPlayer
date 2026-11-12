@@ -74,7 +74,7 @@ fun PlaylistView(
     toggleLoadPlaylist: () -> Unit,
     onTrackClick: (Track) -> Unit,
     onTrackInfoClick: () -> Unit,
-    onDownloadClick: () -> Unit,
+    onDownloadClick: (Track) -> Unit,
     onBackClick: () -> Unit,
     onBitmapLoaded: (Bitmap) -> Unit,
     toggleFavorite: (Track) -> Unit,
@@ -171,7 +171,6 @@ fun PlaylistView(
             ) {
                 Spacer(modifier = Modifier.height(10.dp))
                 PlaylistActions(
-                    onDownloadClick = onDownloadClick,
                     onShuffleClick = onShuffleClick,
                     onPlayPauseClick = onPlayPauseClick,
                     isShuffled = isShuffled,
@@ -199,7 +198,7 @@ fun PlaylistView(
                                 toggleFavorite(track)
                             },
                             onDownloadClick = {
-                                onDownloadClick()
+                                onDownloadClick(track)
                             },
                             isLoaded = !track.localAudioPath.isNullOrBlank(),
                             downloads = downloads,
@@ -369,7 +368,6 @@ private fun PlaylistHat(
 
 @Composable
 private fun PlaylistActions(
-    onDownloadClick: () -> Unit,
     onShuffleClick: () -> Unit,
     onPlayPauseClick: () -> Unit,
     toggleLoadPlaylist: () -> Unit,
