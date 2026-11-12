@@ -152,7 +152,9 @@ fun MainTest(
                                 }
                             },
                             onDownloadAlbumClick = {
-
+                                mainViewModel.downloadListOfTracks(
+                                    tracks = album.tracks,
+                                )
                             },
                             onBitmapLoaded = { bitmap ->
                                 mainViewModel.updateColorsFromBitmap(
