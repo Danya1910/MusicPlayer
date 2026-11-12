@@ -543,6 +543,7 @@ class MainViewModel @Inject constructor(
                 trackRepository.unlikeAlbum(
                     albumId = albumId,
                 )
+                Log.d("Unlike", "unliked success")
             } catch (e: Exception) {
                 Log.e("TrackVM", e.toString())
             }
