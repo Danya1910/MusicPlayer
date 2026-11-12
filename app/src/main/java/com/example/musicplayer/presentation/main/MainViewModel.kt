@@ -508,26 +508,6 @@ class MainViewModel @Inject constructor(
 
     fun onDownloadClick(track: Track) = fileRepository.toggleDownload(track)
 
-    fun downloadListOfTracks(
-        tracks: List<Track>,
-    ) {
-        try {
-            fileRepository.downloadList(
-                tracks = tracks
-            )
-        } catch (e: Exception) {
-            Log.d("TrackVM", e.toString())
-        }
-    }
-
-    fun cancelAllDownloads() {
-        try {
-            fileRepository.cancelAllDownloads()
-        } catch (e: Exception) {
-            Log.d("TrackVM", e.toString())
-        }
-    }
-
     fun toggleListOfTracks(
         tracks: List<Track>
     ) {
