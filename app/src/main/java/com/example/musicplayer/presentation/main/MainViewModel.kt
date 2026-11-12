@@ -528,6 +528,18 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun toggleListOfTracks(
+        tracks: List<Track>
+    ) {
+        try {
+            fileRepository.toggleDownloadList(
+                tracks = tracks
+            )
+        } catch (e: Exception) {
+            Log.d("TrackVM", e.toString())
+        }
+    }
+
     fun getLyrics(
         trackId: String,
     ) {
