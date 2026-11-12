@@ -152,7 +152,7 @@ fun MainTest(
                                 }
                             },
                             onDownloadAlbumClick = {
-                                mainViewModel.downloadListOfTracks(
+                                mainViewModel.toggleListOfTracks(
                                     tracks = album.tracks,
                                 )
                             },
