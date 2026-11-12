@@ -1,9 +1,10 @@
 package com.example.musicplayer.presentation.main.component
 
 import android.util.Log
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +62,7 @@ fun LikedView(
     onTrackClick: (Track) -> Unit,
     onTrackInfoClick: () -> Unit,
     onDownloadClick: () -> Unit,
+    toggleLoadPlaylist: () -> Unit,
     onBackClick: () -> Unit,
     toggleFavorite: (Track) -> Unit,
     onMoreClick: (Track) -> Unit,
@@ -81,6 +84,9 @@ fun LikedView(
 
     val isShuffled = playerState.isShuffleEnabled
     val isPlaying = playerState.isPlaying
+
+    val isAllTracksLoaded = playList.tracks.isNotEmpty() &&
+            playList.tracks.all { it.localAudioPath != null }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -124,6 +130,8 @@ fun LikedView(
                         onPlayPauseClick = onPlayPauseClick,
                         isShuffled = isShuffled,
                         isPlaying = isPlaying,
+                        toggleLoadPlaylist = toggleLoadPlaylist,
+                        isPlaylistLoaded = isAllTracksLoaded,
                     )
                 }
             }
@@ -273,37 +281,36 @@ private fun PlaylistActions(
     onDownloadClick: () -> Unit,
     onShuffleClick: () -> Unit,
     onPlayPauseClick: () -> Unit,
+    toggleLoadPlaylist: () -> Unit,
     isShuffled: Boolean,
     isPlaying: Boolean,
+    isPlaylistLoaded: Boolean,
 ) {
+
+    val color by animateColorAsState(
+        targetValue = if (isPlaylistLoaded) SpotifyGreen else Gray,
+        animationSpec = tween(durationMillis = 300),
+    )
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp)
     ) {
-        Box(
-            contentAlignment = Alignment.Center,
+        Icon(
+            painter = painterResource(R.drawable.ic_load),
+            contentDescription = null,
+            tint = color,
             modifier = Modifier
-                .size(25.dp)
-                .clip(
-                    shape = CircleShape,
-                )
-                .border(
-                    width = 1.dp,
-                    color = Gray,
-                    shape = CircleShape,
-                )
-                .clickable {
-                    onDownloadClick()
+                .size(26.dp)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    toggleLoadPlaylist()
                 }
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_arrow_down),
-                contentDescription = null,
-                tint = Gray,
-            )
-        }
+        )
         Spacer(modifier = Modifier.weight(1f))
         Icon(
             painter = painterResource(R.drawable.ic_random),
