@@ -61,7 +61,7 @@ fun LikedView(
     onShuffleClick: () -> Unit,
     onTrackClick: (Track) -> Unit,
     onTrackInfoClick: () -> Unit,
-    onDownloadClick: () -> Unit,
+    onDownloadClick: (Track) -> Unit,
     toggleLoadPlaylist: () -> Unit,
     onBackClick: () -> Unit,
     toggleFavorite: (Track) -> Unit,
@@ -125,7 +125,6 @@ fun LikedView(
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     PlaylistActions(
-                        onDownloadClick = onDownloadClick,
                         onShuffleClick = onShuffleClick,
                         onPlayPauseClick = onPlayPauseClick,
                         isShuffled = isShuffled,
@@ -165,7 +164,7 @@ fun LikedView(
                                     toggleFavorite(track)
                                 },
                                 onDownloadClick = {
-                                    onDownloadClick()
+                                    onDownloadClick(track)
                                 },
                                 isLoaded = !track.localAudioPath.isNullOrBlank(),
                                 downloads = downloads,
@@ -278,7 +277,6 @@ private fun PlaylistHat(
 
 @Composable
 private fun PlaylistActions(
-    onDownloadClick: () -> Unit,
     onShuffleClick: () -> Unit,
     onPlayPauseClick: () -> Unit,
     toggleLoadPlaylist: () -> Unit,
