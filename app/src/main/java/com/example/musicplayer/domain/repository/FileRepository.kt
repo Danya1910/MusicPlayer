@@ -12,6 +12,8 @@ interface FileRepository {
 
     fun downloadList(tracks: List<Track>)
 
+    fun cancelAllDownloads()
+
     fun cancelDownload(trackId: String)
 
 }
