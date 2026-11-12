@@ -360,6 +360,32 @@ class TrackRepositoryImpl @Inject constructor(
 
     }
 
+    override suspend fun likeAlbum(albumId: String) {
+        val currentUseUid = firebaseAuth.currentUser?.uid ?: return
+
+        albumDao.updateFavoriteStatus(albumId = albumId, isFavorite = true)
+
+        try {
+            val likedData = mapOf(
+                "likedAt" to System.currentTimeMillis()
+            )
+
+            firestore.collection("favorites")
+                .document(currentUseUid)
+                .collection("albums")
+                .document(albumId)
+                .set(likedData)
+                .await()
+
+            Log.d("TrackRepo", "album with id:${albumId} liked")
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            albumDao.updateFavoriteStatus(albumId = albumId, isFavorite = false)
+            throw e
+        }
+    }
+
 
     override suspend fun unlikeTrack(trackId: String) {
 
@@ -384,6 +410,29 @@ class TrackRepositoryImpl @Inject constructor(
             throw e
         }
     }
+
+    override suspend fun unlikeAlbum(albumId: String) {
+        val currentUserUid = firebaseAuth.currentUser?.uid ?: return
+
+        albumDao.updateFavoriteStatus(albumId = albumId, isFavorite = false)
+
+        try {
+
+            firestore.collection("favorites")
+                .document(currentUserUid)
+                .collection("albums")
+                .document(albumId)
+                .delete()
+                .await()
+
+            Log.d("TrackRepo", "album with id:$albumId deleted from favorites")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            albumDao.updateFavoriteStatus(albumId = albumId, isFavorite = true)
+            throw e
+        }
+    }
+
 }
 
 
