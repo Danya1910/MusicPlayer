@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -318,15 +319,12 @@ private fun PlaylistHat(
                 modifier = Modifier
                     .padding(horizontal = 20.dp)
             ) {
-                AsyncImage(
-                    model = creatorAvatarUrl,
+                Icon(
+                    painter = painterResource(R.drawable.ic_user_avatar),
                     contentDescription = null,
-                    contentScale = ContentScale.Crop,
+                    tint = Color.Unspecified,
                     modifier = Modifier
                         .size(28.dp)
-                        .clip(
-                            shape = CircleShape,
-                        )
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
@@ -339,7 +337,7 @@ private fun PlaylistHat(
                         .basicMarquee()
                 )
             }
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
