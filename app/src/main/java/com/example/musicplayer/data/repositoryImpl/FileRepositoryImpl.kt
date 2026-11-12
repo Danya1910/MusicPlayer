@@ -62,6 +62,10 @@ class FileRepositoryImpl @Inject constructor(
         _downloads.update { it - trackId }
     }
 
+    override fun cancelAllDownloads() {
+        jobs.keys.toList().forEach { cancelDownload(it) }
+    }
+
     override fun downloadList(tracks: List<Track>) {
         tracks.forEach { track ->
 
