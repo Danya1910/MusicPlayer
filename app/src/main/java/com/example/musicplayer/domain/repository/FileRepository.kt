@@ -10,6 +10,8 @@ interface FileRepository {
 
     fun toggleDownload(track: Track)
 
+    fun downloadList(tracks: List<Track>)
+
     fun cancelDownload(trackId: String)
 
 }
