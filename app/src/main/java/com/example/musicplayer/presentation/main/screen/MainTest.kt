@@ -178,6 +178,7 @@ fun MainTest(
                             onDownloadClick = { track ->
                                 mainViewModel.onDownloadClick(track)
                             },
+                            downloads = downloads,
                         )
                     }
                 }
