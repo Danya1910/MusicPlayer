@@ -1,6 +1,7 @@
 package com.example.musicplayer.presentation.main.component
 
 import android.graphics.Bitmap
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
@@ -31,19 +32,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -51,12 +47,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import coil.compose.AsyncImage
@@ -103,6 +97,9 @@ fun AlbumView(
         )
     )
 
+    val isAllAlbumLoaded = album.tracks.isNotEmpty() &&
+            album.tracks.all { it.localAudioPath != null }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -144,6 +141,7 @@ fun AlbumView(
                     },
                     onDownloadAlbumClick = onDownloadAlbumClick,
                     isPlaying = playerState.isPlaying,
+                    isAlbumLoaded = isAllAlbumLoaded,
                 )
             }
 
@@ -238,7 +236,13 @@ private fun AlbumInfo(
     onPlayPauseClick: () -> Unit,
     isPlaying: Boolean,
     onDownloadAlbumClick: () -> Unit,
+    isAlbumLoaded: Boolean,
 ) {
+
+    val color by animateColorAsState(
+        targetValue = if (isAlbumLoaded) SpotifyGreen else Gray,
+        animationSpec = tween(durationMillis = 300),
+    )
 
     Box(
         modifier = Modifier
@@ -302,26 +306,19 @@ private fun AlbumInfo(
                         }
                 )
                 Spacer(modifier = Modifier.width(30.dp))
-                Box(
-                    contentAlignment = Alignment.Center,
+                Icon(
+                    painter = painterResource(R.drawable.ic_load),
+                    contentDescription = null,
+                    tint = color,
                     modifier = Modifier
-                        .size(21.dp)
-                        .clip(
-                            shape = CircleShape,
-                        )
-                        .background(
-                            color = SpotifyGreen,
-                        )
-                        .clickable {
+                        .size(26.dp)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
                             onDownloadAlbumClick()
                         }
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_arrow_down),
-                        contentDescription = null,
-                        tint = Black,
-                    )
-                }
+                )
                 Spacer(modifier = Modifier.width(30.dp))
                 Icon(
                     painter = painterResource(R.drawable.ic_ellipsis),
