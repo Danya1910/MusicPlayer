@@ -1,13 +1,21 @@
 package com.example.musicplayer.presentation.main.component
 
 import android.graphics.Bitmap
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -142,6 +150,7 @@ fun AlbumView(
                     onDownloadAlbumClick = onDownloadAlbumClick,
                     isPlaying = playerState.isPlaying,
                     isAlbumLoaded = isAllAlbumLoaded,
+                    isLiked = album.isFavorite
                 )
             }
 
@@ -237,6 +246,7 @@ private fun AlbumInfo(
     isPlaying: Boolean,
     onDownloadAlbumClick: () -> Unit,
     isAlbumLoaded: Boolean,
+    isLiked: Boolean,
 ) {
 
     val color by animateColorAsState(
@@ -296,15 +306,38 @@ private fun AlbumInfo(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_heart),
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier
-                        .clickable {
-                            onHeartClick()
-                        }
-                )
+                AnimatedContent(
+                    targetState = isLiked,
+                    transitionSpec = {
+                        val springSpec = spring<Float>(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        )
+
+                        (fadeIn(animationSpec = tween(220)) +
+                                scaleIn(initialScale = 0.5f, animationSpec = springSpec)) togetherWith
+                                (fadeOut(animationSpec = tween(220)) +
+                                        scaleOut(targetScale = 0.5f, animationSpec = tween(220)))
+                    },
+                ) { favoriteState ->
+                    Icon(
+                        painter = painterResource(
+                            if (favoriteState) R.drawable.ic_tick_circle
+                            else R.drawable.ic_circle_plus
+                        ),
+                        contentDescription = null,
+                        tint = if (isLiked) Color.Unspecified else Gray,
+                        modifier = Modifier
+                            .size(36.dp)
+                            .padding(6.dp)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                onHeartClick()
+                            },
+                    )
+                }
                 Spacer(modifier = Modifier.width(30.dp))
                 Icon(
                     painter = painterResource(R.drawable.ic_load),
