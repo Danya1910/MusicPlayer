@@ -31,6 +31,12 @@ interface AlbumDao {
     @Query("SELECT * FROM albums WHERE albumId = :albumId")
     fun getAlbumWithTracksById(albumId: String): Flow<AlbumWithTracks?>
 
+    @Query("UPDATE albums SET isFavorite = :isFavorite WHERE albumId = :albumId")
+    suspend fun updateFavoriteStatus(albumId: String, isFavorite: Boolean)
+
+    @Query("SELECT * FROM albums")
+    suspend fun getAllAlbumsOnce(): List<AlbumEntity>
+
     @Delete
     suspend fun deleteAlbum(album: AlbumEntity)
 
