@@ -136,20 +136,35 @@ class TrackRepositoryImpl @Inject constructor(
         }
 
     override fun getAlbums(): Flow<List<Album>> = flow {
+
+        val savedAlbums = albumDao.getAllAlbumsOnce().map { it.toDomain() }
+        emit(savedAlbums)
+
         try {
             if (firebaseAuth.currentUser != null) {
                 val allAlbumsSnapshot = firestore.collection("albums").get().await()
+
+                val currentCache = albumDao.getAllAlbumsOnce()
+                val cacheMap = currentCache.associateBy { it.albumId }
 
                 val remoteAlbumsEntities = allAlbumsSnapshot.documents.map { document ->
                     AlbumEntity(
                         albumId = document.id,
                         title = document.getString("title") ?: "Без названия",
                         artist = document.getString("artist") ?: "Неизвестный исполнитель",
-                        imageUrl = document.getString("imageUrl") ?: ""
+                        imageUrl = document.getString("imageUrl") ?: "",
+                        isFavorite = false,
                     )
                 }
 
-                albumDao.insertAlbums(remoteAlbumsEntities)
+                val entitiesToInsert = remoteAlbumsEntities.map { remoteAlbum ->
+                    val cachedAlbum = cacheMap[remoteAlbum.albumId]
+                    remoteAlbum.copy(
+                        isFavorite = cachedAlbum?.isFavorite ?: false
+                    )
+                }
+
+                albumDao.insertAlbums(entitiesToInsert)
             }
         } catch (e: Exception) {
             e.printStackTrace()
