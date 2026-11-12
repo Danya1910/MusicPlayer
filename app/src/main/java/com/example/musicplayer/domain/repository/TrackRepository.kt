@@ -30,5 +30,8 @@ interface TrackRepository {
 
     suspend fun unlikeTrack(trackId: String)
 
+    suspend fun likeAlbum(albumId: String)
+
+    suspend fun unlikeAlbum(albumId: String)
 
 }
