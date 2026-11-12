@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
@@ -34,6 +36,8 @@ class FileRepositoryImpl @Inject constructor(
 
     private val _downloads = MutableStateFlow<Map<String, DownloadProgress>>(emptyMap())
     override val downloads: StateFlow<Map<String, DownloadProgress>> = _downloads.asStateFlow()
+
+    private val downloadSemaphore = Semaphore(3)
 
     private val jobs = ConcurrentHashMap<String, Job>()
 
@@ -58,16 +62,42 @@ class FileRepositoryImpl @Inject constructor(
         _downloads.update { it - trackId }
     }
 
+    override fun downloadList(tracks: List<Track>) {
+        tracks.forEach { track ->
+
+            if(track.localAudioPath != null)
+                return@forEach
+
+            if(jobs.contains(track.id))
+                return@forEach
+
+            if(_downloads.value[track.id] is DownloadProgress.InProgress)
+                return@forEach
+
+            startDownload(
+                trackId = track.id,
+                url = track.audioUrl,
+            )
+        }
+    }
+
     private fun startDownload(trackId: String, url: String) {
-        jobs[trackId] = scope.launch {
+        // Атомарно резервируем слот: если уже есть job — выходим.
+        // Job() из kotlinx.coroutines — неактивная заглушка.
+        if (jobs.putIfAbsent(trackId, Job()) != null) return
+
+        val job = scope.launch {
             _downloads.update { it + (trackId to DownloadProgress.InProgress(0L, 0L)) }
 
             try {
-                downloadInternal(trackId, url)
+                downloadSemaphore.withPermit {
+                    downloadInternal(trackId, url)
+                }
                 val file = File(context.filesDir, "tracks/$trackId.mp3")
                 _downloads.update { it + (trackId to DownloadProgress.Completed(file)) }
             } catch (e: CancellationException) {
                 File(context.filesDir, "tracks/$trackId.mp3").delete()
+                _downloads.update { it - trackId }
                 throw e
             } catch (e: Exception) {
                 File(context.filesDir, "tracks/$trackId.mp3").delete()
@@ -79,6 +109,9 @@ class FileRepositoryImpl @Inject constructor(
             delay(1_500)
             _downloads.update { it - trackId }
         }
+
+        // заменяем placeholder реальной job
+        jobs[trackId] = job
     }
 
     private suspend fun downloadInternal(trackId: String, networkUrl: String) = withContext(Dispatchers.IO) {
