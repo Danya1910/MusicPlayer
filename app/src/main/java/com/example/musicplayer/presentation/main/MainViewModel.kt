@@ -508,6 +508,18 @@ class MainViewModel @Inject constructor(
 
     fun onDownloadClick(track: Track) = fileRepository.toggleDownload(track)
 
+    fun downloadListOfTracks(
+        tracks: List<Track>,
+    ) {
+        try {
+            fileRepository.downloadList(
+                tracks = tracks
+            )
+        } catch (e: Exception) {
+            Log.d("TrackVM", e.toString())
+        }
+    }
+
     fun getLyrics(
         trackId: String,
     ) {
