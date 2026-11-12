@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
+import com.example.musicplayer.domain.model.Album
 import com.example.musicplayer.domain.model.DownloadProgress
 import com.example.musicplayer.domain.model.Lyrics
 import com.example.musicplayer.domain.model.PlayList
@@ -504,6 +505,55 @@ class MainViewModel @Inject constructor(
     fun toggleFavorite(track: Track) {
         if (track.isFavorite) unlikeTrack(track.id)
         else likeTrack(track.id)
+    }
+
+    fun likeAlbum(
+        albumId: String
+    ) {
+
+        viewModelScope.launch {
+            try {
+                trackRepository.likeAlbum(
+                    albumId = albumId,
+                )
+                _toast.value = ToastData(
+                    title = "Library",
+                    message = "Added to your Library",
+                    type = ToastType.SUCCESS,
+                )
+                Log.d("Like", "Liked success")
+            } catch (e: Exception) {
+                Log.e("TrackVM", e.toString())
+                _toast.value = ToastData(
+                    title = "Library",
+                    message = "Fail Adding to your Library",
+                    type = ToastType.ERROR,
+                )
+                Log.d("Like", "Liked exception")
+
+            }
+        }
+    }
+
+    fun unlikeAlbum(
+        albumId: String,
+    ) {
+        viewModelScope.launch {
+            try {
+                trackRepository.unlikeAlbum(
+                    albumId = albumId,
+                )
+            } catch (e: Exception) {
+                Log.e("TrackVM", e.toString())
+            }
+        }
+    }
+
+    fun toggleAlbumLike(
+        album: Album,
+    ) {
+        if (album.isFavorite) unlikeAlbum(albumId = album.id)
+        else likeAlbum(albumId = album.id)
     }
 
     fun onDownloadClick(track: Track) = fileRepository.toggleDownload(track)
