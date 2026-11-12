@@ -50,7 +50,6 @@ import com.example.musicplayer.presentation.main.component.LikedView
 import com.example.musicplayer.presentation.main.component.ModalRightSheet
 import com.example.musicplayer.presentation.main.component.PlaylistView
 import com.example.musicplayer.presentation.main.util.PlaylistUi
-import com.example.musicplayer.presentation.navigation.Screen
 import com.example.musicplayer.presentation.navigation.TabScreen
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
@@ -159,6 +158,11 @@ fun LibraryTest(
                             downloads = downloads,
                             navigateToHome = {
                                 tabController.navigate(TabScreen.Home)
+                            },
+                            toggleLoadPlaylist = {
+                                mainViewModel.toggleListOfTracks(
+                                    tracks = playList.tracks,
+                                )
                             }
                         )
                     } else {
