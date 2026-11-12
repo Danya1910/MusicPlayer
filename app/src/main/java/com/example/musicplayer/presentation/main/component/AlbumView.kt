@@ -1,6 +1,13 @@
 package com.example.musicplayer.presentation.main.component
 
 import android.graphics.Bitmap
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
@@ -34,10 +41,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -49,6 +62,7 @@ import androidx.core.graphics.drawable.toBitmap
 import coil.compose.AsyncImage
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.Album
+import com.example.musicplayer.domain.model.DownloadProgress
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.presentation.player.state.PlayerUiState
 import com.example.musicplayer.ui.theme.Black
@@ -73,6 +87,7 @@ fun AlbumView(
     onTrackClick: (Track) -> Unit,
     toggleFavorite: (Track) -> Unit,
     onDownloadClick: (Track) -> Unit,
+    downloads: Map<String, DownloadProgress>,
 ) {
 
     val hazeState = remember { HazeState() }
@@ -147,6 +162,8 @@ fun AlbumView(
                     onDownloadClick = {
                         onDownloadClick(track)
                     },
+                    isLoaded = !track.localAudioPath.isNullOrBlank(),
+                    downloads = downloads,
                 )
             }
 
@@ -360,6 +377,8 @@ private fun AlbumTrackItem(
     toggleFavorite: () -> Unit,
     onDownloadClick: () -> Unit,
     onMoreClick: () -> Unit,
+    isLoaded: Boolean,
+    downloads: Map<String, DownloadProgress>,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -396,19 +415,11 @@ private fun AlbumTrackItem(
                     .basicMarquee()
             )
         }
-        if(track.localAudioPath != null) {
-            Spacer(modifier = Modifier.width(10.dp))
-            Icon(
-                painter = painterResource(R.drawable.ic_load),
-                contentDescription = null,
-                tint = SpotifyGreen,
-                modifier = Modifier
-                    .size(18.dp)
-                    .clickable{
-                        onDownloadClick()
-                    }
-            )
-        }
+        LoadIndicator(
+            isLoaded = isLoaded,
+            progress = downloads[track.id],
+            onLoadClick = onDownloadClick,
+        )
         if(track.isFavorite) {
             Spacer(modifier = Modifier.width(10.dp))
             Icon(
@@ -435,5 +446,109 @@ private fun AlbumTrackItem(
                     onMoreClick()
                 }
         )
+    }
+}
+
+@Composable
+private fun LoadIndicator(
+    isLoaded: Boolean,
+    progress: DownloadProgress?,
+    onLoadClick: () -> Unit,
+) {
+    val isDownloading = progress is DownloadProgress.InProgress
+
+    val shouldShow = isLoaded || isDownloading
+
+    val percent = (progress as? DownloadProgress.InProgress)?.percent ?: -1
+
+    val animatedProgress by animateFloatAsState(
+        targetValue = if (percent >= 0) percent / 100f else 0f,
+        animationSpec = tween(durationMillis = 200),
+        label = "downloadProgress",
+    )
+
+    val infiniteRotation = rememberInfiniteTransition(label = "spin").animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = LinearEasing),
+        ),
+        label = "rotation",
+    )
+
+    Box(
+        modifier = Modifier
+            .size(30.dp)
+            .alpha(if (shouldShow) 1f else 0f)
+            .then(
+                if (shouldShow) {
+                    Modifier.clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                    ) { onLoadClick() }
+                } else Modifier
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (shouldShow) {
+            Icon(
+                painter = painterResource(R.drawable.ic_load),
+                contentDescription = null,
+                tint = when {
+                    isLoaded -> SpotifyGreen
+                    else -> Gray
+                },
+                modifier = Modifier
+                    .size(30.dp)
+                    .padding(5.dp),
+            )
+
+            if (isDownloading) {
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val iconPadding = 5.4.dp.toPx()
+                    val stroke = 1.7.dp.toPx()
+                    val inset = iconPadding + stroke / 2
+                    val arcSize = Size(
+                        width = size.width - inset * 2,
+                        height = size.height - inset * 2,
+                    )
+                    val topLeft = Offset(inset, inset)
+
+                    drawArc(
+                        color = Gray.copy(alpha = 0.25f),
+                        startAngle = -90f,
+                        sweepAngle = 360f,
+                        useCenter = false,
+                        topLeft = topLeft,
+                        size = arcSize,
+                        style = Stroke(width = stroke),
+                    )
+
+                    if (percent >= 0) {
+                        drawArc(
+                            color = SpotifyGreen,
+                            startAngle = -90f,
+                            sweepAngle = 360f * animatedProgress,
+                            useCenter = false,
+                            topLeft = topLeft,
+                            size = arcSize,
+                            style = Stroke(width = stroke, cap = StrokeCap.Round),
+                        )
+                    } else {
+                        rotate(infiniteRotation.value) {
+                            drawArc(
+                                color = SpotifyGreen,
+                                startAngle = 0f,
+                                sweepAngle = 90f,
+                                useCenter = false,
+                                topLeft = topLeft,
+                                size = arcSize,
+                                style = Stroke(width = stroke, cap = StrokeCap.Round),
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
