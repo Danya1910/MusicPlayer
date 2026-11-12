@@ -520,6 +520,14 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun cancelAllDownloads() {
+        try {
+            fileRepository.cancelAllDownloads()
+        } catch (e: Exception) {
+            Log.d("TrackVM", e.toString())
+        }
+    }
+
     fun getLyrics(
         trackId: String,
     ) {
