@@ -10,6 +10,7 @@ import com.example.musicplayer.domain.model.Album
 import com.example.musicplayer.domain.model.DownloadProgress
 import com.example.musicplayer.domain.model.Lyrics
 import com.example.musicplayer.domain.model.PlayList
+import com.example.musicplayer.domain.model.PlaybackOrigin
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.domain.model.User
 import com.example.musicplayer.domain.repository.FileRepository
@@ -284,17 +285,25 @@ class MainViewModel @Inject constructor(
         initialValue = emptyList()
     ) as StateFlow<List<Track>>
 
-    fun playTrack(track: Track) {
-        musicRepository.playTrack(track)
+    fun playTrack(
+        track: Track,
+        playbackOrigin: PlaybackOrigin,
+    ) {
+        musicRepository.playTrack(
+            track = track,
+            playbackOrigin = playbackOrigin
+        )
     }
 
     fun playTrackWithQueue(
         track: Track,
-        queue: List<Track>
+        queue: List<Track>,
+        playbackOrigin: PlaybackOrigin,
     ) {
         musicRepository.playTrackWithQueue(
             track = track,
             queue = queue,
+            playbackOrigin = playbackOrigin,
         )
     }
 
