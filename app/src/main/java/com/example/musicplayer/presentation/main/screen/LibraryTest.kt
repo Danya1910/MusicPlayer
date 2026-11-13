@@ -1,5 +1,6 @@
 package com.example.musicplayer.presentation.main.screen
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
@@ -23,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,6 +55,7 @@ import com.example.musicplayer.presentation.main.component.LikedView
 import com.example.musicplayer.presentation.main.component.ModalRightSheet
 import com.example.musicplayer.presentation.main.component.PlaylistView
 import com.example.musicplayer.presentation.main.state.MainUiState
+import com.example.musicplayer.presentation.main.util.LibraryTab
 import com.example.musicplayer.presentation.main.util.PlaylistUi
 import com.example.musicplayer.presentation.navigation.TabScreen
 import com.example.musicplayer.ui.theme.DeepBlack
@@ -99,12 +102,26 @@ fun LibraryTest(
     }
 
 
+    var selectedTab by remember { mutableStateOf(LibraryTab.All) }
+
+    LaunchedEffect(selectedTab) {
+        Log.d("Library", "selectedTab: $selectedTab")
+    }
+
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
         LibraryTopBar(
             user = user,
+            changeTab = { tab ->
+                if (selectedTab == tab)
+                    selectedTab = LibraryTab.All
+                else
+                    selectedTab = tab
+            }
         )
         LazyColumn(
             modifier = Modifier
@@ -114,51 +131,54 @@ fun LibraryTest(
                 )
         ) {
 
-            item {
-                FavoritesItem(
-                    playList = favorites.playlist,
-                    onClick = {
-                        currentPlaylistToShow = favorites
-                        showPlayList = true
-                    }
-                )
+            if (selectedTab == LibraryTab.Playlists || selectedTab == LibraryTab.All) {
+                item {
+                    FavoritesItem(
+                        playList = favorites.playlist,
+                        onClick = {
+                            currentPlaylistToShow = favorites
+                            showPlayList = true
+                        }
+                    )
+                }
+
+                items(playlists) { playlist ->
+                    PlayListItem(
+                        playList = playlist.playlist,
+                        onClick = {
+                            currentPlaylistToShow = playlist
+                            showPlayList = true
+                        }
+                    )
+                }
             }
 
-            items(playlists) { playlist ->
-                PlayListItem(
-                    playList = playlist.playlist,
-                    onClick = {
-                        currentPlaylistToShow = playlist
-                        showPlayList = true
-                    }
-                )
-            }
-
-            when (val state = uiState) {
-                is MainUiState.Success -> {
-                    val favorites = state.albums.filter { it.isFavorite }
-                    if (favorites.isEmpty()) {
-                    } else {
-                        items(favorites, key = { it.id }) { album ->
-                            AlbumItem(
-                                album = album,
-                                onClick = {
-                                    currentAlbumToShow = album
-                                    showAlbum = true
-                                }
-                            )
+            if (selectedTab == LibraryTab.Albums || selectedTab == LibraryTab.All)
+                when (val state = uiState) {
+                    is MainUiState.Success -> {
+                        val favorites = state.albums.filter { it.isFavorite }
+                        if (favorites.isEmpty()) {
+                        } else {
+                            items(favorites, key = { it.id }) { album ->
+                                AlbumItem(
+                                    album = album,
+                                    onClick = {
+                                        currentAlbumToShow = album
+                                        showAlbum = true
+                                    }
+                                )
+                            }
                         }
                     }
-                }
 
-                MainUiState.Loading -> {
-                    // скелетон / спиннер
-                }
+                    MainUiState.Loading -> {
+                        // скелетон / спиннер
+                    }
 
-                is MainUiState.Error -> {
-                    // текст ошибки
+                    is MainUiState.Error -> {
+                        // текст ошибки
+                    }
                 }
-            }
         }
     }
 
@@ -548,6 +568,7 @@ private fun songsFormat(
 @Composable
 private fun LibraryTopBar(
     user: User,
+    changeTab: (LibraryTab) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -603,15 +624,20 @@ private fun LibraryTopBar(
         ) {
             TopBarItem(
                 title = "Playlists",
-                onClick = {}
+                onClick = {
+                    changeTab(LibraryTab.Playlists)
+                }
             )
             TopBarItem(
                 title = "Albums",
-                onClick = {}
+                onClick = {
+                    changeTab(LibraryTab.Albums)
+                }
             )
             TopBarItem(
                 title = "Artists",
-                onClick = {}
+                onClick = {
+                }
             )
         }
     }
