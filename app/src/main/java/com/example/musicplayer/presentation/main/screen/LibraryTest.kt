@@ -42,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.musicplayer.R
+import com.example.musicplayer.domain.model.Album
 import com.example.musicplayer.domain.model.PlayList
 import com.example.musicplayer.domain.model.PlaybackOrigin
 import com.example.musicplayer.domain.model.Track
@@ -50,6 +51,7 @@ import com.example.musicplayer.presentation.main.MainViewModel
 import com.example.musicplayer.presentation.main.component.LikedView
 import com.example.musicplayer.presentation.main.component.ModalRightSheet
 import com.example.musicplayer.presentation.main.component.PlaylistView
+import com.example.musicplayer.presentation.main.state.MainUiState
 import com.example.musicplayer.presentation.main.util.PlaylistUi
 import com.example.musicplayer.presentation.navigation.TabScreen
 import com.example.musicplayer.ui.theme.DeepBlack
@@ -67,6 +69,8 @@ fun LibraryTest(
 ) {
 
     val playlists by mainViewModel.playlistsUiState.collectAsStateWithLifecycle()
+
+    val uiState by mainViewModel.uiState.collectAsStateWithLifecycle()
 
     val downloads by mainViewModel.downloads.collectAsStateWithLifecycle()
 
@@ -118,6 +122,23 @@ fun LibraryTest(
                         showPlayList = true
                     }
                 )
+            }
+
+            when (val state = uiState) {
+                is MainUiState.Success -> {
+                    val favorites = state.albums.filter { it.isFavorite }
+                    if (favorites.isEmpty()) {
+                    } else {
+                        items(favorites, key = { it.id }) { album ->
+                            AlbumItem(
+                                album = album,
+                                onClick = {}
+                            )
+                        }
+                    }
+                }
+                MainUiState.Loading -> { /* скелетон / спиннер */ }
+                is MainUiState.Error -> { /* текст ошибки */ }
             }
         }
     }
