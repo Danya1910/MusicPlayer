@@ -391,6 +391,58 @@ private fun FavoritesItem(
     }
 }
 
+@Composable
+private fun AlbumItem(
+    album: Album,
+    onClick: () -> Unit,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(95.dp)
+            .clickable {
+                onClick()
+            }
+            .padding(horizontal = 20.dp)
+    ) {
+        AsyncImage(
+            model = album.imageUrl,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(70.dp)
+                .clip(
+                    shape = RoundedCornerShape(4.dp)
+                )
+        )
+        Spacer(modifier = Modifier.width(15.dp))
+        Column(
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = album.title,
+                fontWeight = FontWeight.Medium,
+                fontSize = 20.sp,
+                color = White,
+                maxLines = 1,
+                modifier = Modifier
+                    .basicMarquee()
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "Album · ${album.artist}",
+                fontWeight = FontWeight.Medium,
+                fontSize = 16.sp,
+                color = Gray,
+                maxLines = 1,
+                modifier = Modifier
+                    .basicMarquee()
+            )
+        }
+    }
+}
+
 private fun songsFormat(
     songsCount: Int,
 ): String {
