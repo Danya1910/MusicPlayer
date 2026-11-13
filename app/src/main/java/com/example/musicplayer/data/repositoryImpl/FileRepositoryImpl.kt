@@ -108,8 +108,6 @@ class FileRepositoryImpl @Inject constructor(
     }
 
     private fun startDownload(trackId: String, url: String) {
-        // Атомарно резервируем слот: если уже есть job — выходим.
-        // Job() из kotlinx.coroutines — неактивная заглушка.
         if (jobs.putIfAbsent(trackId, Job()) != null) return
 
         val job = scope.launch {
@@ -136,7 +134,6 @@ class FileRepositoryImpl @Inject constructor(
             _downloads.update { it - trackId }
         }
 
-        // заменяем placeholder реальной job
         jobs[trackId] = job
     }
 
