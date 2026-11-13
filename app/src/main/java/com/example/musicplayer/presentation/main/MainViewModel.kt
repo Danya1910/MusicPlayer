@@ -94,6 +94,7 @@ class MainViewModel @Inject constructor(
         )
     }
 
+    val currentPlayingOrigin: StateFlow<PlaybackOrigin> = musicRepository.playbackOrigin
     val uiState: StateFlow<MainUiState> = combine(
         trackRepository.getAllTrack(),
         trackRepository.getAlbums(),
