@@ -51,6 +51,8 @@ fun MainTest(
 
     val playerState by mainViewModel.playerState.collectAsStateWithLifecycle()
 
+    val playbackOrigin by mainViewModel.currentPlayingOrigin.collectAsStateWithLifecycle()
+
     val albumToPass = if (clickedAlbum != null) {
         (uiState as MainUiState.Success).albums.find { it.id == clickedAlbum!!.id }
     } else null
@@ -145,20 +147,22 @@ fun MainTest(
                                 isAlbumViewVisible = false
                                 clickedAlbum = null
                             },
-                            onPlayPauseClick = { tracks ->
-                                if (playerState.isPlaying) {
-                                    mainViewModel.togglePlayPause()
-                                } else {
-                                    tracks.firstOrNull()?.let { firstTrack ->
-                                        mainViewModel.playTrackWithQueue(
-                                            track = firstTrack,
-                                            queue = tracks,
-                                            playbackOrigin = PlaybackOrigin.Album(
-                                                albumId = album.id,
-                                            ),
-                                        )
-                                    }
+                            onPlayClick = { tracks ->
+                                tracks.firstOrNull()?.let { firstTrack ->
+                                    mainViewModel.playTrackWithQueue(
+                                        track = firstTrack,
+                                        queue = tracks,
+                                        playbackOrigin = PlaybackOrigin.Album(
+                                            albumId = album.id,
+                                        ),
+                                    )
                                 }
+                            },
+                            onContinuePlayClick = {
+                                mainViewModel.togglePlayPause()
+                            },
+                            onPauseClick = {
+                                mainViewModel.togglePlayPause()
                             },
                             onDownloadAlbumClick = {
                                 mainViewModel.toggleListOfTracks(
@@ -191,6 +195,7 @@ fun MainTest(
                                 mainViewModel.onDownloadClick(track)
                             },
                             downloads = downloads,
+                            currentPlayingOrigin = playbackOrigin,
                         )
                     }
                 }
