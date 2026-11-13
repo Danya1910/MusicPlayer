@@ -1,6 +1,9 @@
 package com.example.musicplayer.presentation.main.screen
 
 import android.util.Log
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
@@ -58,6 +61,7 @@ import com.example.musicplayer.presentation.main.state.MainUiState
 import com.example.musicplayer.presentation.main.util.LibraryTab
 import com.example.musicplayer.presentation.main.util.PlaylistUi
 import com.example.musicplayer.presentation.navigation.TabScreen
+import com.example.musicplayer.ui.theme.DarkGray
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.White
@@ -121,7 +125,8 @@ fun LibraryTest(
                     selectedTab = LibraryTab.All
                 else
                     selectedTab = tab
-            }
+            },
+            selectedTab = selectedTab,
         )
         LazyColumn(
             modifier = Modifier
@@ -569,7 +574,9 @@ private fun songsFormat(
 private fun LibraryTopBar(
     user: User,
     changeTab: (LibraryTab) -> Unit,
+    selectedTab: LibraryTab,
 ) {
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -626,18 +633,21 @@ private fun LibraryTopBar(
                 title = "Playlists",
                 onClick = {
                     changeTab(LibraryTab.Playlists)
-                }
+                },
+                selected = selectedTab == LibraryTab.Playlists,
             )
             TopBarItem(
                 title = "Albums",
                 onClick = {
                     changeTab(LibraryTab.Albums)
-                }
+                },
+                selected = selectedTab == LibraryTab.Albums,
             )
             TopBarItem(
                 title = "Artists",
                 onClick = {
-                }
+                },
+                selected = selectedTab == LibraryTab.Artists,
             )
         }
     }
@@ -647,7 +657,14 @@ private fun LibraryTopBar(
 private fun TopBarItem(
     title: String,
     onClick: () -> Unit,
+    selected: Boolean,
 ) {
+
+    val backgroundColor by animateColorAsState(
+        targetValue = if (selected) DarkGray else DeepBlack,
+        animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
+        label = "TopBarItem_$title"
+    )
 
     val gradientColors = listOf(
         Color(0xFFFFFFFF).copy(alpha = 0.8f),
@@ -665,7 +682,7 @@ private fun TopBarItem(
                 shape = CircleShape
             )
             .background(
-                color = DeepBlack,
+                color = backgroundColor,
             )
             .border(
                 width = 1.dp,
