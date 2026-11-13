@@ -70,6 +70,8 @@ fun LibraryTest(
 
     val downloads by mainViewModel.downloads.collectAsStateWithLifecycle()
 
+    val playbackOrigin by mainViewModel.currentPlayingOrigin.collectAsStateWithLifecycle()
+
     val playerState by mainViewModel.playerState.collectAsStateWithLifecycle()
 
     val user by mainViewModel.userState.collectAsStateWithLifecycle()
@@ -133,14 +135,22 @@ fun LibraryTest(
                             playList = playList,
                             tracks = playList.tracks,
                             playerState = playerState,
-                            onPlayPauseClick = {
-                                mainViewModel.playTrackWithQueue(
-                                    track = playList.tracks[0],
-                                    queue = playList.tracks,
-                                    playbackOrigin = PlaybackOrigin.Playlist(
-                                        playlistId = playList.playlist.id,
+                            onPlayClick = { tracks ->
+                                tracks.firstOrNull()?.let { firstTrack ->
+                                    mainViewModel.playTrackWithQueue(
+                                        track = firstTrack,
+                                        queue = tracks,
+                                        playbackOrigin = PlaybackOrigin.Playlist(
+                                            playlistId = playList.playlist.id ?: "",
+                                        ),
                                     )
-                                )
+                                }
+                            },
+                            onContinuePlayClick = {
+                                mainViewModel.togglePlayPause()
+                            },
+                            onPauseClick = {
+                                mainViewModel.togglePlayPause()
                             },
                             onShuffleClick = {
                                 mainViewModel.toggleShuffleMode()
@@ -176,21 +186,30 @@ fun LibraryTest(
                                 mainViewModel.toggleListOfTracks(
                                     tracks = playList.tracks,
                                 )
-                            }
+                            },
+                            currentPlayingOrigin = playbackOrigin,
                         )
                     } else {
                         PlaylistView(
                             playList = playList,
                             tracks = playList.tracks,
                             playerState = playerState,
-                            onPlayPauseClick = {
-                                mainViewModel.playTrackWithQueue(
-                                    track = playList.tracks[0],
-                                    queue = playList.tracks,
-                                    playbackOrigin = PlaybackOrigin.Playlist(
-                                        playlistId = playList.playlist.id ?: "",
+                            onPlayClick = { tracks ->
+                                tracks.firstOrNull()?.let { firstTrack ->
+                                    mainViewModel.playTrackWithQueue(
+                                        track = firstTrack,
+                                        queue = tracks,
+                                        playbackOrigin = PlaybackOrigin.Playlist(
+                                            playlistId = playList.playlist.id ?: "",
+                                        ),
                                     )
-                                )
+                                }
+                            },
+                            onContinuePlayClick = {
+                                mainViewModel.togglePlayPause()
+                            },
+                            onPauseClick = {
+                                mainViewModel.togglePlayPause()
                             },
                             onShuffleClick = {
                                 mainViewModel.toggleShuffleMode()
@@ -231,7 +250,8 @@ fun LibraryTest(
                                 mainViewModel.toggleListOfTracks(
                                     tracks = playList.tracks,
                                 )
-                            }
+                            },
+                            currentPlayingOrigin = playbackOrigin,
                         )
                     }
                 }
