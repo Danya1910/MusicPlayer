@@ -14,6 +14,7 @@ import androidx.media3.session.SessionToken
 import com.example.musicplayer.data.local.dao.TrackDao
 import com.example.musicplayer.data.local.entity.toDomain
 import com.example.musicplayer.data.service.MusicService
+import com.example.musicplayer.domain.model.PlaybackOrigin
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.domain.repository.MusicRepository
 import com.google.common.util.concurrent.MoreExecutors
@@ -90,6 +91,9 @@ class MusicRepositoryImpl @Inject constructor(
     private val _currentQueue = MutableStateFlow<List<Track>>(emptyList())
     override val currentQueue = _currentQueue.asStateFlow()
 
+    private val _playbackOrigin = MutableStateFlow<PlaybackOrigin>(PlaybackOrigin.Unknown)
+    override val playbackOrigin = _playbackOrigin.asStateFlow()
+
     init {
         val sessionToken = SessionToken(
             context, ComponentName(context, MusicService::class.java)
@@ -156,7 +160,11 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun playTrack(track: Track) {
+    override fun playTrack(
+        track: Track,
+        playbackOrigin: PlaybackOrigin,
+    ) {
+        _playbackOrigin.value = playbackOrigin
         _trackCache.value = _trackCache.value + (track.id to track)
 
         val mediaMetadata = MediaMetadata.Builder()
@@ -177,7 +185,13 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
 
-    override fun playTrackWithQueue(track: Track, queue: List<Track>) {
+    override fun playTrackWithQueue(
+        track: Track,
+        queue: List<Track>,
+        playbackOrigin: PlaybackOrigin,
+    ) {
+        _playbackOrigin.value = playbackOrigin
+
         _trackCache.value = _trackCache.value + queue.associateBy { it.id }
 
         repositoryScope.launch(Dispatchers.Default) {
@@ -320,7 +334,7 @@ class MusicRepositoryImpl @Inject constructor(
             while (true) {
                 val elapsed = System.currentTimeMillis() - start
                 val remaining = totalMs - elapsed
-                if(remaining <= 0L) {
+                if (remaining <= 0L) {
                     _sleepTimerRemainingSec.value = null
                     withContext(Dispatchers.Main) {
                         mediaController?.pause()
