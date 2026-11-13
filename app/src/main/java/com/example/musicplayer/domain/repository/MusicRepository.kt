@@ -1,5 +1,6 @@
 package com.example.musicplayer.domain.repository
 
+import com.example.musicplayer.domain.model.PlaybackOrigin
 import com.example.musicplayer.domain.model.Track
 import kotlinx.coroutines.flow.StateFlow
 
@@ -21,9 +22,18 @@ interface MusicRepository {
 
     val stopAtTrackEnd: StateFlow<Boolean>
 
-    fun playTrack(track: Track)
+    val playbackOrigin: StateFlow<PlaybackOrigin>
 
-    fun playTrackWithQueue(track: Track, queue: List<Track>)
+    fun playTrack(
+        track: Track,
+        playbackOrigin: PlaybackOrigin,
+    )
+
+    fun playTrackWithQueue(
+        track: Track,
+        queue: List<Track>,
+        playbackOrigin: PlaybackOrigin,
+    )
 
     fun togglePlayPause()
 
