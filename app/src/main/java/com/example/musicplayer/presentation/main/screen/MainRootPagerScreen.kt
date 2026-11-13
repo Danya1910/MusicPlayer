@@ -29,6 +29,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.musicplayer.domain.model.PlaybackOrigin
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.presentation.main.MainViewModel
 import com.example.musicplayer.presentation.main.component.AddTrackToPlayListWidget
@@ -376,7 +377,8 @@ fun MainRootPagerScreen(
                         onTrackInQueueClick = { track ->
                             mainViewModel.playTrackWithQueue(
                                 track = track,
-                                queue = currentQueue
+                                queue = currentQueue,
+                                playbackOrigin = PlaybackOrigin.Unknown,
                             )
                         },
                         onMoveTrack = { fromIndex, toIndex ->

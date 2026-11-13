@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.musicplayer.domain.model.Album
+import com.example.musicplayer.domain.model.PlaybackOrigin
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.presentation.main.MainViewModel
 import com.example.musicplayer.presentation.main.component.AlbumView
@@ -93,6 +94,7 @@ fun MainTest(
                                 mainViewModel.playTrackWithQueue(
                                     track = track,
                                     queue = state.tracks,
+                                    playbackOrigin = PlaybackOrigin.Unknown
                                 )
                             },
                             onAlbumClick = { album ->
@@ -144,11 +146,18 @@ fun MainTest(
                                 clickedAlbum = null
                             },
                             onPlayPauseClick = { tracks ->
-                                tracks.firstOrNull()?.let { firstTrack ->
-                                    mainViewModel.playTrackWithQueue(
-                                        track = firstTrack,
-                                        queue = tracks,
-                                    )
+                                if (playerState.isPlaying) {
+                                    mainViewModel.togglePlayPause()
+                                } else {
+                                    tracks.firstOrNull()?.let { firstTrack ->
+                                        mainViewModel.playTrackWithQueue(
+                                            track = firstTrack,
+                                            queue = tracks,
+                                            playbackOrigin = PlaybackOrigin.Album(
+                                                albumId = album.id,
+                                            ),
+                                        )
+                                    }
                                 }
                             },
                             onDownloadAlbumClick = {
@@ -170,6 +179,9 @@ fun MainTest(
                                 mainViewModel.playTrackWithQueue(
                                     track = track,
                                     queue = clickedAlbum!!.tracks,
+                                    playbackOrigin = PlaybackOrigin.Album(
+                                        albumId = album.id,
+                                    ),
                                 )
                             },
                             toggleFavorite = { track ->

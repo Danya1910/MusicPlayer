@@ -43,6 +43,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.PlayList
+import com.example.musicplayer.domain.model.PlaybackOrigin
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.domain.model.User
 import com.example.musicplayer.presentation.main.MainViewModel
@@ -136,6 +137,9 @@ fun LibraryTest(
                                 mainViewModel.playTrackWithQueue(
                                     track = playList.tracks[0],
                                     queue = playList.tracks,
+                                    playbackOrigin = PlaybackOrigin.Playlist(
+                                        playlistId = playList.playlist.id,
+                                    )
                                 )
                             },
                             onShuffleClick = {
@@ -145,10 +149,13 @@ fun LibraryTest(
                                 mainViewModel.playTrackWithQueue(
                                     track = track,
                                     queue = playList.tracks,
+                                    playbackOrigin = PlaybackOrigin.Playlist(
+                                        playlistId = playList.playlist.id,
+                                    )
                                 )
                             },
                             onTrackInfoClick = {},
-                            onDownloadClick = {track ->
+                            onDownloadClick = { track ->
                                 mainViewModel.onDownloadClick(track)
                             },
                             onBackClick = {
@@ -180,6 +187,9 @@ fun LibraryTest(
                                 mainViewModel.playTrackWithQueue(
                                     track = playList.tracks[0],
                                     queue = playList.tracks,
+                                    playbackOrigin = PlaybackOrigin.Playlist(
+                                        playlistId = playList.playlist.id ?: "",
+                                    )
                                 )
                             },
                             onShuffleClick = {
@@ -189,11 +199,15 @@ fun LibraryTest(
                                 mainViewModel.playTrackWithQueue(
                                     track = track,
                                     queue = playList.tracks,
+                                    playbackOrigin = PlaybackOrigin.Playlist(
+                                        playlistId = playList.playlist.id ?: "",
+                                    )
                                 )
                             },
                             onTrackInfoClick = {},
-                            onDownloadClick = {track ->
-                                mainViewModel.onDownloadClick(track)},
+                            onDownloadClick = { track ->
+                                mainViewModel.onDownloadClick(track)
+                            },
                             onBackClick = {
                                 showPlayList = false
                                 currentPlaylistToShow = null
