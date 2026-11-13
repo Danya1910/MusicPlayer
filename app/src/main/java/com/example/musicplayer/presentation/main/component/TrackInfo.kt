@@ -66,9 +66,10 @@ fun TrackInfo(
             onClick = addToPlayList
         ),
         ActionButtonData(
-            icon = R.drawable.ic_apple_logo,
+            icon = R.drawable.ic_heart,
             title = "Add to Liked Songs",
             onClick = addToFavorites,
+            color = if(track.isFavorite) SpotifyGreen else Gray,
         ),
         ActionButtonData(
             icon = R.drawable.ic_add_queue,
