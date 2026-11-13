@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.DownloadProgress
+import com.example.musicplayer.domain.model.PlaybackOrigin
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.presentation.main.util.PlaylistUi
 import com.example.musicplayer.presentation.player.state.PlayerUiState
@@ -57,7 +58,9 @@ fun LikedView(
     playList: PlaylistUi,
     tracks: List<Track>,
     playerState: PlayerUiState,
-    onPlayPauseClick: () -> Unit,
+    onPlayClick: (List<Track>) -> Unit,
+    onContinuePlayClick: () -> Unit,
+    onPauseClick: () -> Unit,
     onShuffleClick: () -> Unit,
     onTrackClick: (Track) -> Unit,
     onTrackInfoClick: () -> Unit,
@@ -68,6 +71,7 @@ fun LikedView(
     onMoreClick: (Track) -> Unit,
     downloads: Map<String, DownloadProgress>,
     navigateToHome: () -> Unit,
+    currentPlayingOrigin: PlaybackOrigin,
 ) {
 
     Log.d("Playlist", "playlist: $playList")
@@ -87,6 +91,12 @@ fun LikedView(
 
     val isAllTracksLoaded = playList.tracks.isNotEmpty() &&
             playList.tracks.all { it.localAudioPath != null }
+
+    val origin = currentPlayingOrigin
+    val isFromThisPlaylist =
+        origin is PlaybackOrigin.Playlist && origin.playlistId == playList.playlist.id
+
+    val isPlayingLocal = isFromThisPlaylist && playerState.isPlaying
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -127,9 +137,17 @@ fun LikedView(
                     PlaylistActions(
                         onDownloadClick = toggleLoadPlaylist,
                         onShuffleClick = onShuffleClick,
-                        onPlayPauseClick = onPlayPauseClick,
+                        onPlayPauseClick = {
+                            if (isFromThisPlaylist && !playerState.isPlaying)
+                                onContinuePlayClick()
+                            else if (isPlayingLocal)
+                                onPauseClick()
+                            else onPlayClick(
+                                playList.tracks
+                            )
+                        },
                         isShuffled = isShuffled,
-                        isPlaying = isPlaying,
+                        isPlaying = isPlayingLocal,
                         toggleLoadPlaylist = toggleLoadPlaylist,
                         isPlaylistLoaded = isAllTracksLoaded,
                     )

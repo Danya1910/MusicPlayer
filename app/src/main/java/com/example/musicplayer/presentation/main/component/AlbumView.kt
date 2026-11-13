@@ -65,6 +65,7 @@ import coil.compose.AsyncImage
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.Album
 import com.example.musicplayer.domain.model.DownloadProgress
+import com.example.musicplayer.domain.model.PlaybackOrigin
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.presentation.player.state.PlayerUiState
 import com.example.musicplayer.ui.theme.Black
@@ -81,7 +82,9 @@ fun AlbumView(
     album: Album,
     onHeartClick: () -> Unit,
     onCancelClick: () -> Unit,
-    onPlayPauseClick: (List<Track>) -> Unit,
+    onPlayClick: (List<Track>) -> Unit,
+    onContinuePlayClick: () -> Unit,
+    onPauseClick: () -> Unit,
     onDownloadAlbumClick: () -> Unit,
     onBitmapLoaded: (Bitmap) -> Unit,
     playerState: PlayerUiState,
@@ -90,6 +93,7 @@ fun AlbumView(
     toggleFavorite: (Track) -> Unit,
     onDownloadClick: (Track) -> Unit,
     downloads: Map<String, DownloadProgress>,
+    currentPlayingOrigin: PlaybackOrigin,
 ) {
 
     val hazeState = remember { HazeState() }
@@ -107,6 +111,12 @@ fun AlbumView(
 
     val isAllAlbumLoaded = album.tracks.isNotEmpty() &&
             album.tracks.all { it.localAudioPath != null }
+
+    val origin = currentPlayingOrigin
+    val isFromThisAlbum =
+        origin is PlaybackOrigin.Album && origin.albumId == album.id
+
+    val isPlayingLocal = isFromThisAlbum && playerState.isPlaying
 
     Box(
         modifier = Modifier
@@ -143,12 +153,16 @@ fun AlbumView(
                     album = album,
                     onHeartClick = onHeartClick,
                     onPlayPauseClick = {
-                        onPlayPauseClick(
+                        if (isFromThisAlbum && !playerState.isPlaying)
+                            onContinuePlayClick()
+                        else if (isPlayingLocal)
+                            onPauseClick()
+                        else onPlayClick(
                             album.tracks
                         )
                     },
                     onDownloadAlbumClick = onDownloadAlbumClick,
-                    isPlaying = playerState.isPlaying,
+                    isPlaying = isPlayingLocal,
                     isAlbumLoaded = isAllAlbumLoaded,
                     isLiked = album.isFavorite
                 )
@@ -315,7 +329,10 @@ private fun AlbumInfo(
                         )
 
                         (fadeIn(animationSpec = tween(220)) +
-                                scaleIn(initialScale = 0.5f, animationSpec = springSpec)) togetherWith
+                                scaleIn(
+                                    initialScale = 0.5f,
+                                    animationSpec = springSpec
+                                )) togetherWith
                                 (fadeOut(animationSpec = tween(220)) +
                                         scaleOut(targetScale = 0.5f, animationSpec = tween(220)))
                     },
@@ -450,7 +467,7 @@ private fun AlbumTrackItem(
             progress = downloads[track.id],
             onLoadClick = onDownloadClick,
         )
-        if(track.isFavorite) {
+        if (track.isFavorite) {
             Spacer(modifier = Modifier.width(10.dp))
             Icon(
                 painter = painterResource(R.drawable.ic_tick_circle),
@@ -458,7 +475,7 @@ private fun AlbumTrackItem(
                 tint = Color.Unspecified,
                 modifier = Modifier
                     .size(18.dp)
-                    .clickable{
+                    .clickable {
                         toggleFavorite()
                     }
             )
