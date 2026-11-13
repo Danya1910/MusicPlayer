@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -163,11 +164,13 @@ class FileRepositoryImpl @Inject constructor(
                     val buffer = ByteArray(8 * 1024)
                     var read: Int
                     while (input.read(buffer).also { read = it } != -1) {
+                        ensureActive()
                         output.write(buffer, 0, read)
                         downloaded += read
 
                         val now = System.currentTimeMillis()
                         if (now - lastEmit > 100) {
+                            ensureActive()
                             _downloads.update {
                                 it + (trackId to DownloadProgress.InProgress(downloaded, total))
                             }
