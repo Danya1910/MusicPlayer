@@ -662,7 +662,7 @@ private fun TopBarItem(
 
     val backgroundColor by animateColorAsState(
         targetValue = if (selected) DarkGray else DeepBlack,
-        animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
+        animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing),
         label = "TopBarItem_$title"
     )
 
