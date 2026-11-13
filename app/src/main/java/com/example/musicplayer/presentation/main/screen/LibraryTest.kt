@@ -48,6 +48,7 @@ import com.example.musicplayer.domain.model.PlaybackOrigin
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.domain.model.User
 import com.example.musicplayer.presentation.main.MainViewModel
+import com.example.musicplayer.presentation.main.component.AlbumView
 import com.example.musicplayer.presentation.main.component.LikedView
 import com.example.musicplayer.presentation.main.component.ModalRightSheet
 import com.example.musicplayer.presentation.main.component.PlaylistView
@@ -83,10 +84,19 @@ fun LibraryTest(
     var currentPlaylistToShow by remember { mutableStateOf<PlaylistUi?>(null) }
     var showPlayList by remember { mutableStateOf(false) }
 
+    var currentAlbumToShow by remember { mutableStateOf<Album?>(null) }
+    var showAlbum by remember { mutableStateOf(false) }
+
     val playlistToPass = if (currentPlaylistToShow != null) {
         if (currentPlaylistToShow!!.playlist.id == favorites.playlist.id) favorites
         else playlists.find { it.playlist.id == currentPlaylistToShow!!.playlist.id }
     } else null
+
+    val albumToPass = currentAlbumToShow?.let { current ->
+        (uiState as? MainUiState.Success)
+            ?.albums
+            ?.find { it.id == current.id }
+    }
 
 
     Column(
@@ -132,15 +142,98 @@ fun LibraryTest(
                         items(favorites, key = { it.id }) { album ->
                             AlbumItem(
                                 album = album,
-                                onClick = {}
+                                onClick = {
+                                    currentAlbumToShow = album
+                                    showAlbum = true
+                                }
                             )
                         }
                     }
                 }
-                MainUiState.Loading -> { /* скелетон / спиннер */ }
-                is MainUiState.Error -> { /* текст ошибки */ }
+
+                MainUiState.Loading -> {
+                    // скелетон / спиннер
+                }
+
+                is MainUiState.Error -> {
+                    // текст ошибки
+                }
             }
         }
+    }
+
+    if (showAlbum) {
+        ModalRightSheet(
+            onDismissRequest = {
+                showAlbum = false
+                currentAlbumToShow = null
+            },
+            content = {
+                albumToPass?.let { album ->
+                    AlbumView(
+                        album = album,
+                        onHeartClick = {
+                            mainViewModel.toggleAlbumLike(
+                                album = album,
+                            )
+                        },
+                        onCancelClick = {
+                            showAlbum = false
+                            currentAlbumToShow = null
+                        },
+                        onPlayClick = { tracks ->
+                            tracks.firstOrNull()?.let { firstTrack ->
+                                mainViewModel.playTrackWithQueue(
+                                    track = firstTrack,
+                                    queue = tracks,
+                                    playbackOrigin = PlaybackOrigin.Album(
+                                        albumId = album.id,
+                                    ),
+                                )
+                            }
+                        },
+                        onContinuePlayClick = {
+                            mainViewModel.togglePlayPause()
+                        },
+                        onPauseClick = {
+                            mainViewModel.togglePlayPause()
+                        },
+                        onDownloadAlbumClick = {
+                            mainViewModel.toggleListOfTracks(
+                                tracks = album.tracks,
+                            )
+                        },
+                        onBitmapLoaded = { bitmap ->
+                            mainViewModel.updateColorsFromBitmap(
+                                id = album.id,
+                                bitmap = bitmap,
+                            )
+                        },
+                        playerState = playerState,
+                        onMoreClick = { track ->
+                            onMoreClick(track)
+                        },
+                        onTrackClick = { track ->
+                            mainViewModel.playTrackWithQueue(
+                                track = track,
+                                queue = albumToPass.tracks,
+                                playbackOrigin = PlaybackOrigin.Album(
+                                    albumId = album.id,
+                                ),
+                            )
+                        },
+                        toggleFavorite = { track ->
+                            mainViewModel.toggleFavorite(track)
+                        },
+                        onDownloadClick = { track ->
+                            mainViewModel.onDownloadClick(track)
+                        },
+                        downloads = downloads,
+                        currentPlayingOrigin = playbackOrigin,
+                    )
+                }
+            }
+        )
     }
 
     if (showPlayList) {
