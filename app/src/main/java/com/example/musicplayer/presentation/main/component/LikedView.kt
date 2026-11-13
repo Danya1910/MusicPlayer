@@ -87,7 +87,6 @@ fun LikedView(
     val hazeState = remember { HazeState() }
 
     val isShuffled = playerState.isShuffleEnabled
-    val isPlaying = playerState.isPlaying
 
     val isAllTracksLoaded = playList.tracks.isNotEmpty() &&
             playList.tracks.all { it.localAudioPath != null }
