@@ -3,6 +3,7 @@ package com.example.musicplayer.presentation.main.component
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,54 +25,49 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.musicplayer.R
-import com.example.musicplayer.presentation.navigation.Screen
+import com.example.musicplayer.presentation.navigation.TabScreen
+import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.White
 
 
 @Composable
 fun BottomBar(
-    navController: NavController,
+    selectedTab: TabScreen,
+    onTabSelected: (TabScreen) -> Unit,
 ) {
 
     val bottomBarItems = listOf(
-        BottomBarData(
+        BottomBarDataTest(
             icon = R.drawable.ic_home,
             text = "Home",
-            route = Screen.Pager,
+            route = TabScreen.Home,
         ),
-        BottomBarData(
+        BottomBarDataTest(
             icon = R.drawable.ic_search,
             text = "Search",
-            route = Screen.Welcome
+            route = TabScreen.Search
         ),
-        BottomBarData(
+        BottomBarDataTest(
             icon = R.drawable.ic_library,
             text = "Library",
-            route = Screen.Pager,
+            route = TabScreen.Library,
         ),
     )
-
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-
-    val currentDestination = navBackStackEntry?.destination
-
-
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
+            .navigationBarsPadding()
             .fillMaxWidth()
             .height(85.dp)
-            .navigationBarsPadding()
+            .background(color = DeepBlack)
     ) {
         bottomBarItems.forEach { item ->
 
-            val isSelected = currentDestination?.route?.contains(
-                item.route::class.qualifiedName ?: "") == true
+            val isSelected = item.route == selectedTab
+
 
             val itemColor by animateColorAsState(
                 targetValue = if(isSelected) White else Gray,
@@ -84,15 +80,7 @@ fun BottomBar(
                 color = itemColor,
                 modifier = Modifier.weight(1f),
                 onClick = {
-                    if (!isSelected) {
-                        navController.navigate(item.route) {
-                            popUpTo(navController.graph.startDestinationId) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
+                    onTabSelected(item.route)
                 }
             )
         }
@@ -100,10 +88,10 @@ fun BottomBar(
 
 }
 
-data class BottomBarData(
+data class BottomBarDataTest(
     val icon: Int,
     val text: String,
-    val route: Screen,
+    val route: TabScreen,
 )
 
 @Composable

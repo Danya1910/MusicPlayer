@@ -33,7 +33,7 @@ import com.example.musicplayer.domain.model.PlaybackOrigin
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.presentation.main.MainViewModel
 import com.example.musicplayer.presentation.main.component.AddTrackToPlayListWidget
-import com.example.musicplayer.presentation.main.component.BottomBarTest
+import com.example.musicplayer.presentation.main.component.BottomBar
 import com.example.musicplayer.presentation.main.component.NowPlayingBar
 import com.example.musicplayer.presentation.main.component.PlayListNameInput
 import com.example.musicplayer.presentation.main.component.SleepTimerWidget
@@ -168,7 +168,7 @@ fun MainRootPagerScreen(
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
         ) {
-            BottomBarTest(
+            BottomBar(
                 selectedTab = selectedTab,
                 onTabSelected = { tab ->
                     tabNavController.navigate(tab) {
