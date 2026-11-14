@@ -50,10 +50,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -77,6 +74,7 @@ import com.example.musicplayer.presentation.main.component.PlaylistView
 import com.example.musicplayer.presentation.main.state.MainUiState
 import com.example.musicplayer.presentation.main.util.LibraryTab
 import com.example.musicplayer.presentation.main.util.PlaylistUi
+import com.example.musicplayer.presentation.navigation.Screen
 import com.example.musicplayer.presentation.navigation.TabScreen
 import com.example.musicplayer.ui.theme.DarkGray
 import com.example.musicplayer.ui.theme.DeepBlack
@@ -244,7 +242,6 @@ fun LibraryTest(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-
                 .background(
                     color = DeepBlack.copy(alpha = 0.7f)
                 )
@@ -266,7 +263,13 @@ fun LibraryTest(
                     isLogOutVisible = false
                 },
                 onAccessClick = {
-
+                    isLogOutVisible = false
+                    mainViewModel.logOut()
+                    navController.navigate(Screen.AuthGraph) {
+                        popUpTo(navController.graph.id) {
+                            inclusive = true
+                        }
+                    }
                 },
                 hazeState = hazeState,
             )
