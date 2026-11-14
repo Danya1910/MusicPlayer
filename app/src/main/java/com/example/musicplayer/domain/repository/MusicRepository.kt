@@ -37,6 +37,8 @@ interface MusicRepository {
 
     fun togglePlayPause()
 
+    fun stopAndClear()
+
     fun seekTo(positionMs: Long)
 
     fun skipToNext()
