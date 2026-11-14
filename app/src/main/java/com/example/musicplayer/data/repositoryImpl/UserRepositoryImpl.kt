@@ -5,6 +5,7 @@ import com.example.musicplayer.domain.model.User
 import com.example.musicplayer.domain.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -15,6 +16,8 @@ class UserRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
 ) : UserRepository {
 
+    private var userListener: ListenerRegistration? = null
+
     override fun getUserData(): Flow<User> = callbackFlow {
         val uid = firebaseAuth.currentUser?.uid
 
@@ -23,7 +26,7 @@ class UserRepositoryImpl @Inject constructor(
             return@callbackFlow
         }
 
-        val listenerRegistration = firestore
+        userListener = firestore
             .collection("users")
             .document(uid)
             .addSnapshotListener { snapshot, error ->
@@ -43,8 +46,14 @@ class UserRepositoryImpl @Inject constructor(
             }
 
         awaitClose {
-            listenerRegistration.remove()
+            userListener?.remove()
+            userListener = null
         }
+    }
+
+    override fun stopListening() {
+        userListener?.remove()
+        userListener = null
     }
 
 }

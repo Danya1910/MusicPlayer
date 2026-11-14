@@ -17,6 +17,7 @@ import com.example.musicplayer.domain.repository.TrackRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -43,6 +44,8 @@ class TrackRepositoryImpl @Inject constructor(
     private val playListDao: PlayListDao,
     private val lyricDao: LyricDao,
 ) : TrackRepository {
+
+    private var playlistsListener: ListenerRegistration? = null
 
     override fun getAllTrack(): Flow<List<Track>> = flow {
 
@@ -244,7 +247,7 @@ class TrackRepositoryImpl @Inject constructor(
         val query = firestore.collection("playlists")
             .whereEqualTo("creatorId", currentUserId)
 
-        val listenerRegistration = query.addSnapshotListener { snapshot, error ->
+        playlistsListener = query.addSnapshotListener { snapshot, error ->
             if (error != null) {
                 error.printStackTrace()
                 return@addSnapshotListener
@@ -272,8 +275,10 @@ class TrackRepositoryImpl @Inject constructor(
         }
 
         awaitClose {
-            listenerRegistration.remove()
+            playlistsListener?.remove()
+            playlistsListener = null
         }
+
     }.flowOn(Dispatchers.IO)
 
     override fun getUserPlayLists(): Flow<List<PlayList>> {
@@ -468,6 +473,11 @@ class TrackRepositoryImpl @Inject constructor(
             albumDao.updateFavoriteStatus(albumId = albumId, isFavorite = true)
             throw e
         }
+    }
+
+    override fun stopListening() {
+        playlistsListener?.remove()
+        playlistsListener = null
     }
 
 }
