@@ -10,6 +10,8 @@ interface AuthRepository {
         name: String,
     ) : Result<Unit>
 
+    fun logOut()
+
     fun isUserAuthenticated(): Boolean
 
 }
