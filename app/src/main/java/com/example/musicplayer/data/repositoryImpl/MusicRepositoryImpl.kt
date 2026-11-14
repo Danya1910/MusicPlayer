@@ -232,6 +232,14 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun stopAndClear() {
+        mediaController?.apply {
+            pause()
+            clearMediaItems()
+            seekTo(0, 0L)
+        }
+    }
+
     override fun seekTo(positionMs: Long) {
         mediaController?.seekTo(positionMs)
     }
