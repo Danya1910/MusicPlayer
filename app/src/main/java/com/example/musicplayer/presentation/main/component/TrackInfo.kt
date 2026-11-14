@@ -52,6 +52,7 @@ fun TrackInfo(
     addToFavorites: () -> Unit,
     onDownloadClick: () -> Unit,
     setTimer: () -> Unit,
+    isTimerActive: Boolean,
 ) {
 
     val actionsList = listOf(
@@ -88,6 +89,7 @@ fun TrackInfo(
             icon = R.drawable.ic_timer,
             title = "Set timer",
             onClick = setTimer,
+            color = if(isTimerActive) SpotifyGreen else null,
         ),
     )
 
