@@ -3,6 +3,8 @@ package com.example.musicplayer.presentation.main.component
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
@@ -11,10 +13,12 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -24,6 +28,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -35,6 +40,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -159,6 +166,30 @@ fun TrackView(
         skipPartiallyExpanded = false
     )
 
+    val currentIndex = remember(currentQueue, track.id) {
+        currentQueue.indexOfFirst { it.id == track.id }.coerceAtLeast(0)
+    }
+
+    val pagerState = rememberPagerState(
+        initialPage = currentIndex,
+        pageCount = {
+            currentQueue.size
+        }
+    )
+
+    LaunchedEffect(pagerState.settledPage) {
+        val settledPage = pagerState.settledPage
+        if (settledPage != currentIndex && settledPage in currentQueue.indices) {
+            onTrackInQueueClick(currentQueue[settledPage])
+        }
+    }
+
+    LaunchedEffect(currentIndex) {
+        if (pagerState.currentPage != currentIndex && currentIndex in currentQueue.indices) {
+            pagerState.animateScrollToPage(currentIndex)
+        }
+    }
+
     LaunchedEffect(Unit) {
         sheetState.partialExpand()
     }
@@ -196,29 +227,60 @@ fun TrackView(
                 },
             )
 
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                TrackImage(
-                    url = track.imageUrl,
-                    onBitmapLoaded = { bitmap ->
-                        onBitmapLoaded(bitmap)
-                    },
-                )
-            }
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.weight(1f)
+            ) { page ->
 
-            Box(
-                modifier = Modifier
-                    .padding(vertical = 7.dp)
-            ) {
-                lyrics?.let {
-                    LyricsLinesRow(
-                        lyrics = lyrics.lines,
-                        currentPosition = playerState.currentPosition,
-                    )
+                val pageTrack = currentQueue.getOrNull(page) ?: return@HorizontalPager
+                val isCurrentPage = page == currentIndex
+
+                Column (
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .weight(1f)
+                    ) {
+                        TrackImage(
+                            url = pageTrack.imageUrl,
+                            onBitmapLoaded = { bitmap ->
+                                if (isCurrentPage)
+                                    onBitmapLoaded(bitmap)
+                            },
+                        )
+                    }
+
+                    AnimatedVisibility(
+                        visible = isCurrentPage && lyrics != null,
+                        enter = expandVertically(
+                            animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
+                        ) + fadeIn(
+                            animationSpec = tween(durationMillis = 300)
+                        ),
+                        exit = shrinkVertically(
+                            animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)
+                        ) + fadeOut(
+                            animationSpec = tween(durationMillis = 200)
+                        )
+                    ) {
+
+                        val currentLyrics = remember(lyrics) { lyrics }
+                        if (currentLyrics != null) {
+                            Box(
+                                modifier = Modifier.padding(vertical = 7.dp)
+                            ) {
+                                LyricsLinesRow(
+                                    lyrics = currentLyrics.lines,
+                                    currentPosition = playerState.currentPosition,
+                                )
+                            }
+                        }
+                    }
                 }
+
             }
 
             TrackInfoAndHeart(
