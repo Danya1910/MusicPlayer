@@ -52,6 +52,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -242,18 +244,10 @@ fun LibraryTest(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .graphicsLayer {
-                    val offset =
-                        runCatching { logOutSheetState.requireOffset() }.getOrNull() ?: 0f
-                    val alphaProgress = if (offset > 0f) {
-                        (1f - (offset / 2300f)).coerceIn(0f, 0.7f)
-                    } else {
-                        0.7f
-                    }
 
-                    alpha = alphaProgress
-                }
-                .background(Color.Black)
+                .background(
+                    color = DeepBlack.copy(alpha = 0.7f)
+                )
         )
     }
 
