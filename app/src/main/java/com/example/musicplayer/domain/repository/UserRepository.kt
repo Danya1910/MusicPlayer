@@ -7,4 +7,6 @@ interface UserRepository {
 
     fun getUserData(): Flow<User>
 
+    fun stopListening()
+
 }

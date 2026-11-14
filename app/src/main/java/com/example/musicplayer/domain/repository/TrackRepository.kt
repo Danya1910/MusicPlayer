@@ -34,4 +34,6 @@ interface TrackRepository {
 
     suspend fun unlikeAlbum(albumId: String)
 
+    fun stopListening()
+
 }
