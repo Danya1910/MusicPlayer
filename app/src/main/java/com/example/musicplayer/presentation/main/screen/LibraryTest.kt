@@ -13,6 +13,7 @@ import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,8 +32,11 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,6 +53,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -72,9 +78,16 @@ import com.example.musicplayer.presentation.navigation.TabScreen
 import com.example.musicplayer.ui.theme.DarkGray
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
+import com.example.musicplayer.ui.theme.SpotifyGreen
 import com.example.musicplayer.ui.theme.White
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.HazeTint
+import dev.chrisbanes.haze.haze
+import dev.chrisbanes.haze.hazeChild
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryTest(
     mainViewModel: MainViewModel,
@@ -96,11 +109,17 @@ fun LibraryTest(
 
     val user by mainViewModel.userState.collectAsStateWithLifecycle()
 
+    var isLogOutVisible by remember { mutableStateOf(false) }
+
     var currentPlaylistToShow by remember { mutableStateOf<PlaylistUi?>(null) }
     var showPlayList by remember { mutableStateOf(false) }
 
     var currentAlbumToShow by remember { mutableStateOf<Album?>(null) }
     var showAlbum by remember { mutableStateOf(false) }
+
+    val logOutSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    val hazeState = remember { HazeState() }
 
     val playlistToPass = if (currentPlaylistToShow != null) {
         if (currentPlaylistToShow!!.playlist.id == favorites.playlist.id) favorites
@@ -125,9 +144,15 @@ fun LibraryTest(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .haze(
+                hazeState
+            )
     ) {
         LibraryTopBar(
             user = user,
+            onUserClick = {
+                isLogOutVisible = true
+            },
             changeTab = { tab ->
                 if (selectedTab == tab)
                     selectedTab = LibraryTab.All
@@ -209,6 +234,28 @@ fun LibraryTest(
                         }
                     }
             }
+        }
+    }
+
+    if (isLogOutVisible) {
+        ModalBottomSheet(
+            onDismissRequest = { isLogOutVisible = false },
+            sheetState = logOutSheetState,
+            containerColor = Color.Transparent,
+            dragHandle = null,
+            scrimColor = Color.Transparent,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            LogOutWidget(
+                onCancelClick = {
+                    isLogOutVisible = false
+                },
+                onAccessClick = {
+
+                },
+                hazeState = hazeState,
+            )
         }
     }
 
@@ -598,6 +645,7 @@ private fun songsFormat(
 @Composable
 private fun LibraryTopBar(
     user: User,
+    onUserClick: () -> Unit,
     changeTab: (LibraryTab) -> Unit,
     selectedTab: LibraryTab,
 ) {
@@ -613,15 +661,18 @@ private fun LibraryTopBar(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            AsyncImage(
-                model = user.avatarUrl,
+            Icon(
+                painter = painterResource(R.drawable.ic_user_avatar),
                 contentDescription = null,
-                contentScale = ContentScale.Crop,
+                tint = Color.Unspecified,
                 modifier = Modifier
                     .size(35.dp)
-                    .clip(
-                        shape = CircleShape
-                    )
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        onUserClick()
+                    }
             )
             Spacer(modifier = Modifier.width(15.dp))
             Text(
@@ -745,4 +796,121 @@ private fun TopBarItem(
             color = White,
         )
     }
+}
+
+@Composable
+private fun LogOutWidget(
+    onCancelClick: () -> Unit,
+    onAccessClick: () -> Unit,
+    hazeState: HazeState,
+) {
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(
+                shape = RoundedCornerShape(40.dp)
+            )
+            .hazeChild(
+                state = hazeState,
+                style = HazeStyle(
+                    backgroundColor = DeepBlack,
+                    blurRadius = 10.dp,
+                    tint = HazeTint(color = DeepBlack.copy(alpha = 0.8f)),
+                    noiseFactor = 0.001f
+                ),
+            )
+            .border(
+                width = 1.dp,
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color.White.copy(alpha = 0.15f),
+                        Color.White.copy(alpha = 0.02f)
+                    )
+                ),
+                shape = RoundedCornerShape(40.dp)
+            )
+            .padding(
+                top = 10.dp,
+                bottom = 16.dp
+            )
+    ) {
+        DragHandle()
+        Spacer(modifier = Modifier.height(5.dp))
+        Text(
+            textAlign = TextAlign.Center,
+            text = "Log out of your account?",
+            color = White,
+            fontWeight = FontWeight.Medium,
+            fontSize = 19.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            LogOutButton(
+                title = "Cancel",
+                color = SpotifyGreen,
+                onClick = onCancelClick,
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.width(20.dp))
+            LogOutButton(
+                title = "Log out",
+                color = White,
+                onClick = onAccessClick,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+
+}
+
+@Composable
+private fun DragHandle() {
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.2f)
+                .height(4.dp)
+                .clip(
+                    shape = CircleShape
+                )
+                .background(
+                    color = Gray
+                )
+        )
+    }
+}
+
+@Composable
+private fun LogOutButton(
+    title: String,
+    color: Color,
+    onClick: () -> Unit,
+    modifier: Modifier,
+) {
+    Text(
+        textAlign = TextAlign.Center,
+        text = title,
+        fontSize = 17.sp,
+        fontWeight = FontWeight.Normal,
+        textDecoration = TextDecoration.Underline,
+        color = color,
+        modifier = modifier
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
+                onClick()
+            }
+    )
 }
