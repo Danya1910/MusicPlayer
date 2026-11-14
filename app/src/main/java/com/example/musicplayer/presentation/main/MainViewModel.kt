@@ -659,6 +659,9 @@ class MainViewModel @Inject constructor(
         lyricsJob = null
         _toast.value = null
 
+        userRepository.stopListening()
+        trackRepository.stopListening()
+
         authRepository.logOut()
     }
 
