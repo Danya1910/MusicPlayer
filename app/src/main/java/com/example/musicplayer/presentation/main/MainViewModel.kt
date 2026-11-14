@@ -651,6 +651,8 @@ class MainViewModel @Inject constructor(
 
     fun logOut() {
 
+        musicRepository.stopAndClear()
+
         _paletteState.value = emptyMap()
         _lyrics.value = null
         lyricsJob?.cancel()
