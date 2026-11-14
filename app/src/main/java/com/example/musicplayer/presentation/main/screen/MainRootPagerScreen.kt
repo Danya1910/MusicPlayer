@@ -283,7 +283,8 @@ fun MainRootPagerScreen(
                                 track = currentInfoToShow!!
                             )
                             isTrackInfoVisible = false
-                        }
+                        },
+                        isTimerActive = isTimerActive,
                     )
                 }
             }
@@ -303,9 +304,11 @@ fun MainRootPagerScreen(
                 SleepTimerWidget(
                     onTimeClick = { minutes ->
                         mainViewModel.setSleepTime(minutes)
+                        showTimer = false
                     },
                     onEndClick = {
                         mainViewModel.stopOnTrackEnd()
+                        showTimer = false
                     },
                     hazeState = hazeState,
                 )
