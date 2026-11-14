@@ -85,7 +85,7 @@ fun TrackInfo(
             color = if(!track.localAudioPath.isNullOrBlank()) SpotifyGreen else null,
         ),
         ActionButtonData(
-            icon = R.drawable.ic_artist,
+            icon = R.drawable.ic_timer,
             title = "Set timer",
             onClick = setTimer,
         ),
