@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -23,6 +25,8 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,7 +59,9 @@ fun NowPlayingBar(
     duration: Long,
     bgColor: Color,
     onBitmapLoaded: (Bitmap) -> Unit,
-) {
+    currentQueue: List<Track>,
+    onTrackInQueueClick: (Track) -> Unit,
+    ) {
 
     val totalDurationSeconds = (duration / 1000).coerceAtLeast(0)
     val currentPosSeconds = (currentPosition / 1000).coerceAtLeast(0)
@@ -68,6 +74,30 @@ fun NowPlayingBar(
         disabledActiveTrackColor = White,
         disabledInactiveTrackColor = Gray
     )
+
+    val currentIndex = remember(currentQueue, track.id) {
+        currentQueue.indexOfFirst { it.id == track.id }.coerceAtLeast(0)
+    }
+
+    val pagerState = rememberPagerState(
+        initialPage = currentIndex,
+        pageCount = {
+            currentQueue.size
+        }
+    )
+
+    LaunchedEffect(pagerState.settledPage) {
+        val settledPage = pagerState.settledPage
+        if (settledPage != currentIndex && settledPage in currentQueue.indices) {
+            onTrackInQueueClick(currentQueue[settledPage])
+        }
+    }
+
+    LaunchedEffect(currentIndex) {
+        if (pagerState.currentPage != currentIndex && currentIndex in currentQueue.indices) {
+            pagerState.animateScrollToPage(currentIndex)
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -112,35 +142,36 @@ fun NowPlayingBar(
                 }
             )
             Spacer(modifier = Modifier.width(11.dp))
-            Column(
-                verticalArrangement = Arrangement.Center,
+
+            HorizontalPager(
+                state = pagerState,
                 modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = track.title + " · " + track.artist,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.sp,
-                    color = White,
-                    maxLines = 1,
-                    modifier = Modifier
-                        .basicMarquee()
-                )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
+            ) { page ->
+
+                val pageTrack = currentQueue.getOrNull(page) ?: return@HorizontalPager
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_bluetooth),
-                        contentDescription = null,
-                        tint = SpotifyGreen,
-                        modifier = Modifier.size(12.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "BEATSPILL +",
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 12.sp,
-                        color = SpotifyGreen,
+                        text = pageTrack.title,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp,
+                        color = White,
+                        maxLines = 1,
+                        modifier = Modifier
+                            .basicMarquee()
                     )
+                    Text(
+                        text = pageTrack.artist,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp,
+                        color = Gray,
+                        maxLines = 1,
+                        modifier = Modifier
+                            .basicMarquee()
+                    )
+
                 }
             }
             Spacer(modifier = Modifier.width(10.dp))
