@@ -206,7 +206,15 @@ fun MainRootPagerScreen(
                             id = track.id,
                             bitmap = bitmap,
                         )
-                    }
+                    },
+                    currentQueue = currentQueue,
+                    onTrackInQueueClick = { track ->
+                        mainViewModel.playTrackWithQueue(
+                            track = track,
+                            queue = currentQueue,
+                            playbackOrigin = PlaybackOrigin.Unknown,
+                        )
+                    },
                 )
             }
         }
