@@ -256,9 +256,9 @@ fun TrackView(
                     AnimatedVisibility(
                         visible = isCurrentPage && lyrics != null,
                         enter = expandVertically(
-                            animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
+                            animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
                         ) + fadeIn(
-                            animationSpec = tween(durationMillis = 300)
+                            animationSpec = tween(durationMillis = 500)
                         ),
                         exit = shrinkVertically(
                             animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)
