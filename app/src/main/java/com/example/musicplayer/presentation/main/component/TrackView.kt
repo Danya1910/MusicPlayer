@@ -402,6 +402,7 @@ fun TrackView(
                             onLoadClick()
                             isTrackInfoVisible = false
                         },
+                        isTimerActive = isTimerActive,
                     )
                 }
             }
