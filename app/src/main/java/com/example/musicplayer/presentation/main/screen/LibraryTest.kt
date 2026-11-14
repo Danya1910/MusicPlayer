@@ -50,6 +50,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -235,6 +236,25 @@ fun LibraryTest(
                     }
             }
         }
+    }
+
+    if (isLogOutVisible) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    val offset =
+                        runCatching { logOutSheetState.requireOffset() }.getOrNull() ?: 0f
+                    val alphaProgress = if (offset > 0f) {
+                        (1f - (offset / 2300f)).coerceIn(0f, 0.7f)
+                    } else {
+                        0.7f
+                    }
+
+                    alpha = alphaProgress
+                }
+                .background(Color.Black)
+        )
     }
 
     if (isLogOutVisible) {
