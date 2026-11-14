@@ -13,6 +13,7 @@ import com.example.musicplayer.domain.model.PlayList
 import com.example.musicplayer.domain.model.PlaybackOrigin
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.domain.model.User
+import com.example.musicplayer.domain.repository.AuthRepository
 import com.example.musicplayer.domain.repository.FileRepository
 import com.example.musicplayer.domain.repository.MusicRepository
 import com.example.musicplayer.domain.repository.TrackRepository
@@ -47,6 +48,7 @@ import kotlin.coroutines.cancellation.CancellationException
 @Suppress("UNCHECKED_CAST")
 @HiltViewModel
 class MainViewModel @Inject constructor(
+    private val authRepository: AuthRepository,
     private val trackRepository: TrackRepository,
     private val musicRepository: MusicRepository,
     private val fileRepository: FileRepository,
@@ -637,6 +639,25 @@ class MainViewModel @Inject constructor(
 
     fun resetToast() {
         _toast.value = null
+    }
+
+    private fun resetLocalState() {
+        _paletteState.value = emptyMap()
+        _lyrics.value = null
+        _toast.value = null
+        lyricsJob?.cancel()
+        lyricsJob = null
+    }
+
+    fun logOut() {
+
+        _paletteState.value = emptyMap()
+        _lyrics.value = null
+        lyricsJob?.cancel()
+        lyricsJob = null
+        _toast.value = null
+
+        authRepository.logOut()
     }
 
 }
