@@ -31,6 +31,7 @@ import com.google.protobuf.LazyStringArrayList.emptyList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -651,6 +652,9 @@ class MainViewModel @Inject constructor(
 
     fun logOut() {
 
+        userRepository.stopListening()
+        trackRepository.stopListening()
+
         musicRepository.stopAndClear()
 
         _paletteState.value = emptyMap()
@@ -659,10 +663,13 @@ class MainViewModel @Inject constructor(
         lyricsJob = null
         _toast.value = null
 
-        userRepository.stopListening()
-        trackRepository.stopListening()
+        viewModelScope.launch {
+            delay(100) // даём awaitClose/remove завершиться
+            authRepository.logOut()
+        }
 
-        authRepository.logOut()
+        Log.d("Log out", "log out from account")
+
     }
 
 }
