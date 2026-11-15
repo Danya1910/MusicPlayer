@@ -1,5 +1,7 @@
 package com.example.musicplayer.domain.repository
 
+import kotlinx.coroutines.flow.Flow
+
 interface AuthRepository {
 
     suspend fun signIn(email: String, password: String) : Result<Unit>
@@ -13,5 +15,7 @@ interface AuthRepository {
     fun logOut()
 
     fun isUserAuthenticated(): Boolean
+
+    fun authStateFlow(): Flow<Boolean>
 
 }
