@@ -46,17 +46,20 @@ class TrackRepositoryImpl @Inject constructor(
 ) : TrackRepository {
 
     private var playlistsListener: ListenerRegistration? = null
+    private var userPlaylistsRegistration: ListenerRegistration? = null
 
     override fun getAllTrack(): Flow<List<Track>> = flow {
+
+        val currentUserId = firebaseAuth.currentUser?.uid
+        if (currentUserId == null) {
+            emit(emptyList())
+            return@flow
+        }
 
         val savedTracks = trackDao.getAllTracksOnce().map { it.toDomain() }
         emit(savedTracks)
 
         try {
-            val currentUserId = firebaseAuth.currentUser?.uid ?: throw Exception(
-                "Пользователь не авторизирован"
-            )
-
             coroutineScope {
 
                 val favoriteDeferred = async {
@@ -140,13 +143,16 @@ class TrackRepositoryImpl @Inject constructor(
 
     override fun getAlbums(): Flow<List<Album>> = flow {
 
+        val currentUserId = firebaseAuth.currentUser?.uid
+        if (currentUserId == null) {
+            emit(emptyList())
+            return@flow
+        }
+
         val savedAlbums = albumDao.getAllAlbumsOnce().map { it.toDomain() }
         emit(savedAlbums)
 
         try {
-            val currentUserId = firebaseAuth.currentUser?.uid
-                ?: throw Exception("Пользователь не авторизирован")
-
             coroutineScope {
                 val favoriteDeferred = async {
                     firestore.collection("favorites")
@@ -239,7 +245,11 @@ class TrackRepositoryImpl @Inject constructor(
 
 
         val currentUserId = firebaseAuth.currentUser?.uid
-            ?: throw Exception("Пользователь не авторизирован")
+        if (currentUserId == null) {
+            send(emptyList())
+            close()
+            return@callbackFlow
+        }
 
         val savedPlaylists = playListDao.getPlaylistsOnce(currentUserId).map { it.toDomain() }
         send(savedPlaylists)
@@ -247,7 +257,7 @@ class TrackRepositoryImpl @Inject constructor(
         val query = firestore.collection("playlists")
             .whereEqualTo("creatorId", currentUserId)
 
-        playlistsListener = query.addSnapshotListener { snapshot, error ->
+        userPlaylistsRegistration = query.addSnapshotListener { snapshot, error ->
             if (error != null) {
                 error.printStackTrace()
                 return@addSnapshotListener
@@ -275,8 +285,8 @@ class TrackRepositoryImpl @Inject constructor(
         }
 
         awaitClose {
-            playlistsListener?.remove()
-            playlistsListener = null
+            userPlaylistsRegistration?.remove()
+            userPlaylistsRegistration = null
         }
 
     }.flowOn(Dispatchers.IO)
@@ -289,16 +299,12 @@ class TrackRepositoryImpl @Inject constructor(
         }
 
         return getRawUserPlayLists().combine(allTracksFlow) { playlists, allTracks ->
-            Log.d("TrackRepo", "Combine сработал! Всего треков в базе: ${allTracks.size}")
+            if (firebaseAuth.currentUser?.uid == null) return@combine emptyList()
+
             playlists.map { playlist ->
                 val playlistTracks = allTracks.filter { track ->
                     playlist.tracks?.contains(track.id) == true
                 }
-
-                Log.d(
-                    "TrackRepo",
-                    "Плейлист '${playlist.name}' содержит треков из базы: ${playlistTracks.size} (ID в плейлисте: ${playlist.tracks})"
-                )
 
                 val totalMs = playlistTracks.sumOf { it.duration }
 
@@ -312,8 +318,7 @@ class TrackRepositoryImpl @Inject constructor(
 
     override suspend fun addTrackToPlayList(playListId: String, trackId: String) {
 
-        val currentUserId = firebaseAuth.currentUser?.uid
-            ?: throw Exception("Пользователь не авторизирован")
+        val currentUserId = firebaseAuth.currentUser?.uid ?: return
 
         try {
             firestore.collection("playlists")
@@ -478,6 +483,9 @@ class TrackRepositoryImpl @Inject constructor(
     override fun stopListening() {
         playlistsListener?.remove()
         playlistsListener = null
+
+        userPlaylistsRegistration?.remove()
+        userPlaylistsRegistration = null
     }
 
 }
