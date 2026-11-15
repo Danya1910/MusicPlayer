@@ -266,9 +266,8 @@ fun LibraryTest(
                     isLogOutVisible = false
                     mainViewModel.logOut()
                     navController.navigate(Screen.AuthGraph) {
-                        popUpTo(navController.graph.id) {
-                            inclusive = true
-                        }
+                        popUpTo(0) { inclusive = true }
+                        launchSingleTop = true
                     }
                 },
                 hazeState = hazeState,
