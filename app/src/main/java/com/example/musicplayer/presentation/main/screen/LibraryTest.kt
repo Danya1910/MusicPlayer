@@ -74,7 +74,6 @@ import com.example.musicplayer.presentation.main.component.PlaylistView
 import com.example.musicplayer.presentation.main.state.MainUiState
 import com.example.musicplayer.presentation.main.util.LibraryTab
 import com.example.musicplayer.presentation.main.util.PlaylistUi
-import com.example.musicplayer.presentation.navigation.Screen
 import com.example.musicplayer.presentation.navigation.TabScreen
 import com.example.musicplayer.ui.theme.DarkGray
 import com.example.musicplayer.ui.theme.DeepBlack
@@ -265,10 +264,6 @@ fun LibraryTest(
                 onAccessClick = {
                     isLogOutVisible = false
                     mainViewModel.logOut()
-                    navController.navigate(Screen.AuthGraph) {
-                        popUpTo(0) { inclusive = true }
-                        launchSingleTop = true
-                    }
                 },
                 hazeState = hazeState,
             )
