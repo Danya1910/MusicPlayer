@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -23,17 +24,14 @@ fun RootNavGraph(
     navController: NavHostController,
     splashViewModel: SplashViewModel = hiltViewModel(),
 ) {
-
     val startDestination by splashViewModel.startDestination.collectAsStateWithLifecycle()
 
-    if(startDestination == null) {
+    if (startDestination == null) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    color = DeepBlack
-                )
+                .background(color = DeepBlack)
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_logo),
@@ -42,23 +40,22 @@ fun RootNavGraph(
             )
         }
     } else {
-        NavHost(
-            navController = navController,
-            startDestination = startDestination!!
-        ) {
-            authGraph(
-                onAuthSuccess = {
-                    navController.navigate(Screen.MainGraph) {
-                        popUpTo(Screen.AuthGraph) {
-                            inclusive = true
+        key(startDestination) {
+            NavHost(
+                navController = navController,
+                startDestination = startDestination!!
+            ) {
+                authGraph(
+                    onAuthSuccess = {
+                        navController.navigate(Screen.MainGraph) {
+                            popUpTo(Screen.AuthGraph) { inclusive = true }
                         }
                     }
-                }
-            )
-
-            mainGraph(
-                navController = navController,
-            )
+                )
+                mainGraph(
+                    navController = navController,
+                )
+            }
         }
     }
 }
