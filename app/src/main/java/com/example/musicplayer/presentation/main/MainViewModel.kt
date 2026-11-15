@@ -651,25 +651,11 @@ class MainViewModel @Inject constructor(
     }
 
     fun logOut() {
-
         userRepository.stopListening()
         trackRepository.stopListening()
-
         musicRepository.stopAndClear()
 
-        _paletteState.value = emptyMap()
-        _lyrics.value = null
-        lyricsJob?.cancel()
-        lyricsJob = null
-        _toast.value = null
-
-        viewModelScope.launch {
-            delay(100) // даём awaitClose/remove завершиться
-            authRepository.logOut()
-        }
-
-        Log.d("Log out", "log out from account")
-
+        authRepository.logOut()
     }
 
 }
