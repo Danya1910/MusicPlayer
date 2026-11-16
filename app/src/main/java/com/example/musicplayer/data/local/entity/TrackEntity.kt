@@ -15,7 +15,6 @@ data class TrackEntity(
     val imageUrl: String,
     val duration: Long,
     val genre: String = "",
-    val isFavorite: Boolean,
     val localAudioPath: String?,
     val albumName: String?,
     val albumId: String?,
@@ -30,7 +29,6 @@ fun TrackEntity.toDomain(): Track {
         imageUrl = imageUrl,
         duration = duration,
         genre = genre,
-        isFavorite = isFavorite,
         localAudioPath = localAudioPath,
         albumName = albumName,
         albumId = albumId,
@@ -46,9 +44,19 @@ fun Track.toEntity(): TrackEntity {
         imageUrl = imageUrl,
         duration = duration,
         genre = genre,
-        isFavorite = isFavorite,
         localAudioPath = localAudioPath,
         albumName = albumName,
         albumId = albumId,
     )
 }
+
+@Entity(
+    tableName = "favorite_tracks",
+    primaryKeys = ["userId", "trackId"],
+)
+data class FavoriteTrackEntity(
+    val userId: String,
+    val trackId: String,
+    val likedAt: Long,
+)
+
