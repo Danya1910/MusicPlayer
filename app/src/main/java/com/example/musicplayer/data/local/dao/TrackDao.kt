@@ -24,6 +24,13 @@ interface TrackDao {
     @Query("SELECT * FROM tracks_table")
     suspend fun getAllTracksOnce(): List<TrackEntity>
 
+    @Query("SELECT trackId FROM favorite_tracks WHERE userId = :userId")
+    fun observeFavoriteIds(userId: String): Flow<List<String>>
+
+    @Query("SELECT trackId FROM favorite_tracks WHERE userId = :userId")
+    suspend fun getFavoriteIdsOnce(userId: String): List<String>
+
+
     @Query("UPDATE tracks_table SET isFavorite = :isFavorite WHERE id = :trackId")
     suspend fun updateFavoriteStatus(trackId: String, isFavorite: Boolean)
 
