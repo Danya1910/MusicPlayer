@@ -12,7 +12,6 @@ data class AlbumEntity (
     val title: String = "",
     val artist: String = "",
     val imageUrl: String = "",
-    val isFavorite: Boolean = false,
 )
 
 fun AlbumEntity.toDomain(): Album = Album(
@@ -20,6 +19,16 @@ fun AlbumEntity.toDomain(): Album = Album(
     title = title,
     artist = artist,
     imageUrl = imageUrl,
-    isFavorite = isFavorite,
+    isFavorite = false,
     tracks = emptyList(),
+)
+
+@Entity(
+    tableName = "favorite_albums",
+    primaryKeys = ["userId", "albumId"],
+)
+data class FavoriteAlbumEntity(
+    val userId: String,
+    val albumId: String,
+    val likedAt: Long,
 )
