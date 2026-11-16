@@ -177,8 +177,7 @@ class TrackRepositoryImpl @Inject constructor(
                     val albumId = document.id
                     val cached = cacheMap[albumId]
 
-                    val isFavorite = cached?.isFavorite
-                        ?: favoriteAlbumIds.contains(albumId)
+                    val isFavorite = favoriteAlbumIds.contains(albumId)
 
                     Log.d(
                         "AlbumDebug",
