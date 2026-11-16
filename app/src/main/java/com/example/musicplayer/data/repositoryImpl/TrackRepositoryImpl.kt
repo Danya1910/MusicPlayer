@@ -6,6 +6,8 @@ import com.example.musicplayer.data.local.dao.LyricDao
 import com.example.musicplayer.data.local.dao.PlayListDao
 import com.example.musicplayer.data.local.dao.TrackDao
 import com.example.musicplayer.data.local.entity.AlbumEntity
+import com.example.musicplayer.data.local.entity.FavoriteTrackEntity
+import com.example.musicplayer.data.local.entity.TrackEntity
 import com.example.musicplayer.data.local.entity.toDomain
 import com.example.musicplayer.data.local.entity.toEntity
 import com.example.musicplayer.data.wrapper.toDomain
@@ -28,6 +30,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
@@ -49,73 +52,62 @@ class TrackRepositoryImpl @Inject constructor(
     private var userPlaylistsRegistration: ListenerRegistration? = null
 
     override fun getAllTrack(): Flow<List<Track>> = flow {
-
-        val currentUserId = firebaseAuth.currentUser?.uid
-        if (currentUserId == null) {
+        val userId = firebaseAuth.currentUser?.uid
+        if (userId == null) {
             emit(emptyList())
             return@flow
         }
 
-        val savedTracks = trackDao.getAllTracksOnce().map { it.toDomain() }
-        emit(savedTracks)
-
         try {
             coroutineScope {
-
                 val favoriteDeferred = async {
-                    firestore.collection("favorites")
-                        .document(currentUserId)
-                        .collection("tracks")
-                        .get()
-                        .await()
-                        .map { it.id }
-                        .toSet()
+                    firestore.collection("favorites").document(userId)
+                        .collection("tracks").get().await().map { it.id }
                 }
-
                 val tracksDeferred = async {
                     firestore.collection("tracks").get().await()
                 }
-
-                val favoriteTracksIds = favoriteDeferred.await()
+                val favoriteIds = favoriteDeferred.await()
                 val allTracksSnapshot = tracksDeferred.await()
 
-                val currentCache = trackDao.getAllTracksOnce()
-                val cacheMap = currentCache.associateBy { it.id }
-
-
-                val remoteTracks = allTracksSnapshot.documents.map { document ->
-                    val trackId = document.id
-                    Track(
-                        id = trackId,
-                        title = document.getString("title") ?: "",
-                        artist = document.getString("artist") ?: "",
-                        audioUrl = document.getString("audioUrl") ?: "",
-                        imageUrl = document.getString("imageUrl") ?: "",
-                        duration = document.getLong("duration") ?: 0L,
-                        genre = document.getString("genre") ?: "",
-                        isFavorite = favoriteTracksIds.contains(trackId),
-                        localAudioPath = null,
-                        albumName = document.getString("albumName") ?: "",
-                        albumId = document.getString("albumId") ?: "",
+                val cacheMap = trackDao.getAllTracksOnce().associateBy { it.id }
+                val entities = allTracksSnapshot.documents.map { doc ->
+                    val cached = cacheMap[doc.id]
+                    TrackEntity(
+                        id = doc.id,
+                        title = doc.getString("title") ?: "",
+                        artist = doc.getString("artist") ?: "",
+                        audioUrl = doc.getString("audioUrl") ?: "",
+                        imageUrl = doc.getString("imageUrl") ?: "",
+                        duration = doc.getLong("duration") ?: 0L,
+                        genre = doc.getString("genre") ?: "",
+                        albumName = doc.getString("albumName") ?: "",
+                        albumId = doc.getString("albumId") ?: "",
+                        localAudioPath = cached?.localAudioPath,   // ✅ не теряем
                     )
                 }
+                trackDao.insertTracks(entities)
 
-                val entitiesToInsert = remoteTracks.map { remoteTrack ->
-                    val cachedTrack = cacheMap[remoteTrack.id]
-                    remoteTrack.toEntity().copy(
-                        localAudioPath = cachedTrack?.localAudioPath
-                    )
-                }
-                trackDao.insertTracks(entitiesToInsert)
+                trackDao.clearFavoritesForUser(userId)
+                val now = System.currentTimeMillis()
+                trackDao.addFavorites(favoriteIds.map { FavoriteTrackEntity(userId, it, now) })
             }
         } catch (e: Exception) {
             e.printStackTrace()
+            // не пробрасываем — ниже всё равно отдадим то, что есть в Room
         }
 
-        emitAll(trackDao.getAllTracksFlow().map { list ->
-            list.map { it.toDomain() }
-        })
-
+        emitAll(
+            combine(
+                trackDao.getAllTracksFlow(),
+                trackDao.observeFavoriteIds(userId)
+            ) { tracks, favoriteIds ->
+                val favSet = favoriteIds.toSet()
+                tracks.map { entity ->
+                    entity.toDomain().copy(isFavorite = entity.id in favSet)
+                }
+            }
+        )
     }.flowOn(Dispatchers.IO)
 
     override suspend fun getLyrics(trackId: String): Lyrics? =
@@ -380,9 +372,11 @@ class TrackRepositoryImpl @Inject constructor(
 
     override suspend fun likeTrack(trackId: String) {
 
-        val currentUserUid = firebaseAuth.currentUser?.uid ?: return
+        val uid = firebaseAuth.currentUser?.uid ?: return
+        val now = System.currentTimeMillis()
 
-        trackDao.updateFavoriteStatus(trackId = trackId, isFavorite = true)
+        trackDao.addFavorite(FavoriteTrackEntity(uid, trackId, now))
+
 
         try {
             val likeData = mapOf(
@@ -391,16 +385,15 @@ class TrackRepositoryImpl @Inject constructor(
             Log.d("TrackRepo", "start liking track with id:$trackId")
 
             firestore.collection("favorites")
-                .document(currentUserUid)
+                .document(uid)
                 .collection("tracks")
                 .document(trackId)
-                .set(likeData)
+                .set(mapOf("likedAt" to now))
                 .await()
 
             Log.d("TrackRepo", "track with id:$trackId liked")
         } catch (e: Exception) {
-            e.printStackTrace()
-            trackDao.updateFavoriteStatus(trackId = trackId, isFavorite = false)
+            trackDao.removeFavorite(uid, trackId)
             throw e
         }
 
@@ -435,15 +428,17 @@ class TrackRepositoryImpl @Inject constructor(
 
     override suspend fun unlikeTrack(trackId: String) {
 
-        val currentUserUid = firebaseAuth.currentUser?.uid ?: return
+        val uid = firebaseAuth.currentUser?.uid ?: return
 
-        trackDao.updateFavoriteStatus(trackId = trackId, isFavorite = false)
+        val wasFavorite = trackDao.getFavoriteIdsOnce(uid).contains(trackId)
+
+        trackDao.removeFavorite(uid, trackId)
 
         try {
             Log.d("TrackRepo", "start deleting track with id:$trackId")
 
             firestore.collection("favorites")
-                .document(currentUserUid)
+                .document(uid)
                 .collection("tracks")
                 .document(trackId)
                 .delete()
@@ -451,8 +446,11 @@ class TrackRepositoryImpl @Inject constructor(
 
             Log.d("TrackRepo", "track with id:$trackId deleted from favorites")
         } catch (e: Exception) {
-            e.printStackTrace()
-            trackDao.updateFavoriteStatus(trackId = trackId, isFavorite = true)
+            if (wasFavorite) {
+                trackDao.addFavorite(
+                    FavoriteTrackEntity(uid, trackId, System.currentTimeMillis())
+                )
+            }
             throw e
         }
     }
