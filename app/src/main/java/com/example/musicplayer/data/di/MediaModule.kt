@@ -4,6 +4,8 @@ import android.content.Context
 import com.example.musicplayer.data.local.dao.TrackDao
 import com.example.musicplayer.data.repositoryImpl.MusicRepositoryImpl
 import com.example.musicplayer.domain.repository.MusicRepository
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,10 +22,14 @@ object MediaModule {
     fun provideMusicRepository(
         @ApplicationContext context: Context,
         trackDao: TrackDao,
-    ) : MusicRepository {
+        firebaseAuth: FirebaseAuth,
+        firestore: FirebaseFirestore,
+    ): MusicRepository {
         return MusicRepositoryImpl(
             context = context,
             trackDao = trackDao,
+            firebaseAuth = firebaseAuth,
+            firestore = firestore,
         )
     }
 
