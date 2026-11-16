@@ -6,6 +6,7 @@ import com.example.musicplayer.data.local.dao.LyricDao
 import com.example.musicplayer.data.local.dao.PlayListDao
 import com.example.musicplayer.data.local.dao.TrackDao
 import com.example.musicplayer.data.local.entity.AlbumEntity
+import com.example.musicplayer.data.local.entity.FavoriteAlbumEntity
 import com.example.musicplayer.data.local.entity.FavoriteTrackEntity
 import com.example.musicplayer.data.local.entity.TrackEntity
 import com.example.musicplayer.data.local.entity.toDomain
@@ -30,7 +31,6 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
@@ -134,67 +134,61 @@ class TrackRepositoryImpl @Inject constructor(
         }
 
     override fun getAlbums(): Flow<List<Album>> = flow {
-
-        val currentUserId = firebaseAuth.currentUser?.uid
-        if (currentUserId == null) {
+        val userId = firebaseAuth.currentUser?.uid
+        if (userId == null) {
             emit(emptyList())
             return@flow
         }
 
-        val savedAlbums = albumDao.getAllAlbumsOnce().map { it.toDomain() }
-        emit(savedAlbums)
-
+        // --- 1. СИНХРОНИЗАЦИЯ С FIRESTORE ---
         try {
             coroutineScope {
                 val favoriteDeferred = async {
-                    firestore.collection("favorites")
-                        .document(currentUserId)
-                        .collection("albums")
-                        .get()
-                        .await()
-                        .map { it.id }
-                        .toSet()
+                    firestore.collection("favorites").document(userId)
+                        .collection("albums").get().await().map { it.id }
                 }
                 val albumsDeferred = async {
                     firestore.collection("albums").get().await()
                 }
-
-                val favoriteAlbumIds = favoriteDeferred.await()
+                val favoriteIds = favoriteDeferred.await()
                 val allAlbumsSnapshot = albumsDeferred.await()
 
-                val currentCache = albumDao.getAllAlbumsOnce()
-                val cacheMap = currentCache.associateBy { it.albumId }
-
-                val remoteAlbumsEntities = allAlbumsSnapshot.documents.map { document ->
-                    val albumId = document.id
-                    val cached = cacheMap[albumId]
-
-                    val isFavorite = favoriteAlbumIds.contains(albumId)
-
-                    Log.d(
-                        "AlbumDebug",
-                        "merge album=$albumId cached=${cached?.isFavorite} " +
-                                "remote=${favoriteAlbumIds.contains(albumId)} -> $isFavorite"
-                    )
-
+                // Контент (без isFavorite)
+                val entities = allAlbumsSnapshot.documents.map { doc ->
                     AlbumEntity(
-                        albumId = albumId,
-                        title = document.getString("title") ?: "Без названия",
-                        artist = document.getString("artist") ?: "Неизвестный исполнитель",
-                        imageUrl = document.getString("imageUrl") ?: "",
-                        isFavorite = isFavorite,
+                        albumId = doc.id,
+                        title = doc.getString("title") ?: "Без названия",
+                        artist = doc.getString("artist") ?: "Неизвестный исполнитель",
+                        imageUrl = doc.getString("imageUrl") ?: "",
                     )
                 }
+                albumDao.insertAlbums(entities)
 
-                albumDao.insertAlbums(remoteAlbumsEntities)
+                // Лайки для текущего пользователя
+                albumDao.clearFavoritesForUser(userId)
+                val now = System.currentTimeMillis()
+                albumDao.addFavorites(favoriteIds.map { FavoriteAlbumEntity(userId, it, now) })
             }
         } catch (e: Exception) {
             e.printStackTrace()
+            // Если упала сеть, идем дальше и показываем то, что есть в Room
         }
 
+        // --- 2. НАБЛЮДЕНИЕ ЗА ROOM ---
         emitAll(
-            albumDao.getAllAlbumsWithTracks().map { albums ->
-                albums.map { it.toDomain() }
+            combine(
+                albumDao.getAllAlbumsWithTracks(),
+                albumDao.observeFavoriteIds(userId)
+            ) { albumsWithTracks, favoriteIds ->
+                val favSet = favoriteIds.toSet()
+
+                albumsWithTracks.map { wrapper ->
+                    // Вызываем ваш маппер (он вернет isFavorite = false)
+                    wrapper.toDomain().copy(
+                        // И подставляем актуальный флаг из favorite_albums
+                        isFavorite = wrapper.album.albumId in favSet
+                    )
+                }
             }
         )
     }.flowOn(Dispatchers.IO)
@@ -400,27 +394,26 @@ class TrackRepositoryImpl @Inject constructor(
     }
 
     override suspend fun likeAlbum(albumId: String) {
-        val currentUseUid = firebaseAuth.currentUser?.uid ?: return
 
-        albumDao.updateFavoriteStatus(albumId = albumId, isFavorite = true)
+        val uid = firebaseAuth.currentUser?.uid ?: return
+        val now = System.currentTimeMillis()
 
+        // Сначала Room
+        albumDao.addFavorite(FavoriteAlbumEntity(uid, albumId, now))
         try {
-            val likedData = mapOf(
-                "likedAt" to System.currentTimeMillis()
-            )
 
             firestore.collection("favorites")
-                .document(currentUseUid)
+                .document(uid)
                 .collection("albums")
                 .document(albumId)
-                .set(likedData)
+                .set(mapOf("likedAt" to now))
                 .await()
 
             Log.d("TrackRepo", "album with id:${albumId} liked")
 
         } catch (e: Exception) {
             e.printStackTrace()
-            albumDao.updateFavoriteStatus(albumId = albumId, isFavorite = false)
+            albumDao.removeFavorite(uid, albumId)
             throw e
         }
     }
@@ -456,14 +449,16 @@ class TrackRepositoryImpl @Inject constructor(
     }
 
     override suspend fun unlikeAlbum(albumId: String) {
-        val currentUserUid = firebaseAuth.currentUser?.uid ?: return
 
-        albumDao.updateFavoriteStatus(albumId = albumId, isFavorite = false)
+        val uid = firebaseAuth.currentUser?.uid ?: return
+        val wasFavorite = albumDao.getFavoriteIdsOnce(uid).contains(albumId)
+
+        albumDao.removeFavorite(uid, albumId)
 
         try {
 
             firestore.collection("favorites")
-                .document(currentUserUid)
+                .document(uid)
                 .collection("albums")
                 .document(albumId)
                 .delete()
@@ -472,7 +467,11 @@ class TrackRepositoryImpl @Inject constructor(
             Log.d("TrackRepo", "album with id:$albumId deleted from favorites")
         } catch (e: Exception) {
             e.printStackTrace()
-            albumDao.updateFavoriteStatus(albumId = albumId, isFavorite = true)
+            if(wasFavorite) {
+                albumDao.addFavorite(
+                    FavoriteAlbumEntity(uid, albumId, System.currentTimeMillis())
+                )
+            }
             throw e
         }
     }
