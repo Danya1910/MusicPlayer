@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.example.musicplayer.data.local.entity.FavoriteTrackEntity
 import com.example.musicplayer.data.local.entity.TrackEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -31,8 +32,21 @@ interface TrackDao {
     suspend fun getFavoriteIdsOnce(userId: String): List<String>
 
 
-    @Query("UPDATE tracks_table SET isFavorite = :isFavorite WHERE id = :trackId")
-    suspend fun updateFavoriteStatus(trackId: String, isFavorite: Boolean)
+    @Query("SELECT * FROM favorite_tracks WHERE userId = :userId ORDER BY likedAt DESC")
+    fun observeFavorites(userId: String): Flow<List<FavoriteTrackEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addFavorite(favorite: FavoriteTrackEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addFavorites(favorites: List<FavoriteTrackEntity>)
+
+    @Query("DELETE FROM favorite_tracks WHERE userId = :userId AND trackId = :trackId")
+    suspend fun removeFavorite(userId: String, trackId: String)
+
+    @Query("DELETE FROM favorite_tracks WHERE userId = :userId")
+    suspend fun clearFavoritesForUser(userId: String)
+
 
     @Query("UPDATE tracks_table SET localAudioPath = :localAudioPath WHERE id = :trackId")
     suspend fun updateAudioPath(trackId: String, localAudioPath: String?)
