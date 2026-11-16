@@ -10,6 +10,7 @@ import com.example.musicplayer.data.local.dao.LyricDao
 import com.example.musicplayer.data.local.dao.PlayListDao
 import com.example.musicplayer.data.local.dao.TrackDao
 import com.example.musicplayer.data.local.entity.AlbumEntity
+import com.example.musicplayer.data.local.entity.FavoriteTrackEntity
 import com.example.musicplayer.data.local.entity.LyricsEntity
 import com.example.musicplayer.data.local.entity.PlaylistEntity
 import com.example.musicplayer.data.local.entity.TrackEntity
@@ -21,8 +22,9 @@ import com.example.musicplayer.data.local.entity.TrackEntity
         AlbumEntity::class,
         PlaylistEntity::class,
         LyricsEntity::class,
+        FavoriteTrackEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = false,
 )
 
@@ -89,5 +91,52 @@ val MIGRATION_4_5 = object : Migration(4, 5) {
             ADD COLUMN isFavorite INTEGER NOT NULL DEFAULT 0
             """.trimIndent()
         )
+    }
+}
+
+val MIGRATION_5_6 = object : Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // 1. Создаём таблицу избранного
+        db.execSQL("""
+            CREATE TABLE IF NOT EXISTS favorite_tracks (
+                userId TEXT NOT NULL,
+                trackId TEXT NOT NULL,
+                likedAt INTEGER NOT NULL,
+                PRIMARY KEY(userId, trackId)
+            )
+        """)
+
+        // 2. Пересоздаём tracks_table без isFavorite,
+        // строго соблюдая типы из TrackEntity
+        db.execSQL("""
+            CREATE TABLE tracks_table_new (
+                id TEXT NOT NULL PRIMARY KEY,
+                title TEXT NOT NULL,
+                artist TEXT NOT NULL,
+                audioUrl TEXT NOT NULL,
+                imageUrl TEXT NOT NULL,
+                duration INTEGER NOT NULL,
+                genre TEXT NOT NULL,
+                localAudioPath TEXT,
+                albumName TEXT,
+                albumId TEXT
+            )
+        """)
+
+        // 3. Переносим данные
+        db.execSQL("""
+            INSERT INTO tracks_table_new (
+                id, title, artist, audioUrl, imageUrl,
+                duration, genre, localAudioPath, albumName, albumId
+            )
+            SELECT
+                id, title, artist, audioUrl, imageUrl,
+                duration, genre, localAudioPath, albumName, albumId
+            FROM tracks_table
+        """)
+
+        // 4. Удаляем старую таблицу и переименовываем новую
+        db.execSQL("DROP TABLE tracks_table")
+        db.execSQL("ALTER TABLE tracks_table_new RENAME TO tracks_table")
     }
 }
