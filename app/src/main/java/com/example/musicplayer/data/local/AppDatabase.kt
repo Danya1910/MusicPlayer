@@ -10,6 +10,7 @@ import com.example.musicplayer.data.local.dao.LyricDao
 import com.example.musicplayer.data.local.dao.PlayListDao
 import com.example.musicplayer.data.local.dao.TrackDao
 import com.example.musicplayer.data.local.entity.AlbumEntity
+import com.example.musicplayer.data.local.entity.FavoriteAlbumEntity
 import com.example.musicplayer.data.local.entity.FavoriteTrackEntity
 import com.example.musicplayer.data.local.entity.LyricsEntity
 import com.example.musicplayer.data.local.entity.PlaylistEntity
@@ -23,8 +24,9 @@ import com.example.musicplayer.data.local.entity.TrackEntity
         PlaylistEntity::class,
         LyricsEntity::class,
         FavoriteTrackEntity::class,
+        FavoriteAlbumEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = false,
 )
 
@@ -138,5 +140,41 @@ val MIGRATION_5_6 = object : Migration(5, 6) {
         // 4. Удаляем старую таблицу и переименовываем новую
         db.execSQL("DROP TABLE tracks_table")
         db.execSQL("ALTER TABLE tracks_table_new RENAME TO tracks_table")
+    }
+}
+
+val MIGRATION_6_7 = object : Migration(6, 7) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // 1. Создаем таблицу избранных альбомов
+        db.execSQL("""
+            CREATE TABLE IF NOT EXISTS favorite_albums (
+                userId TEXT NOT NULL,
+                albumId TEXT NOT NULL,
+                likedAt INTEGER NOT NULL,
+                PRIMARY KEY(userId, albumId)
+            )
+        """)
+
+        // 2. Пересоздаем таблицу albums без isFavorite
+        // ВАЖНО: сверьтесь с вашим AlbumEntity, чтобы типы (TEXT, INTEGER, NOT NULL) совпадали!
+        db.execSQL("""
+            CREATE TABLE albums_new (
+                albumId TEXT NOT NULL PRIMARY KEY,
+                title TEXT NOT NULL,
+                artist TEXT NOT NULL,
+                imageUrl TEXT NOT NULL
+            )
+        """)
+
+        // 3. Переносим данные
+        db.execSQL("""
+            INSERT INTO albums_new (albumId, title, artist, imageUrl)
+            SELECT albumId, title, artist, imageUrl
+            FROM albums
+        """)
+
+        // 4. Удаляем старую и переименовываем новую
+        db.execSQL("DROP TABLE albums")
+        db.execSQL("ALTER TABLE albums_new RENAME TO albums")
     }
 }
