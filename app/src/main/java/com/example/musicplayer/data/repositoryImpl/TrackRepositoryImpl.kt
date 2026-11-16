@@ -56,9 +56,7 @@ class TrackRepositoryImpl @Inject constructor(
             return@flow
         }
 
-        val savedTracks = trackDao.getAllTracksOnce().map { entity ->
-            entity.toDomain().copy(isFavorite = false)
-        }
+        val savedTracks = trackDao.getAllTracksOnce().map { it.toDomain() }
         emit(savedTracks)
 
         try {
@@ -151,9 +149,7 @@ class TrackRepositoryImpl @Inject constructor(
             return@flow
         }
 
-        val savedAlbums = albumDao.getAllAlbumsOnce().map { entity ->
-            entity.toDomain().copy(isFavorite = false)
-        }
+        val savedAlbums = albumDao.getAllAlbumsOnce().map { it.toDomain() }
         emit(savedAlbums)
 
         try {
