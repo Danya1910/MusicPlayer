@@ -8,6 +8,7 @@ import com.example.musicplayer.data.local.MIGRATION_2_3
 import com.example.musicplayer.data.local.MIGRATION_3_4
 import com.example.musicplayer.data.local.MIGRATION_4_5
 import com.example.musicplayer.data.local.MIGRATION_5_6
+import com.example.musicplayer.data.local.MIGRATION_6_7
 import com.example.musicplayer.data.local.dao.AlbumDao
 import com.example.musicplayer.data.local.dao.LyricDao
 import com.example.musicplayer.data.local.dao.PlayListDao
@@ -40,6 +41,7 @@ object DatabaseModule {
                 MIGRATION_3_4,
                 MIGRATION_4_5,
                 MIGRATION_5_6,
+                MIGRATION_6_7,
             )
             .build()
 
