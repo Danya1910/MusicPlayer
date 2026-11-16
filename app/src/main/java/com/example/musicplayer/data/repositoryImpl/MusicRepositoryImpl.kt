@@ -12,12 +12,15 @@ import androidx.media3.common.Timeline
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.example.musicplayer.data.local.dao.TrackDao
+import com.example.musicplayer.data.local.entity.FavoriteTrackEntity
 import com.example.musicplayer.data.local.entity.toDomain
 import com.example.musicplayer.data.service.MusicService
 import com.example.musicplayer.domain.model.PlaybackOrigin
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.domain.repository.MusicRepository
 import com.google.common.util.concurrent.MoreExecutors
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,11 +31,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
@@ -41,6 +46,8 @@ import javax.inject.Inject
 class MusicRepositoryImpl @Inject constructor(
     @ApplicationContext context: Context,
     private val trackDao: TrackDao,
+    private val firebaseAuth: FirebaseAuth,
+    private val firestore: FirebaseFirestore,
 ) : MusicRepository {
 
     private val repositoryScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -63,8 +70,19 @@ class MusicRepositoryImpl @Inject constructor(
 
     override val currentTrack: StateFlow<Track?> = _currentTrackId
         .flatMapLatest { id ->
-            if (id == null) flowOf(null)
-            else trackDao.observeTrackById(id).map { it?.toDomain() }
+            val uid = firebaseAuth.currentUser?.uid
+            if (id == null || uid == null) {
+                flowOf(null)
+            } else {
+                combine(
+                    trackDao.observeTrackById(id),
+                    trackDao.observeFavoriteIds(uid)
+                ) { entity, favoriteIds ->
+                    entity?.toDomain()?.copy(
+                        isFavorite = entity.id in favoriteIds.toSet()
+                    )
+                }
+            }
         }
         .stateIn(
             scope = repositoryScope,
@@ -315,18 +333,58 @@ class MusicRepositoryImpl @Inject constructor(
 
     override fun removeTrackFromQueue(index: Int) {
         val controller = mediaController ?: return
-        if (controller.shuffleModeEnabled) return   // или маппинг индексом
+        if (controller.shuffleModeEnabled) return
         val totalItemsInPlayer = controller.mediaItemCount
         if (index in 0 until totalItemsInPlayer) {
             controller.removeMediaItem(index)
         } else {
-            Log.e("MusicPlayer_Repo", "Индекс $index вне границ (0..${totalItemsInPlayer - 1})")
+            Log.e(
+                "MusicPlayer_Repo",
+                "Индекс $index вне границ (0..${totalItemsInPlayer - 1})"
+            )
         }
     }
 
     override fun updateFavoriteStatus(trackId: String, isFavorite: Boolean) {
         repositoryScope.launch(Dispatchers.IO) {
-            trackDao.updateFavoriteStatus(trackId, isFavorite)
+            val uid = firebaseAuth.currentUser?.uid ?: return@launch
+            val now = System.currentTimeMillis()
+
+            if (isFavorite) {
+                // ---------- LIKE ----------
+                trackDao.addFavorite(FavoriteTrackEntity(uid, trackId, now))
+
+                try {
+                    firestore.collection("favorites")
+                        .document(uid)
+                        .collection("tracks")
+                        .document(trackId)
+                        .set(mapOf("likedAt" to now))
+                        .await()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    trackDao.removeFavorite(uid, trackId)
+                }
+            } else {
+                val wasFavorite = trackDao.getFavoriteIdsOnce(uid).contains(trackId)
+                trackDao.removeFavorite(uid, trackId)
+
+                try {
+                    firestore.collection("favorites")
+                        .document(uid)
+                        .collection("tracks")
+                        .document(trackId)
+                        .delete()
+                        .await()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    if (wasFavorite) {
+                        trackDao.addFavorite(
+                            FavoriteTrackEntity(uid, trackId, now)
+                        )
+                    }
+                }
+            }
         }
     }
 
