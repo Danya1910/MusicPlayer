@@ -656,6 +656,8 @@ class MainViewModel @Inject constructor(
         musicRepository.stopAndClear()
 
         authRepository.logOut()
+
+        Log.d("Logout", "log out")
     }
 
 }
