@@ -1,9 +1,11 @@
 package com.example.musicplayer.presentation.auth
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.musicplayer.domain.repository.AuthRepository
 import com.example.musicplayer.presentation.auth.state.AuthUiState
+import com.google.firebase.auth.FirebaseAuthException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.Lazy
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,8 +25,8 @@ class AuthViewModel @Inject constructor(
         email: String,
         password: String,
     ) {
-        if (email.isBlank() && password.isBlank()) {
-            _uiState.value = AuthUiState.Error("Поля не могут быть пустыми")
+        if (email.isBlank() || password.isBlank()) {
+            _uiState.value = AuthUiState.Error("Fields cannot be empty")
             return
         }
 
@@ -40,7 +42,7 @@ class AuthViewModel @Inject constructor(
                 }
                 .onFailure { exception ->
                     _uiState.value = AuthUiState.Error(
-                        exception.localizedMessage ?: "Неизвестная ошибка"
+                        exception.toUserMessage()
                     )
                 }
         }
@@ -51,7 +53,7 @@ class AuthViewModel @Inject constructor(
         password: String,
         name: String,
     ) {
-        if(email.isBlank() && password.isBlank() && name.isBlank()) {
+        if (email.isBlank() && password.isBlank() && name.isBlank()) {
             _uiState.value = AuthUiState.Error("Поля не могут быть пустыми")
         }
 
@@ -68,7 +70,7 @@ class AuthViewModel @Inject constructor(
                 }
                 .onFailure { exception ->
                     _uiState.value = AuthUiState.Error(
-                        exception.localizedMessage ?: "Неизвестная ошибка"
+                        exception.toUserMessage()
                     )
                 }
         }
@@ -78,4 +80,21 @@ class AuthViewModel @Inject constructor(
         _uiState.value = AuthUiState.Idle
     }
 
+}
+
+private fun Throwable.toUserMessage(): String = when ((this as? FirebaseAuthException)?.errorCode) {
+    "invalid-credential" -> "Wrong email or password"
+    "user-not-found" -> "The user with this email was not found"
+    "wrong-password" -> "Wrong password"
+    "invalid-email" -> "Invalid email"
+    "user-disabled" -> "Account disabled"
+    "too-many-requests" -> "Too many requests. Try later"
+    "network-request-failed" -> "Check network connection"
+    else -> {
+        Log.w(
+            "AuthViewModel",
+            "Необработанный код ошибки: ${(this as? FirebaseAuthException)?.errorCode}"
+        )
+        "Unknown error"
+    }
 }
