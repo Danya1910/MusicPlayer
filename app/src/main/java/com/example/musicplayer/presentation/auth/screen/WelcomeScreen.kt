@@ -1,6 +1,7 @@
 package com.example.musicplayer.presentation.auth.screen
 
 import android.util.Log
+import android.util.Patterns
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -299,6 +300,9 @@ private fun EmailStep(
     onBackClick: () -> Unit,
     onNextClick: () -> Unit,
 ) {
+
+    val isNextClickable = Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -328,7 +332,8 @@ private fun EmailStep(
         NextButton(
             onClick = {
                 onNextClick()
-            }
+            },
+            isClickable = isNextClickable,
         )
     }
 }
@@ -340,6 +345,9 @@ private fun NameStep(
     onBackClick: () -> Unit,
     onNextClick: () -> Unit,
 ) {
+
+    val isNextClickable = !name.isBlank()
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -369,7 +377,8 @@ private fun NameStep(
         NextButton(
             onClick = {
                 onNextClick()
-            }
+            },
+            isClickable = isNextClickable,
         )
 
     }
@@ -382,6 +391,9 @@ private fun PasswordStep(
     onBackClick: () -> Unit,
     onNextClick: () -> Unit,
 ) {
+
+    val isClickable = password.length >= 6 && !password.contains(Regex("\\s"))
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -412,7 +424,8 @@ private fun PasswordStep(
         NextButton(
             onClick = {
                 onNextClick()
-            }
+            },
+            isClickable = isClickable,
         )
     }
 }
@@ -485,13 +498,6 @@ private fun WelcomeScreenPreview() {
                                         page = pagerState.currentPage + 1,
                                         animationSpec = tween(400)
                                     )
-                                } else {
-                                    if (isSignUpMode) {
-                                        //viewModel.signUp(email, password, name)
-                                    } else {
-                                        //viewModel.signIn(email, password)
-                                    }
-                                    //onAuthSuccess()
                                 }
                             }
                         }
@@ -512,13 +518,6 @@ private fun WelcomeScreenPreview() {
                                         page = pagerState.currentPage + 1,
                                         animationSpec = tween(400)
                                     )
-                                } else {
-                                    if (isSignUpMode) {
-                                        //viewModel.signUp(email, password, name)
-                                    } else {
-                                        //viewModel.signIn(email, password)
-                                    }
-                                    //onAuthSuccess()
                                 }
                             }
                         },
@@ -539,13 +538,6 @@ private fun WelcomeScreenPreview() {
                                         page = pagerState.currentPage + 1,
                                         animationSpec = tween(400)
                                     )
-                                } else {
-                                    if (isSignUpMode) {
-                                        //viewModel.signUp(email, password, name)
-                                    } else {
-                                        //viewModel.signIn(email, password)
-                                    }
-                                    //onAuthSuccess()
                                 }
                             }
                         }
