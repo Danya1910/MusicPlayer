@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Icon
@@ -306,6 +307,7 @@ private fun EmailStep(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding()
     ) {
         WelcomeTopBar(
             title = "Create account",
@@ -350,6 +352,7 @@ private fun NameStep(
 
     Column(
         modifier = Modifier
+            .statusBarsPadding()
             .fillMaxWidth()
     ) {
         WelcomeTopBar(
@@ -396,6 +399,7 @@ private fun PasswordStep(
 
     Column(
         modifier = Modifier
+            .statusBarsPadding()
             .fillMaxWidth()
     ) {
         WelcomeTopBar(
