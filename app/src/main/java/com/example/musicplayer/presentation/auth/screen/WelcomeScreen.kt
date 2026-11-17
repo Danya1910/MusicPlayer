@@ -87,7 +87,7 @@ fun WelcomeScreen(
     }
 
     LaunchedEffect(pagerState.currentPage) {
-        if(pagerState.currentPage == 0) {
+        if (pagerState.currentPage == 0) {
             email = ""
             name = ""
             password = ""
@@ -98,102 +98,100 @@ fun WelcomeScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Scaffold(
-            containerColor = DeepBlack,
-        ) { paddingValues ->
-            Column(
-                verticalArrangement = Arrangement.Top,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
-                HorizontalPager(
-                    state = pagerState,
-                    userScrollEnabled = false,
-                    modifier = Modifier.weight(1f)
-                ) { page ->
-                    when (steps[page]) {
-                        "Welcome" -> WelcomeContent(
-                            onSignUpClick = {
-                                isSignUpMode = true
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(1, animationSpec = tween(400))
-                                }
-                            },
-                            onLogInClick = {
-                                isSignUpMode = false
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(1, animationSpec = tween(400))
+        Column(
+            verticalArrangement = Arrangement.Top,
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    color = DeepBlack
+                )
+        ) {
+            HorizontalPager(
+                state = pagerState,
+                userScrollEnabled = false,
+                modifier = Modifier.weight(1f)
+            ) { page ->
+                when (steps[page]) {
+                    "Welcome" -> WelcomeContent(
+                        onSignUpClick = {
+                            isSignUpMode = true
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(1, animationSpec = tween(400))
+                            }
+                        },
+                        onLogInClick = {
+                            isSignUpMode = false
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(1, animationSpec = tween(400))
+                            }
+                        }
+                    )
+
+                    "Email" -> EmailStep(
+                        email = email,
+                        onEmailChange = { email = it },
+                        onBackClick = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                            }
+                        },
+                        onNextClick = {
+                            coroutineScope.launch {
+                                if (pagerState.currentPage < steps.size - 1) {
+                                    pagerState.animateScrollToPage(
+                                        page = pagerState.currentPage + 1,
+                                        animationSpec = tween(400)
+                                    )
                                 }
                             }
-                        )
+                        }
+                    )
 
-                        "Email" -> EmailStep(
-                            email = email,
-                            onEmailChange = { email = it },
-                            onBackClick = {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                                }
-                            },
-                            onNextClick = {
-                                coroutineScope.launch {
-                                    if (pagerState.currentPage < steps.size - 1) {
-                                        pagerState.animateScrollToPage(
-                                            page = pagerState.currentPage + 1,
-                                            animationSpec = tween(400)
-                                        )
-                                    }
+                    "Name" -> NameStep(
+                        name = name,
+                        onNameChange = { name = it },
+                        onBackClick = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                            }
+                        },
+                        onNextClick = {
+                            coroutineScope.launch {
+                                if (pagerState.currentPage < steps.size - 1) {
+                                    pagerState.animateScrollToPage(
+                                        page = pagerState.currentPage + 1,
+                                        animationSpec = tween(400)
+                                    )
                                 }
                             }
-                        )
+                        },
+                    )
 
-                        "Name" -> NameStep(
-                            name = name,
-                            onNameChange = { name = it },
-                            onBackClick = {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                                }
-                            },
-                            onNextClick = {
-                                coroutineScope.launch {
-                                    if (pagerState.currentPage < steps.size - 1) {
-                                        pagerState.animateScrollToPage(
-                                            page = pagerState.currentPage + 1,
-                                            animationSpec = tween(400)
-                                        )
-                                    }
-                                }
-                            },
-                        )
-
-                        "Password" -> PasswordStep(
-                            password = password,
-                            onPasswordChange = { password = it },
-                            onBackClick = {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                                }
-                            },
-                            onNextClick = {
-                                coroutineScope.launch {
-                                    if (pagerState.currentPage < steps.size - 1) {
-                                        pagerState.animateScrollToPage(
-                                            page = pagerState.currentPage + 1,
-                                            animationSpec = tween(400)
-                                        )
+                    "Password" -> PasswordStep(
+                        password = password,
+                        onPasswordChange = { password = it },
+                        onBackClick = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                            }
+                        },
+                        onNextClick = {
+                            coroutineScope.launch {
+                                if (pagerState.currentPage < steps.size - 1) {
+                                    pagerState.animateScrollToPage(
+                                        page = pagerState.currentPage + 1,
+                                        animationSpec = tween(400)
+                                    )
+                                } else {
+                                    if (isSignUpMode) {
+                                        viewModel.signUp(email, password, name)
                                     } else {
-                                        if (isSignUpMode) {
-                                            viewModel.signUp(email, password, name)
-                                        } else {
-                                            viewModel.signIn(email, password)
-                                        }
+                                        viewModel.signIn(email, password)
                                     }
                                 }
                             }
-                        )
-                    }
+                        }
+                    )
                 }
             }
         }
@@ -215,7 +213,6 @@ fun WelcomeScreen(
 }
 
 
-
 @Composable
 private fun WelcomeContent(
     onLogInClick: () -> Unit,
@@ -232,7 +229,7 @@ private fun WelcomeContent(
         Image(
             painter = painterResource(R.drawable.welcome_bg),
             contentDescription = null,
-            contentScale = ContentScale.Fit,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(0.5f)
