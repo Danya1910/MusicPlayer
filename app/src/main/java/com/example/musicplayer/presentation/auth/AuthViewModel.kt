@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.musicplayer.domain.repository.AuthRepository
 import com.example.musicplayer.presentation.auth.state.AuthUiState
+import com.example.musicplayer.presentation.auth.util.AuthToastData
+import com.example.musicplayer.presentation.main.util.ToastType
 import com.google.firebase.auth.FirebaseAuthException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.Lazy
@@ -20,6 +22,9 @@ class AuthViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
     val uiState = _uiState.asStateFlow()
+
+    private val _toast = MutableStateFlow<AuthToastData?>(null)
+    val toast = _toast.asStateFlow()
 
     fun signIn(
         email: String,
@@ -43,6 +48,11 @@ class AuthViewModel @Inject constructor(
                 .onFailure { exception ->
                     _uiState.value = AuthUiState.Error(
                         exception.toUserMessage()
+                    )
+                    _toast.value= AuthToastData(
+                        title = "Error",
+                        message = exception.toUserMessage(),
+                        type = ToastType.ERROR,
                     )
                 }
         }
@@ -72,12 +82,18 @@ class AuthViewModel @Inject constructor(
                     _uiState.value = AuthUiState.Error(
                         exception.toUserMessage()
                     )
+                    _toast.value= AuthToastData(
+                        title = "Error",
+                        message = exception.toUserMessage(),
+                        type = ToastType.ERROR,
+                    )
                 }
         }
     }
 
     fun resetState() {
         _uiState.value = AuthUiState.Idle
+        _toast.value = null
     }
 
 }
