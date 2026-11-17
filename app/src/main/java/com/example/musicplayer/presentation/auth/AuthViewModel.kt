@@ -99,18 +99,15 @@ class AuthViewModel @Inject constructor(
 }
 
 private fun Throwable.toUserMessage(): String = when ((this as? FirebaseAuthException)?.errorCode) {
-    "invalid-credential" -> "Wrong email or password"
-    "user-not-found" -> "The user with this email was not found"
-    "wrong-password" -> "Wrong password"
-    "invalid-email" -> "Invalid email"
-    "user-disabled" -> "Account disabled"
-    "too-many-requests" -> "Too many requests. Try later"
-    "network-request-failed" -> "Check network connection"
+    "ERROR_INVALID_CREDENTIAL" -> "Wrong email or password"
+    "ERROR_USER_NOT_FOUND" -> "The user with this email was not found"
+    "ERROR_WRONG_PASSWORD" -> "Wrong password"
+    "ERROR_INVALID_EMAIL" -> "Invalid email"
+    "ERROR_USER_DISABLED" -> "Account disabled"
+    "ERROR_TOO_MANY_REQUESTS" -> "Too many requests. Try later"
+    "ERROR_NETWORK_REQUEST_FAILED" -> "Check network connection"
     else -> {
-        Log.w(
-            "AuthViewModel",
-            "Необработанный код ошибки: ${(this as? FirebaseAuthException)?.errorCode}"
-        )
+        Log.w("AuthViewModel", "Необработанный код ошибки: ${(this as? FirebaseAuthException)?.errorCode}")
         "Unknown error"
     }
 }
