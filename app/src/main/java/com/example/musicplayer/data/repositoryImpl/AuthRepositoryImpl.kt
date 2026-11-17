@@ -16,11 +16,9 @@ class AuthRepositoryImpl @Inject constructor(
 ) : AuthRepository {
 
     override suspend fun signIn(email: String, password: String): Result<Unit> = runCatching {
-        val result = firebaseAuth.signInWithEmailAndPassword(email, password).await()
+        firebaseAuth.signInWithEmailAndPassword(email, password).await()
 
-        Log.d("AuthRepository", "результат входа: $result")
-
-        Unit
+        Log.d("AuthRepository", "Вход успешен")
     }
 
     override suspend fun signUp(
