@@ -1,5 +1,7 @@
 package com.example.musicplayer.presentation.auth.component
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,11 +23,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.musicplayer.ui.theme.Black
 import com.example.musicplayer.ui.theme.DarkGray
+import com.example.musicplayer.ui.theme.SpotifyGreen
 
 @Composable
 fun NextButton(
+    isClickable: Boolean,
     onClick: () -> Unit,
 ) {
+
+    val color by animateColorAsState(
+        targetValue = if (isClickable) SpotifyGreen else Color(0xFF535353),
+        animationSpec = tween(300),
+    )
+
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
@@ -39,11 +50,13 @@ fun NextButton(
                     shape = RoundedCornerShape(21.dp)
                 )
                 .background(
-                    color = Color(0xFF535353)
+                    color = color,
                 )
-                .clickable {
-                    onClick()
-                }
+                .clickable(
+                    enabled = isClickable,
+                    onClick = onClick,
+                )
+
         ) {
             Text(
                 text = "Next",
