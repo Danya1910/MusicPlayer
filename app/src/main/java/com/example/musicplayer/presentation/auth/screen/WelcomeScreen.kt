@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Icon
@@ -50,6 +49,8 @@ import com.example.musicplayer.presentation.auth.state.AuthUiState
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.SpotifyGreen
 import com.example.musicplayer.ui.theme.White
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.haze
 import kotlinx.coroutines.launch
 
 @Composable
@@ -304,38 +305,47 @@ private fun EmailStep(
 
     val isNextClickable = Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()
 
-    Column(
+    val hazeState = remember { HazeState() }
+
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .statusBarsPadding()
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .haze(hazeState)
+        ) {
+            Spacer(modifier = Modifier.height(85.dp))
+            Text(
+                text = "What's your email?",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = White,
+                modifier = Modifier
+                    .padding(31.dp)
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            WelcomeInputField(
+                value = email,
+                hintText = "example@gmail.com",
+                onValueChange = onEmailChange
+            )
+            Spacer(modifier = Modifier.height(62.dp))
+            NextButton(
+                onClick = {
+                    onNextClick()
+                },
+                isClickable = isNextClickable,
+            )
+        }
         WelcomeTopBar(
             title = "Create account",
             onClick = {
                 onBackClick()
-            }
-        )
-        Spacer(modifier = Modifier.height(25.dp))
-        Text(
-            text = "What's your email?",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = White,
-            modifier = Modifier
-                .padding(31.dp)
-        )
-        Spacer(modifier = Modifier.height(2.dp))
-        WelcomeInputField(
-            value = email,
-            hintText = "example@gmail.com",
-            onValueChange = onEmailChange
-        )
-        Spacer(modifier = Modifier.height(62.dp))
-        NextButton(
-            onClick = {
-                onNextClick()
             },
-            isClickable = isNextClickable,
+            hazeState = hazeState
         )
     }
 }
@@ -350,40 +360,50 @@ private fun NameStep(
 
     val isNextClickable = !name.isBlank()
 
-    Column(
+    val hazeState = remember { HazeState() }
+
+
+    Box(
         modifier = Modifier
-            .statusBarsPadding()
-            .fillMaxWidth()
+            .fillMaxSize()
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .haze(hazeState)
+        ) {
+
+            Spacer(modifier = Modifier.height(85.dp))
+            Text(
+                text = "What's your name?",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = White,
+                modifier = Modifier
+                    .padding(31.dp)
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            WelcomeInputField(
+                value = name,
+                hintText = "",
+                onValueChange = onNameChange
+            )
+            Spacer(modifier = Modifier.height(62.dp))
+            NextButton(
+                onClick = {
+                    onNextClick()
+                },
+                isClickable = isNextClickable,
+            )
+
+        }
         WelcomeTopBar(
             title = "Create account",
             onClick = {
                 onBackClick()
-            }
-        )
-        Spacer(modifier = Modifier.height(25.dp))
-        Text(
-            text = "What's your name?",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = White,
-            modifier = Modifier
-                .padding(31.dp)
-        )
-        Spacer(modifier = Modifier.height(2.dp))
-        WelcomeInputField(
-            value = name,
-            hintText = "",
-            onValueChange = onNameChange
-        )
-        Spacer(modifier = Modifier.height(62.dp))
-        NextButton(
-            onClick = {
-                onNextClick()
             },
-            isClickable = isNextClickable,
+            hazeState = hazeState,
         )
-
     }
 }
 
@@ -397,39 +417,48 @@ private fun PasswordStep(
 
     val isClickable = password.length >= 6 && !password.contains(Regex("\\s"))
 
-    Column(
+    val hazeState = remember { HazeState() }
+
+    Box(
         modifier = Modifier
-            .statusBarsPadding()
-            .fillMaxWidth()
+            .fillMaxSize()
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .haze(hazeState)
+        ) {
+            Spacer(modifier = Modifier.height(85.dp))
+            Text(
+                text = "Create a password",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = White,
+                modifier = Modifier
+                    .padding(31.dp)
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            WelcomeInputField(
+                value = password,
+                hintText = "",
+                onValueChange = onPasswordChange,
+                isPassword = true,
+            )
+            Spacer(modifier = Modifier.height(62.dp))
+            NextButton(
+                onClick = {
+                    onNextClick()
+                },
+                isClickable = isClickable,
+            )
+
+        }
         WelcomeTopBar(
             title = "Create account",
             onClick = {
                 onBackClick()
-            }
-        )
-        Spacer(modifier = Modifier.height(25.dp))
-        Text(
-            text = "Create a password",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = White,
-            modifier = Modifier
-                .padding(31.dp)
-        )
-        Spacer(modifier = Modifier.height(2.dp))
-        WelcomeInputField(
-            value = password,
-            hintText = "",
-            onValueChange = onPasswordChange,
-            isPassword = true,
-        )
-        Spacer(modifier = Modifier.height(62.dp))
-        NextButton(
-            onClick = {
-                onNextClick()
             },
-            isClickable = isClickable,
+            hazeState = hazeState,
         )
     }
 }
