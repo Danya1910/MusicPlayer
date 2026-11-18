@@ -106,15 +106,7 @@ private fun ToastContent(
             )
             .padding(horizontal = 13.dp)
     ) {
-        if(toastData.title == "Exception") {
-            Text(
-                text = toastData.message ?: "",
-                fontWeight = FontWeight.Medium,
-                fontSize = 17.sp,
-                color = Black,
-                modifier = Modifier
-            )
-        } else {
+        if (toastData.title == "Favorites") {
             Icon(
                 painter = painterResource(
                     if (toastData.type == ToastType.ERROR) R.drawable.ic_error_favorites
@@ -151,6 +143,14 @@ private fun ToastContent(
                     ) {
                         onChangeClick()
                     }
+            )
+        } else {
+            Text(
+                text = toastData.message ?: "",
+                fontWeight = FontWeight.Medium,
+                fontSize = 17.sp,
+                color = Black,
+                modifier = Modifier
             )
         }
     }
