@@ -179,9 +179,10 @@ class TrackRepositoryImpl @Inject constructor(
                 val now = System.currentTimeMillis()
                 albumDao.addFavorites(favoriteIds.map { FavoriteAlbumEntity(userId, it, now) })
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            e.printStackTrace()
-            // Если упала сеть, идем дальше и показываем то, что есть в Room
+            _syncError.emit(e)
         }
 
         // --- 2. НАБЛЮДЕНИЕ ЗА ROOM ---
