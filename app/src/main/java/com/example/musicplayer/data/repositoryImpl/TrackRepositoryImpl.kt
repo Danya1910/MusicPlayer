@@ -27,6 +27,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
@@ -37,6 +39,7 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 
 class TrackRepositoryImpl @Inject constructor(
@@ -50,6 +53,12 @@ class TrackRepositoryImpl @Inject constructor(
 
     private var playlistsListener: ListenerRegistration? = null
     private var userPlaylistsRegistration: ListenerRegistration? = null
+
+    private val _syncError = MutableSharedFlow<Throwable>(
+        extraBufferCapacity = 1
+    )
+
+    override val syncError: SharedFlow<Throwable> = _syncError
 
     override fun getAllTrack(): Flow<List<Track>> = flow {
         val userId = firebaseAuth.currentUser?.uid
@@ -83,7 +92,7 @@ class TrackRepositoryImpl @Inject constructor(
                         genre = doc.getString("genre") ?: "",
                         albumName = doc.getString("albumName") ?: "",
                         albumId = doc.getString("albumId") ?: "",
-                        localAudioPath = cached?.localAudioPath,   // ✅ не теряем
+                        localAudioPath = cached?.localAudioPath,
                     )
                 }
                 trackDao.insertTracks(entities)
@@ -92,9 +101,10 @@ class TrackRepositoryImpl @Inject constructor(
                 val now = System.currentTimeMillis()
                 trackDao.addFavorites(favoriteIds.map { FavoriteTrackEntity(userId, it, now) })
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (e: CancellationException) {
             throw e
+        } catch (e: Exception) {
+            _syncError.emit(e)
         }
 
         emitAll(
