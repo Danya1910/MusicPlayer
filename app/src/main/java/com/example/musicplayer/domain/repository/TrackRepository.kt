@@ -6,8 +6,12 @@ import com.example.musicplayer.domain.model.Lyrics
 import com.example.musicplayer.domain.model.PlayList
 import com.example.musicplayer.domain.model.Track
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
 
 interface TrackRepository {
+
+    val syncError: SharedFlow<Throwable>
+
 
     fun getAllTrack(): Flow<List<Track>>
 
@@ -33,6 +37,7 @@ interface TrackRepository {
     suspend fun likeAlbum(albumId: String)
 
     suspend fun unlikeAlbum(albumId: String)
+
 
     fun stopListening()
 
