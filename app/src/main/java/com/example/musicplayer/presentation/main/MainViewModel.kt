@@ -23,6 +23,7 @@ import com.example.musicplayer.presentation.main.util.PlaylistUi
 import com.example.musicplayer.presentation.main.util.ToastData
 import com.example.musicplayer.presentation.main.util.ToastType
 import com.example.musicplayer.presentation.main.util.getTracksTotalTime
+import com.example.musicplayer.presentation.main.util.toToastData
 import com.example.musicplayer.presentation.player.state.PlayerUiState
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
@@ -31,7 +32,6 @@ import com.google.protobuf.LazyStringArrayList.emptyList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -109,6 +109,7 @@ class MainViewModel @Inject constructor(
         MainUiState.Success(tracks = tracks, albums = albums) as MainUiState
     }
         .catch { exception ->
+            _toast.value = exception.toToastData()
             emit(MainUiState.Error(exception.localizedMessage ?: "Неизвестная ошибка"))
         }
         .stateIn(
