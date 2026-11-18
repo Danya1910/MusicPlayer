@@ -94,7 +94,7 @@ class TrackRepositoryImpl @Inject constructor(
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            // не пробрасываем — ниже всё равно отдадим то, что есть в Room
+            throw e
         }
 
         emitAll(
