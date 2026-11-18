@@ -109,6 +109,7 @@ class MainViewModel @Inject constructor(
         MainUiState.Success(tracks = tracks, albums = albums) as MainUiState
     }
         .catch { exception ->
+            Log.d("MainToastDebug", exception.toToastData().toString())
             _toast.value = exception.toToastData()
             emit(MainUiState.Error(exception.localizedMessage ?: "Неизвестная ошибка"))
         }
