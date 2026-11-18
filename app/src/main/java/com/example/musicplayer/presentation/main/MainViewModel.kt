@@ -78,6 +78,10 @@ class MainViewModel @Inject constructor(
 
     private var lyricsJob: Job? = null
 
+    init {
+        observeSyncErrors()
+    }
+
     companion object {
         private const val FAVORITES_ID = "favorites"
 
@@ -290,6 +294,14 @@ class MainViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     ) as StateFlow<List<Track>>
+
+    private fun observeSyncErrors() {
+        viewModelScope.launch {
+            trackRepository.syncError.collect { error ->
+                _toast.value = error.toToastData()
+            }
+        }
+    }
 
     fun playTrack(
         track: Track,
