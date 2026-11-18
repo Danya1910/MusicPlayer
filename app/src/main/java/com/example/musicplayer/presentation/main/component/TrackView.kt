@@ -130,7 +130,7 @@ fun TrackView(
     isTimerActive: Boolean,
 ) {
 
-    LaunchedEffect(track) {
+    LaunchedEffect(track.id) {
         getLyrics()
     }
 
