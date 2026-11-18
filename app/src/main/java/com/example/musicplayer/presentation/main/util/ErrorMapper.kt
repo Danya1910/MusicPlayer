@@ -11,35 +11,35 @@ fun Throwable.toToastData(): ToastData {
         is UnknownHostException,
         is IOException,
         is FirebaseNetworkException -> ToastData(
-            title = "No Connection",
+            title = "Exception",
             message = "Please check your internet connection and try again.",
             type = ToastType.ERROR
         )
 
         is SocketTimeoutException -> ToastData(
-            title = "Server Not Responding",
+            title = "Exception",
             message = "Connection timed out. Please try again later.",
             type = ToastType.ERROR
         )
 
         is FirebaseFirestoreException -> when (this.code) {
             FirebaseFirestoreException.Code.UNAVAILABLE -> ToastData(
-                title = "No Connection",
+                title = "Exception",
                 message = "Service is temporarily unavailable or you are offline.",
                 type = ToastType.ERROR
             )
             FirebaseFirestoreException.Code.PERMISSION_DENIED -> ToastData(
-                title = "Access Denied",
+                title = "Exception",
                 message = "You do not have permission to view this data.",
                 type = ToastType.ERROR
             )
             FirebaseFirestoreException.Code.UNAUTHENTICATED -> ToastData(
-                title = "Authentication Error",
+                title = "Exception",
                 message = "Please sign in to your account again.",
                 type = ToastType.ERROR
             )
             else -> ToastData(
-                title = "Server Error",
+                title = "Exception",
                 message = "Failed to load data. Code: ${this.code.name}",
                 type = ToastType.ERROR
             )
