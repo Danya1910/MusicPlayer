@@ -468,7 +468,7 @@ class TrackRepositoryImpl @Inject constructor(
             Log.d("TrackRepo", "album with id:$albumId deleted from favorites")
         } catch (e: Exception) {
             e.printStackTrace()
-            if(wasFavorite) {
+            if (wasFavorite) {
                 albumDao.addFavorite(
                     FavoriteAlbumEntity(uid, albumId, System.currentTimeMillis())
                 )
