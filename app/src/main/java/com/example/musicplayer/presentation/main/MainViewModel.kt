@@ -515,7 +515,6 @@ class MainViewModel @Inject constructor(
                 Log.d("Like", "Liked success")
             } catch (e: Exception) {
                 Log.e("TrackVM", e.toString())
-                musicRepository.updateFavoriteStatus(trackId, isFavorite = false)
                 _toast.value = ToastData(
                     title = "Favorites",
                     message = "Fail Adding to Liked Songs",
@@ -539,7 +538,11 @@ class MainViewModel @Inject constructor(
                 )
             } catch (e: Exception) {
                 Log.e("TrackVM", e.toString())
-                musicRepository.updateFavoriteStatus(trackId, isFavorite = true)
+                _toast.value = ToastData(
+                    title = "Favorites",
+                    message = "Fail to delete like from track",
+                    type = ToastType.ERROR,
+                )
             }
         }
     }
