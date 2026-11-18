@@ -461,6 +461,11 @@ class MainViewModel @Inject constructor(
                     trackId = trackId,
                 )
             } catch (e: Exception) {
+                _toast.value = ToastData(
+                    title = "Adding",
+                    message = "Couldn't add track to playlist. Try again later",
+                    type = ToastType.ERROR,
+                )
                 Log.d("TrackVM", e.toString())
             }
         }
