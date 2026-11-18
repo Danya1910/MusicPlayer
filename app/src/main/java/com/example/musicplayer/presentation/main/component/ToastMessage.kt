@@ -106,43 +106,53 @@ private fun ToastContent(
             )
             .padding(horizontal = 13.dp)
     ) {
-        Icon(
-            painter = painterResource(
-                if (toastData.type == ToastType.ERROR) R.drawable.ic_error_favorites
-                else R.drawable.ic_liked_songs
-            ),
-            contentDescription = null,
-            tint = Color.Unspecified,
-            modifier = Modifier
-                .size(36.dp)
-                .clip(
-                    shape = RoundedCornerShape(2.dp)
-                )
-        )
-        Spacer(modifier = Modifier.width(15.dp))
-        Text(
-            text = toastData.message ?: "",
-            fontWeight = FontWeight.Medium,
-            fontSize = 17.sp,
-            color = Black,
-            maxLines = 1,
-            modifier = Modifier
-                .basicMarquee()
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        Text(
-            text = "Change",
-            fontSize = 17.sp,
-            fontWeight = FontWeight.Bold,
-            color = SpotifyGreen,
-            modifier = Modifier
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) {
-                    onChangeClick()
-                }
-        )
+        if(toastData.title == "Exception") {
+            Text(
+                text = toastData.message ?: "",
+                fontWeight = FontWeight.Medium,
+                fontSize = 17.sp,
+                color = Black,
+                modifier = Modifier
+            )
+        } else {
+            Icon(
+                painter = painterResource(
+                    if (toastData.type == ToastType.ERROR) R.drawable.ic_error_favorites
+                    else R.drawable.ic_liked_songs
+                ),
+                contentDescription = null,
+                tint = Color.Unspecified,
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(
+                        shape = RoundedCornerShape(2.dp)
+                    )
+            )
+            Spacer(modifier = Modifier.width(15.dp))
+            Text(
+                text = toastData.message ?: "",
+                fontWeight = FontWeight.Medium,
+                fontSize = 17.sp,
+                color = Black,
+                maxLines = 1,
+                modifier = Modifier
+                    .basicMarquee()
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = "Change",
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Bold,
+                color = SpotifyGreen,
+                modifier = Modifier
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        onChangeClick()
+                    }
+            )
+        }
     }
 
 }
