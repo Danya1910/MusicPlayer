@@ -150,7 +150,6 @@ class TrackRepositoryImpl @Inject constructor(
             return@flow
         }
 
-        // --- 1. СИНХРОНИЗАЦИЯ С FIRESTORE ---
         try {
             coroutineScope {
                 val favoriteDeferred = async {
@@ -163,7 +162,6 @@ class TrackRepositoryImpl @Inject constructor(
                 val favoriteIds = favoriteDeferred.await()
                 val allAlbumsSnapshot = albumsDeferred.await()
 
-                // Контент (без isFavorite)
                 val entities = allAlbumsSnapshot.documents.map { doc ->
                     AlbumEntity(
                         albumId = doc.id,
@@ -174,7 +172,6 @@ class TrackRepositoryImpl @Inject constructor(
                 }
                 albumDao.insertAlbums(entities)
 
-                // Лайки для текущего пользователя
                 albumDao.clearFavoritesForUser(userId)
                 val now = System.currentTimeMillis()
                 albumDao.addFavorites(favoriteIds.map { FavoriteAlbumEntity(userId, it, now) })
@@ -185,7 +182,6 @@ class TrackRepositoryImpl @Inject constructor(
             _syncError.emit(e)
         }
 
-        // --- 2. НАБЛЮДЕНИЕ ЗА ROOM ---
         emitAll(
             combine(
                 albumDao.getAllAlbumsWithTracks(),
@@ -194,9 +190,7 @@ class TrackRepositoryImpl @Inject constructor(
                 val favSet = favoriteIds.toSet()
 
                 albumsWithTracks.map { wrapper ->
-                    // Вызываем ваш маппер (он вернет isFavorite = false)
                     wrapper.toDomain().copy(
-                        // И подставляем актуальный флаг из favorite_albums
                         isFavorite = wrapper.album.albumId in favSet
                     )
                 }
@@ -384,9 +378,6 @@ class TrackRepositoryImpl @Inject constructor(
 
 
         try {
-            val likeData = mapOf(
-                "likedAt" to System.currentTimeMillis()
-            )
             Log.d("TrackRepo", "start liking track with id:$trackId")
 
             firestore.collection("favorites")
@@ -409,7 +400,6 @@ class TrackRepositoryImpl @Inject constructor(
         val uid = firebaseAuth.currentUser?.uid ?: return
         val now = System.currentTimeMillis()
 
-        // Сначала Room
         albumDao.addFavorite(FavoriteAlbumEntity(uid, albumId, now))
         try {
 
