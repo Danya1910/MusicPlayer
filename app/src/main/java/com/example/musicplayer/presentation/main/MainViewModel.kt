@@ -487,6 +487,11 @@ class MainViewModel @Inject constructor(
                     trackId = trackId,
                 )
             } catch (e: Exception) {
+                _toast.value = ToastData(
+                    title = "Adding",
+                    message = "Couldn't remove track from playlist. Try again later",
+                    type = ToastType.ERROR,
+                )
                 Log.d("TrackVM", e.toString())
             }
         }
@@ -582,6 +587,11 @@ class MainViewModel @Inject constructor(
                 )
                 Log.d("Unlike", "unliked success")
             } catch (e: Exception) {
+                _toast.value = ToastData(
+                    title = "Library",
+                    message = "Fail deleting from your Library",
+                    type = ToastType.ERROR,
+                )
                 Log.e("TrackVM", e.toString())
             }
         }
@@ -604,6 +614,11 @@ class MainViewModel @Inject constructor(
                 tracks = tracks
             )
         } catch (e: Exception) {
+            _toast.value = ToastData(
+                title = "Library",
+                message = "Fail to load tracks",
+                type = ToastType.ERROR,
+            )
             Log.d("TrackVM", e.toString())
         }
     }
@@ -623,6 +638,11 @@ class MainViewModel @Inject constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                _toast.value = ToastData(
+                    title = "Lyrics",
+                    message = "Couldn't load lyrics. Try again later",
+                    type = ToastType.ERROR,
+                )
                 Log.e("Lyrics", "Failed to load lyrics", e)
             }
         }
@@ -637,6 +657,11 @@ class MainViewModel @Inject constructor(
                     minutes = minutes,
                 )
             } catch (e: Exception) {
+                _toast.value = ToastData(
+                    title = "Timer",
+                    message = "Failed to set sleep timer",
+                    type = ToastType.SUCCESS,
+                )
                 Log.d("TrackVM", e.toString())
             }
         }
@@ -647,6 +672,11 @@ class MainViewModel @Inject constructor(
             try {
                 musicRepository.setSleepTimerToTrackEnd()
             } catch (e: Exception) {
+                _toast.value = ToastData(
+                    title = "Timer",
+                    message = "Couldn't set timer to end of track. Try again later",
+                    type = ToastType.SUCCESS,
+                )
                 Log.d("TrackVM", e.toString())
             }
         }
@@ -657,6 +687,11 @@ class MainViewModel @Inject constructor(
             try {
                 musicRepository.cancelSleepTimer()
             } catch (e: Exception) {
+                _toast.value = ToastData(
+                    title = "Timer",
+                    message = "Timer cancelled",
+                    type = ToastType.SUCCESS,
+                )
                 Log.d("TrackVM", e.toString())
             }
         }
