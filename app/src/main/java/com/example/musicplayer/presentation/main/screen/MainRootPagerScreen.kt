@@ -60,6 +60,8 @@ fun MainRootPagerScreen(
     val playlists by mainViewModel.playlistsState.collectAsStateWithLifecycle()
     val favorites by mainViewModel.favoritesPlaylist.collectAsStateWithLifecycle()
 
+    val nowPlayingOrigin by mainViewModel.currentPlayingOrigin.collectAsStateWithLifecycle()
+
     val isTimerActive by mainViewModel.isSleepTimerActive.collectAsStateWithLifecycle()
 
     val toast by mainViewModel.toast.collectAsStateWithLifecycle()
@@ -417,6 +419,7 @@ fun MainRootPagerScreen(
                             mainViewModel.stopOnTrackEnd()
                         },
                         isTimerActive = isTimerActive,
+                        trackOrigin = nowPlayingOrigin,
                     )
 
                 }
