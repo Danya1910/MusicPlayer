@@ -154,6 +154,7 @@ fun MainTest(
                                         queue = tracks,
                                         playbackOrigin = PlaybackOrigin.Album(
                                             albumId = album.id,
+                                            albumTitle = album.title,
                                         ),
                                     )
                                 }
@@ -185,6 +186,7 @@ fun MainTest(
                                     queue = clickedAlbum!!.tracks,
                                     playbackOrigin = PlaybackOrigin.Album(
                                         albumId = album.id,
+                                        albumTitle = album.title,
                                     ),
                                 )
                             },

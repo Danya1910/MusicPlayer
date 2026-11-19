@@ -296,6 +296,7 @@ fun LibraryTest(
                                     queue = tracks,
                                     playbackOrigin = PlaybackOrigin.Album(
                                         albumId = album.id,
+                                        albumTitle = album.title,
                                     ),
                                 )
                             }
@@ -327,6 +328,7 @@ fun LibraryTest(
                                 queue = albumToPass.tracks,
                                 playbackOrigin = PlaybackOrigin.Album(
                                     albumId = album.id,
+                                    albumTitle = album.title,
                                 ),
                             )
                         },
@@ -363,7 +365,8 @@ fun LibraryTest(
                                         track = firstTrack,
                                         queue = tracks,
                                         playbackOrigin = PlaybackOrigin.Playlist(
-                                            playlistId = playList.playlist.id ?: "",
+                                            playlistId = playList.playlist.id,
+                                            playlistTitle = playList.playlist.name,
                                         ),
                                     )
                                 }
@@ -383,6 +386,7 @@ fun LibraryTest(
                                     queue = playList.tracks,
                                     playbackOrigin = PlaybackOrigin.Playlist(
                                         playlistId = playList.playlist.id,
+                                        playlistTitle = playList.playlist.name,
                                     )
                                 )
                             },
@@ -423,6 +427,7 @@ fun LibraryTest(
                                         queue = tracks,
                                         playbackOrigin = PlaybackOrigin.Playlist(
                                             playlistId = playList.playlist.id ?: "",
+                                            playlistTitle = playList.playlist.name,
                                         ),
                                     )
                                 }
@@ -442,6 +447,7 @@ fun LibraryTest(
                                     queue = playList.tracks,
                                     playbackOrigin = PlaybackOrigin.Playlist(
                                         playlistId = playList.playlist.id ?: "",
+                                        playlistTitle = playList.playlist.name,
                                     )
                                 )
                             },
