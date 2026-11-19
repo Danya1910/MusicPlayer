@@ -89,6 +89,8 @@ fun MainScreenColumn(
                 },
                 isLoaded = !track.localAudioPath.isNullOrBlank(),
                 downloads = downloads,
+                currentPlayingId = playerState.currentTrack?.id ?: "",
+                isPlaying = playerState.isPlaying,
             )
         }
         item {
