@@ -585,7 +585,7 @@ private fun PlayerHead(
             textAlign = TextAlign.Center,
             text = title,
             fontWeight = FontWeight.SemiBold,
-            fontSize = 15.sp,
+            fontSize = 17.sp,
             color = White,
             modifier = Modifier.weight(1f)
         )
