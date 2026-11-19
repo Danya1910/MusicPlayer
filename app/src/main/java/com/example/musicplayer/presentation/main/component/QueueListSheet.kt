@@ -380,6 +380,7 @@ private fun CurrentPlayingTrack(
     onPlayPauseClick: () -> Unit,
     isPlaying: Boolean,
 ) {
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -407,12 +408,21 @@ private fun CurrentPlayingTrack(
                 )
                 .padding(end = 15.dp)
         ) {
-            Text(
-                text = track.title,
-                fontWeight = FontWeight.Medium,
-                fontSize = 15.sp,
-                color = SpotifyGreen,
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TrackPlayingIndicator(
+                    isPlaying = isPlaying,
+                    modifier = Modifier,
+                )
+                Spacer(modifier = Modifier.width(5.dp))
+                Text(
+                    text = track.title,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 15.sp,
+                    color = SpotifyGreen,
+                )
+            }
             Text(
                 text = track.artist,
                 fontWeight = FontWeight.Medium,
@@ -620,7 +630,7 @@ private fun TimerButton(
     modifier: Modifier,
 ) {
 
-    val color = if(isTimerActive) SpotifyGreen else Gray
+    val color = if (isTimerActive) SpotifyGreen else Gray
 
     Column(
         verticalArrangement = Arrangement.Center,
