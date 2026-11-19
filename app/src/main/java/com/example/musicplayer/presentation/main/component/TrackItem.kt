@@ -58,7 +58,11 @@ fun TrackItem(
     onDownloadClick: () -> Unit,
     isLoaded: Boolean,
     downloads: Map<String, DownloadProgress>,
+    currentPlayingId: String,
+    isPlaying: Boolean,
 ) {
+
+    val isThisTrackFocus = track.id == currentPlayingId
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -82,14 +86,25 @@ fun TrackItem(
             modifier = Modifier
                 .weight(1f)
         ) {
-            Text(
-                text = track.title,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                color = White,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if(isThisTrackFocus) {
+                    TrackPlayingIndicator(
+                        isPlaying = isPlaying,
+                        modifier = Modifier,
+                    )
+                }
+                Spacer(modifier = Modifier.width(5.dp))
+                Text(
+                    text = track.title,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = if(isThisTrackFocus) SpotifyGreen else White,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
             Spacer(modifier = Modifier.height(5.dp))
             Text(
                 text = track.artist,

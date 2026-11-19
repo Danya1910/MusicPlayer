@@ -2,6 +2,7 @@ package com.example.musicplayer.presentation.main.component
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -30,7 +31,7 @@ fun TrackPlayingIndicator(
         horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalAlignment = Alignment.Bottom,
         modifier = modifier
-            .height(20.dp),
+            .height(13.dp)
     ) {
         repeat(3) { index ->
 
@@ -51,14 +52,25 @@ fun TrackPlayingIndicator(
                 ),
             )
 
-            val height = if(isPlaying) {
-                animatedHeight * 12f
-            } else 2f
+            val targetHeight = if (isPlaying) {
+                (animatedHeight * 14f).dp
+            } else {
+                2.dp
+            }
+
+            val height by animateDpAsState(
+                targetValue = targetHeight,
+                animationSpec = tween(
+                    durationMillis = 300,
+                    easing = FastOutSlowInEasing
+                ),
+                label = "bar_height"
+            )
 
             Box(
                 modifier = Modifier
                     .width(2.dp)
-                    .height(height.dp)
+                    .height(height)
                     .background(
                         color = SpotifyGreen,
                     )
