@@ -58,6 +58,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -95,6 +96,7 @@ import com.example.musicplayer.ui.theme.SpotifyGreen
 import com.example.musicplayer.ui.theme.White
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
+import kotlinx.coroutines.flow.drop
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -185,18 +187,25 @@ fun TrackView(
         }
     )
 
-    LaunchedEffect(pagerState.settledPage) {
-        val settledPage = pagerState.settledPage
-        if (settledPage != currentIndex && settledPage in currentQueue.indices) {
-            onTrackInQueueClick(currentQueue[settledPage])
-        }
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.settledPage }
+            .drop(1)
+            .collect { page ->
+                if (page in currentQueue.indices) {
+                    val pageTrack = currentQueue[page]
+                    if (pageTrack.id != track.id) {
+                        onTrackInQueueClick(pageTrack)
+                    }
+                }
+            }
     }
 
     LaunchedEffect(currentIndex) {
         if (pagerState.currentPage != currentIndex && currentIndex in currentQueue.indices) {
-            pagerState.animateScrollToPage(currentIndex)
+            pagerState.scrollToPage(currentIndex)
         }
     }
+
 
     LaunchedEffect(Unit) {
         sheetState.partialExpand()
