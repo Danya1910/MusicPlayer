@@ -52,7 +52,7 @@ fun TrackPlayingIndicator(
             )
 
             val height = if(isPlaying) {
-                animatedHeight * 16f
+                animatedHeight * 12f
             } else 2f
 
             Box(
