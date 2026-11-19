@@ -84,6 +84,7 @@ import coil.request.ImageRequest
 import com.example.musicplayer.R
 import com.example.musicplayer.domain.model.DownloadProgress
 import com.example.musicplayer.domain.model.Lyrics
+import com.example.musicplayer.domain.model.PlaybackOrigin
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.presentation.main.util.formatDuration
 import com.example.musicplayer.presentation.main.util.increaseSaturation
@@ -127,6 +128,7 @@ fun TrackView(
     getLyrics: () -> Unit,
     lyrics: Lyrics?,
     isTimerActive: Boolean,
+    trackOrigin: PlaybackOrigin,
 ) {
 
     LaunchedEffect(track.id) {
@@ -143,6 +145,13 @@ fun TrackView(
             DeepBlack,
         )
     )
+
+    val hatTitle = when(trackOrigin) {
+        is PlaybackOrigin.Album -> trackOrigin.albumTitle
+        is PlaybackOrigin.Playlist -> trackOrigin.playlistTitle
+        PlaybackOrigin.Unknown -> track.title
+    }
+
 
     val increasedBgColor = playerState.bgColor.increaseSaturation(
         saturationFactor = 1.4f,
@@ -220,7 +229,7 @@ fun TrackView(
                 onCancelClick = {
                     onCancelClick()
                 },
-                title = track.title,
+                title = hatTitle,
                 onMoreClick = {
                     isTrackInfoVisible = true
                 },
