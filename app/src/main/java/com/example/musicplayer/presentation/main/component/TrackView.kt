@@ -981,9 +981,10 @@ private fun PlayerControl(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(44.dp)
+                .padding(10.dp)
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_random),
+                painter = painterResource(R.drawable.ic_shuffle),
                 contentDescription = null,
                 tint = if (isShuffled) SpotifyGreen else White,
                 modifier = Modifier
