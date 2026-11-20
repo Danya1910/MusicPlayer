@@ -74,6 +74,7 @@ import com.example.musicplayer.presentation.main.component.PlaylistView
 import com.example.musicplayer.presentation.main.state.MainUiState
 import com.example.musicplayer.presentation.main.util.LibraryTab
 import com.example.musicplayer.presentation.main.util.PlaylistUi
+import com.example.musicplayer.presentation.main.util.shimmer
 import com.example.musicplayer.presentation.navigation.TabScreen
 import com.example.musicplayer.ui.theme.DarkGray
 import com.example.musicplayer.ui.theme.DeepBlack
@@ -594,6 +595,57 @@ private fun FavoritesItem(
                 modifier = Modifier
                     .basicMarquee()
             )
+        }
+    }
+}
+
+@Composable
+private fun FavoritesItemSkeleton(
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(95.dp)
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_liked_songs),
+            contentDescription = null,
+            tint = Color.Unspecified,
+            modifier = Modifier
+                .size(70.dp)
+                .clip(
+                    shape = RoundedCornerShape(4.dp)
+                )
+        )
+        Spacer(modifier = Modifier.width(15.dp))
+        Column(
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Liked Songs",
+                fontWeight = FontWeight.Medium,
+                fontSize = 20.sp,
+                color = White,
+                maxLines = 1,
+                modifier = Modifier
+                    .basicMarquee()
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Box(
+                modifier = Modifier
+                    .shimmer()
+            ) {
+                Text(
+                    text = "2 songs",
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 16.sp,
+                    color = Gray,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .basicMarquee()
+                )
+            }
         }
     }
 }
