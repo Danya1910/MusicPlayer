@@ -94,8 +94,8 @@ fun TrackItem(
                         isPlaying = isPlaying,
                         modifier = Modifier,
                     )
+                    Spacer(modifier = Modifier.width(5.dp))
                 }
-                Spacer(modifier = Modifier.width(5.dp))
                 Text(
                     text = track.title,
                     fontSize = 16.sp,
