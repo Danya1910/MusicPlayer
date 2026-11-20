@@ -23,6 +23,7 @@ import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.presentation.main.MainViewModel
 import com.example.musicplayer.presentation.main.component.AlbumView
 import com.example.musicplayer.presentation.main.component.MainScreenColumn
+import com.example.musicplayer.presentation.main.component.MainScreenColumnSkeleton
 import com.example.musicplayer.presentation.main.component.ModalRightSheet
 import com.example.musicplayer.presentation.main.state.MainUiState
 import com.example.musicplayer.ui.theme.DeepBlack
@@ -66,13 +67,13 @@ fun MainTest(
     ) {
         when (val state = uiState) {
             is MainUiState.Loading ->
-                Text(
-                    textAlign = TextAlign.Center,
-                    text = "Загрузка нах...",
-                    fontSize = 23.sp,
-                    color = White,
-                    modifier = Modifier.fillMaxSize()
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .statusBarsPadding()
+                ) {
+                    MainScreenColumnSkeleton()
+                }
 
             is MainUiState.Success ->
                 if (state.tracks.isEmpty() && state.albums.isEmpty()) {
