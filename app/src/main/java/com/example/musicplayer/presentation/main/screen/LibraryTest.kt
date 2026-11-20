@@ -181,29 +181,44 @@ fun LibraryTest(
             ) {
 
                 if (tab == LibraryTab.Playlists || tab == LibraryTab.All) {
-                    item(
-                        key = "favorites"
-                    ) {
-                        FavoritesItem(
-                            playList = favorites.playlist,
-                            onClick = {
-                                currentPlaylistToShow = favorites
-                                showPlayList = true
-                            }
-                        )
-                    }
 
-                    items(
-                        items = playlists,
-                        key = { "playlist_${it.playlist.id}" }
-                    ) { playlist ->
-                        PlayListItem(
-                            playList = playlist.playlist,
-                            onClick = {
-                                currentPlaylistToShow = playlist
-                                showPlayList = true
+                    when (uiState) {
+                        MainUiState.Loading -> {
+                            item{
+                                FavoritesItemSkeleton()
                             }
-                        )
+                            items(
+                                count = 4,
+                            ) {
+                                PlayListItemSkeleton()
+                            }
+                        }
+                        else -> {
+                            item(
+                                key = "favorites"
+                            ) {
+                                FavoritesItem(
+                                    playList = favorites.playlist,
+                                    onClick = {
+                                        currentPlaylistToShow = favorites
+                                        showPlayList = true
+                                    }
+                                )
+                            }
+
+                            items(
+                                items = playlists,
+                                key = { "playlist_${it.playlist.id}" }
+                            ) { playlist ->
+                                PlayListItem(
+                                    playList = playlist.playlist,
+                                    onClick = {
+                                        currentPlaylistToShow = playlist
+                                        showPlayList = true
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -227,7 +242,11 @@ fun LibraryTest(
                         }
 
                         MainUiState.Loading -> {
-                            // скелетон / спиннер
+                            items(
+                                count = 3
+                            )  {
+                                AlbumItemSkeleton()
+                            }
                         }
 
                         is MainUiState.Error -> {
@@ -543,6 +562,63 @@ private fun PlayListItem(
 }
 
 @Composable
+private fun PlayListItemSkeleton() {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(95.dp)
+            .padding(horizontal = 20.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(70.dp)
+                .clip(
+                    shape = RoundedCornerShape(4.dp)
+                )
+                .shimmer()
+        )
+        Spacer(modifier = Modifier.width(15.dp))
+        Column(
+            verticalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.3f)
+                    .shimmer()
+            ) {
+                Text(
+                    text = "",
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 20.sp,
+                    color = Color.Transparent,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .basicMarquee()
+                )
+            }
+            Spacer(modifier = Modifier.height(6.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+                    .shimmer()
+            ) {
+                Text(
+                    text = "Playlist · ",
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 16.sp,
+                    color = Color.Transparent,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .basicMarquee()
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun FavoritesItem(
     playList: PlayList,
     onClick: () -> Unit,
@@ -640,7 +716,7 @@ private fun FavoritesItemSkeleton(
                     text = "2 songs",
                     fontWeight = FontWeight.Medium,
                     fontSize = 16.sp,
-                    color = Gray,
+                    color = Color.Transparent,
                     maxLines = 1,
                     modifier = Modifier
                         .basicMarquee()
@@ -698,6 +774,64 @@ private fun AlbumItem(
                 modifier = Modifier
                     .basicMarquee()
             )
+        }
+    }
+}
+
+@Composable
+private fun AlbumItemSkeleton(
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(95.dp)
+            .padding(horizontal = 20.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(70.dp)
+                .clip(
+                    shape = RoundedCornerShape(4.dp)
+                )
+                .shimmer()
+        )
+        Spacer(modifier = Modifier.width(15.dp))
+        Column(
+            verticalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.4f)
+                    .shimmer()
+            ) {
+                Text(
+                    text = "Playlist name",
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 20.sp,
+                    color = Color.Transparent,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .basicMarquee()
+                )
+            }
+            Spacer(modifier = Modifier.height(6.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+                    .shimmer()
+            ) {
+                Text(
+                    text = "Album · ",
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 16.sp,
+                    color = Color.Transparent,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .basicMarquee()
+                )
+            }
         }
     }
 }
