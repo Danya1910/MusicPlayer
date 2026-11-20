@@ -93,11 +93,15 @@ fun MainTest(
                             tracks = state.tracks,
                             albums = state.albums,
                             onTrackClick = { track ->
-                                mainViewModel.playTrackWithQueue(
-                                    track = track,
-                                    queue = state.tracks,
-                                    playbackOrigin = PlaybackOrigin.Unknown
-                                )
+                                if (playerState.isPlaying && playerState.currentTrack == track) {
+                                    mainViewModel.togglePlayPause()
+                                } else {
+                                    mainViewModel.playTrackWithQueue(
+                                        track = track,
+                                        queue = state.tracks,
+                                        playbackOrigin = PlaybackOrigin.Unknown
+                                    )
+                                }
                             },
                             onAlbumClick = { album ->
                                 clickedAlbum = album
