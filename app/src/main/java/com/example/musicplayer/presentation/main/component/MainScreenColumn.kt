@@ -72,7 +72,7 @@ fun MainScreenColumn(
         itemsIndexed(
             items = tracks,
             key = { index, track -> "${track.id}_$index" }
-        ) { index, track ->
+        ) { _, track ->
             TrackItem(
                 track = track,
                 onTrackClick = {
