@@ -22,7 +22,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.musicplayer.ui.theme.Black
-import com.example.musicplayer.ui.theme.DarkGray
 import com.example.musicplayer.ui.theme.SpotifyGreen
 
 @Composable
