@@ -1,11 +1,16 @@
 package com.example.musicplayer.presentation.main.component
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -89,12 +94,18 @@ fun TrackItem(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if(isThisTrackFocus) {
-                    TrackPlayingIndicator(
-                        isPlaying = isPlaying,
-                        modifier = Modifier,
-                    )
-                    Spacer(modifier = Modifier.width(5.dp))
+                AnimatedVisibility(
+                    visible = isThisTrackFocus,
+                    enter = expandHorizontally(expandFrom = Alignment.Start) + fadeIn(),
+                    exit = shrinkHorizontally(shrinkTowards = Alignment.Start) + fadeOut()
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        TrackPlayingIndicator(
+                            isPlaying = isPlaying,
+                            modifier = Modifier
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                    }
                 }
                 Text(
                     text = track.title,
