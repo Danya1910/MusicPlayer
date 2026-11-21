@@ -202,7 +202,7 @@ fun TrackView(
 
     LaunchedEffect(currentIndex) {
         if (pagerState.currentPage != currentIndex && currentIndex in currentQueue.indices) {
-            pagerState.scrollToPage(currentIndex)
+            pagerState.animateScrollToPage(currentIndex)
         }
     }
 
