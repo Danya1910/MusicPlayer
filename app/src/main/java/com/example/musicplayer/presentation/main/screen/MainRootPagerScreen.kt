@@ -57,7 +57,6 @@ fun MainRootPagerScreen(
     val hazeState = remember { HazeState() }
 
     val playerState by mainViewModel.playerState.collectAsStateWithLifecycle()
-    val playlists by mainViewModel.playlistsState.collectAsStateWithLifecycle()
     val favorites by mainViewModel.favoritesPlaylist.collectAsStateWithLifecycle()
 
     val nowPlayingOrigin by mainViewModel.currentPlayingOrigin.collectAsStateWithLifecycle()
