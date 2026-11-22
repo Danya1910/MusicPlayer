@@ -162,6 +162,9 @@ fun LibraryTest(
                     selectedTab = tab
             },
             selectedTab = selectedTab,
+            onShowMessage = { message ->
+                onShowMessage(message)
+            }
         )
         AnimatedContent(
             targetState = selectedTab,
@@ -855,6 +858,7 @@ private fun LibraryTopBar(
     onUserClick: () -> Unit,
     changeTab: (LibraryTab) -> Unit,
     selectedTab: LibraryTab,
+    onShowMessage: (String) -> Unit,
 ) {
 
     Column(
@@ -897,14 +901,29 @@ private fun LibraryTopBar(
                 painter = painterResource(R.drawable.ic_search_for_field),
                 contentDescription = null,
                 tint = White,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier
+                    .size(24.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        onShowMessage("This feature isn't available yet")
+                    }
             )
             Spacer(modifier = Modifier.width(20.dp))
             Icon(
                 painter = painterResource(R.drawable.ic_plus),
                 contentDescription = null,
                 tint = White,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier
+                    .size(24.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        onShowMessage("This feature isn't available yet")
+
+                    }
             )
         }
         Spacer(modifier = Modifier.height(22.dp))
