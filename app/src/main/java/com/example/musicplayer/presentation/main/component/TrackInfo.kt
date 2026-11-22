@@ -53,13 +53,16 @@ fun TrackInfo(
     onDownloadClick: () -> Unit,
     setTimer: () -> Unit,
     isTimerActive: Boolean,
+    onShowMessage: (String) -> Unit,
 ) {
 
     val actionsList = listOf(
         ActionButtonData(
             icon = R.drawable.ic_share,
             title = "Share",
-            onClick = {}
+            onClick = {
+                onShowMessage("This feature isn't available yet")
+            }
         ),
         ActionButtonData(
             icon = R.drawable.ic_circle_plus,
