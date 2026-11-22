@@ -142,7 +142,9 @@ fun MainRootPagerScreen(
                         isTrackInfoVisible = true
                     },
                     onShowMessage = { message ->
-                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context, message, Toast.LENGTH_SHORT
+                        ).show()
                     }
                 )
             }
@@ -166,7 +168,9 @@ fun MainRootPagerScreen(
                         isTrackInfoVisible = true
                     },
                     onShowMessage = { message ->
-                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context, message, Toast.LENGTH_SHORT
+                        ).show()
                     }
                 )
             }
@@ -296,6 +300,11 @@ fun MainRootPagerScreen(
                             isTrackInfoVisible = false
                         },
                         isTimerActive = isTimerActive,
+                        onShowMessage = { message ->
+                            Toast.makeText(
+                                context, message, Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     )
                 }
             }
@@ -429,6 +438,11 @@ fun MainRootPagerScreen(
                         },
                         isTimerActive = isTimerActive,
                         trackOrigin = nowPlayingOrigin,
+                        onShowMessage = { message ->
+                            Toast.makeText(
+                                context, message, Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     )
 
                 }
