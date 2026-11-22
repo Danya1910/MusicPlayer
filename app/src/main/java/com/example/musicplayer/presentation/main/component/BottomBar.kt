@@ -59,7 +59,6 @@ fun BottomBar(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .navigationBarsPadding()
             .fillMaxWidth()
             .height(85.dp)
             .background(color = DeepBlack)
@@ -78,7 +77,10 @@ fun BottomBar(
                 icon = item.icon,
                 text = item.text,
                 color = itemColor,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .navigationBarsPadding()
+                ,
                 onClick = {
                     onTabSelected(item.route)
                 }
