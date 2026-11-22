@@ -96,6 +96,7 @@ fun LibraryTest(
     tabController: NavController,
     favorites: PlaylistUi,
     onMoreClick: (Track) -> Unit,
+    onShowMessage: (String) -> Unit,
 ) {
 
     val playlists by mainViewModel.playlistsUiState.collectAsStateWithLifecycle()
@@ -360,6 +361,9 @@ fun LibraryTest(
                         },
                         downloads = downloads,
                         currentPlayingOrigin = playbackOrigin,
+                        onShowMessage = { message ->
+                            onShowMessage(message)
+                        }
                     )
                 }
             }

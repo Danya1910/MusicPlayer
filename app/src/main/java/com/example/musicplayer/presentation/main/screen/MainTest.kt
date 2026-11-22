@@ -36,7 +36,7 @@ fun MainTest(
     mainViewModel: MainViewModel,
     navController: NavController,
     onMoreClick: (Track) -> Unit,
-
+    onShowMessage: (String) -> Unit,
     ) {
 
     BackHandler(enabled = true) {}
@@ -203,6 +203,9 @@ fun MainTest(
                             },
                             downloads = downloads,
                             currentPlayingOrigin = playbackOrigin,
+                            onShowMessage = { message ->
+                                onShowMessage(message)
+                            }
                         )
                     }
                 }
