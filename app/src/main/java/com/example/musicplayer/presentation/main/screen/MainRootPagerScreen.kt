@@ -1,6 +1,7 @@
 package com.example.musicplayer.presentation.main.screen
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -22,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -53,6 +55,8 @@ fun MainRootPagerScreen(
     mainViewModel: MainViewModel,
     rootNavController: NavController
 ) {
+
+    val context = LocalContext.current
 
     val hazeState = remember { HazeState() }
 
@@ -136,6 +140,9 @@ fun MainRootPagerScreen(
                     onMoreClick = { track ->
                         currentInfoToShow = track
                         isTrackInfoVisible = true
+                    },
+                    onShowMessage = { message ->
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                     }
                 )
             }
@@ -157,6 +164,9 @@ fun MainRootPagerScreen(
                     onMoreClick = { track ->
                         currentInfoToShow = track
                         isTrackInfoVisible = true
+                    },
+                    onShowMessage = { message ->
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                     }
                 )
             }
