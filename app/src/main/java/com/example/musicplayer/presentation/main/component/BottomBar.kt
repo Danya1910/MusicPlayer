@@ -79,7 +79,6 @@ fun BottomBar(
                 color = itemColor,
                 modifier = Modifier
                     .weight(1f)
-                    .navigationBarsPadding()
                 ,
                 onClick = {
                     onTabSelected(item.route)
@@ -110,6 +109,7 @@ private fun BottomBarItem(
             .clickable{
                 onClick()
             }
+            .navigationBarsPadding()
     ) {
         Column(
             verticalArrangement = Arrangement.Center,
