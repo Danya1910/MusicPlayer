@@ -134,6 +134,7 @@ fun TrackView(
     lyrics: Lyrics?,
     isTimerActive: Boolean,
     trackOrigin: PlaybackOrigin,
+    onShowMessage: (String) -> Unit,
 ) {
 
     LaunchedEffect(track.id) {
@@ -451,6 +452,9 @@ fun TrackView(
                             isTrackInfoVisible = false
                         },
                         isTimerActive = isTimerActive,
+                        onShowMessage = { message ->
+                            onShowMessage(message)
+                        }
                     )
                 }
             }
