@@ -94,6 +94,7 @@ fun AlbumView(
     onDownloadClick: (Track) -> Unit,
     downloads: Map<String, DownloadProgress>,
     currentPlayingOrigin: PlaybackOrigin,
+    onShowMessage: (String) -> Unit,
 ) {
 
     val hazeState = remember { HazeState() }
@@ -164,7 +165,10 @@ fun AlbumView(
                     onDownloadAlbumClick = onDownloadAlbumClick,
                     isPlaying = isPlayingLocal,
                     isAlbumLoaded = isAllAlbumLoaded,
-                    isLiked = album.isFavorite
+                    isLiked = album.isFavorite,
+                    onShowMessage = {
+                        onShowMessage("This feature isn't available yet")
+                    }
                 )
             }
 
@@ -261,6 +265,7 @@ private fun AlbumInfo(
     onDownloadAlbumClick: () -> Unit,
     isAlbumLoaded: Boolean,
     isLiked: Boolean,
+    onShowMessage: () -> Unit,
 ) {
 
     val color by animateColorAsState(
@@ -375,6 +380,12 @@ private fun AlbumInfo(
                     contentDescription = null,
                     tint = Gray,
                     modifier = Modifier.size(28.dp)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            onShowMessage()
+                        }
                 )
             }
 
