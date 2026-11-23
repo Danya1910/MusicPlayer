@@ -90,7 +90,7 @@ import dev.chrisbanes.haze.hazeChild
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LibraryTest(
+fun LibraryScreen(
     mainViewModel: MainViewModel,
     navController: NavController,
     tabController: NavController,

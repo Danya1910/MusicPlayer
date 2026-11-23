@@ -32,7 +32,7 @@ import com.example.musicplayer.ui.theme.White
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainTest(
+fun MainScreen(
     mainViewModel: MainViewModel,
     navController: NavController,
     onMoreClick: (Track) -> Unit,

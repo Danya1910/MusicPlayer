@@ -136,7 +136,7 @@ fun MainRootPagerScreen(
         ) {
 
             composable<TabScreen.Home> {
-                MainTest(
+                MainScreen(
                     mainViewModel = mainViewModel,
                     navController = rootNavController,
                     onMoreClick = { track ->
@@ -160,7 +160,7 @@ fun MainRootPagerScreen(
             }
 
             composable<TabScreen.Library> {
-                LibraryTest(
+                LibraryScreen(
                     mainViewModel = mainViewModel,
                     navController = rootNavController,
                     tabController = tabNavController,
