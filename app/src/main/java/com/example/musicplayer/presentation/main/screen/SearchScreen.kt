@@ -1,8 +1,17 @@
 package com.example.musicplayer.presentation.main.screen
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,13 +19,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -26,14 +33,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.musicplayer.R
 import com.example.musicplayer.presentation.main.SearchViewModel
 import com.example.musicplayer.ui.theme.Black
+import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.White
 
@@ -76,47 +83,54 @@ private fun SearchField(
     hintText: String,
 ) {
 
-    val showIcon = value.isBlank()
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
 
-    val rowOffset by animateDpAsState(
-        targetValue = if (showIcon) 0.dp else -(12.dp + 32.dp),
+    val focusManager = LocalFocusManager.current
+
+    val showCancel = isFocused
+
+    val cornerRadius by animateDpAsState(
+        targetValue = if(isFocused) 100.dp else 5.dp,
         animationSpec = tween(durationMillis = 250),
-        label = "rowOffset"
     )
 
-    Box(
+    val fieldPadding by animateDpAsState(
+        targetValue = if(showCancel) 8.dp else 0.dp,
+        animationSpec = tween(durationMillis = 250),
+    )
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .padding(horizontal = 16.dp)
-            .height(56.dp)
-            .fillMaxWidth()
-            .clip(
-                shape = RoundedCornerShape(5.dp)
-            )
-            .background(
-                color = White
-            )
+            .fillMaxWidth(),
     ) {
-        BasicTextField(
-            value = value,
-            onValueChange = onQueryChange,
-            textStyle = TextStyle(
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                color = Black
-            ),
-            decorationBox = { innerTextField ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.offset(x = rowOffset)
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_search_for_field),
-                        contentDescription = null,
-                        tint = Black,
-                        modifier = Modifier
-                            .padding(start = 12.dp)
-                            .size(32.dp)
-                    )
+        Box(
+            modifier = Modifier
+                .height(56.dp)
+                .weight(1f)
+                .clip(
+                    shape = RoundedCornerShape(cornerRadius)
+                )
+                .background(
+                    color = White
+                )
+                .padding(
+                    end = fieldPadding
+                )
+        ) {
+            BasicTextField(
+                value = value,
+                onValueChange = onQueryChange,
+                interactionSource = interactionSource,
+                textStyle = TextStyle(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = Black
+                ),
+                decorationBox = { innerTextField ->
+
                     Box(
                         contentAlignment = Alignment.CenterStart,
                         modifier = Modifier
@@ -124,15 +138,147 @@ private fun SearchField(
                             .padding(start = 12.dp)
                     ) {
                         if (value.isEmpty() && hintText.isNotEmpty()) {
-                            Text(hintText, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Gray)
+                            Text(
+                                hintText,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Gray
+                            )
                         }
                         innerTextField()
                     }
+                },
+                modifier = Modifier
+                    .fillMaxSize()
+            )
+        }
+        AnimatedVisibility(
+            visible = showCancel,
+            enter = slideInHorizontally(
+                initialOffsetX = { fullWidth -> fullWidth }, // из-за правого края
+                animationSpec = tween(250),
+            ) + fadeIn(tween(250)),
+            exit = slideOutHorizontally(
+                targetOffsetX = { fullWidth -> fullWidth },  // уезжает вправо
+                animationSpec = tween(200),
+            ) + fadeOut(tween(200)),
+        ) {
+            CloseButton(
+                text = "Cancel",
+                onClick = {
+                    onQueryChange("")
+                    focusManager.clearFocus()
                 }
-            },
-            modifier = Modifier
-                .fillMaxSize()
+            )
+        }
+    }
+
+}
+
+@Composable
+private fun CloseButton(
+    text: String,
+    onClick: () -> Unit,
+) {
+
+    Box(
+        modifier = Modifier
+            .height(50.dp)
+            .clip(
+                shape = CircleShape
+            )
+            .border(
+                shape = CircleShape,
+                width = 1.dp,
+                color = Gray
+            )
+            .background(
+                color = DeepBlack,
+            )
+            .clickable{
+                onClick()
+            }
+            .padding(
+                horizontal = 12.dp
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            fontWeight = FontWeight.Medium,
+            fontSize = 17.sp,
+            color = White,
         )
     }
 
 }
+
+
+//@Composable
+//private fun SearchField(
+//    value: String,
+//    onQueryChange: (String) -> Unit,
+//    onCancelClick: () -> Unit,
+//    hintText: String,
+//) {
+//
+//    val showIcon = value.isBlank()
+//
+//    val rowOffset by animateDpAsState(
+//        targetValue = if (showIcon) 0.dp else -(12.dp + 32.dp),
+//        animationSpec = tween(durationMillis = 250),
+//        label = "rowOffset"
+//    )
+//
+//    Box(
+//        modifier = Modifier
+//            .padding(horizontal = 16.dp)
+//            .height(56.dp)
+//            .fillMaxWidth()
+//            .clip(
+//                shape = RoundedCornerShape(5.dp)
+//            )
+//            .background(
+//                color = White
+//            )
+//    ) {
+//        BasicTextField(
+//            value = value,
+//            onValueChange = onQueryChange,
+//            textStyle = TextStyle(
+//                fontWeight = FontWeight.Bold,
+//                fontSize = 16.sp,
+//                color = Black
+//            ),
+//            decorationBox = { innerTextField ->
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically,
+//                    modifier = Modifier.offset(x = rowOffset)
+//                ) {
+//                    Icon(
+//                        painter = painterResource(R.drawable.ic_search_for_field),
+//                        contentDescription = null,
+//                        tint = Black,
+//                        modifier = Modifier
+//                            .padding(start = 12.dp)
+//                            .size(32.dp)
+//                    )
+//                    Box(
+//                        contentAlignment = Alignment.CenterStart,
+//                        modifier = Modifier
+//                            .fillMaxSize()
+//                            .padding(start = 12.dp)
+//                    ) {
+//                        if (value.isEmpty() && hintText.isNotEmpty()) {
+//                            Text(hintText, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Gray)
+//                        }
+//                        innerTextField()
+//                    }
+//                }
+//            },
+//            modifier = Modifier
+//                .fillMaxSize()
+//        )
+//    }
+//
+//}
