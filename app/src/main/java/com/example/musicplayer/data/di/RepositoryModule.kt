@@ -2,10 +2,12 @@ package com.example.musicplayer.data.di
 
 import com.example.musicplayer.data.repositoryImpl.AuthRepositoryImpl
 import com.example.musicplayer.data.repositoryImpl.FileRepositoryImpl
+import com.example.musicplayer.data.repositoryImpl.SearchRepositoryImpl
 import com.example.musicplayer.data.repositoryImpl.TrackRepositoryImpl
 import com.example.musicplayer.data.repositoryImpl.UserRepositoryImpl
 import com.example.musicplayer.domain.repository.AuthRepository
 import com.example.musicplayer.domain.repository.FileRepository
+import com.example.musicplayer.domain.repository.SearchRepository
 import com.example.musicplayer.domain.repository.TrackRepository
 import com.example.musicplayer.domain.repository.UserRepository
 import dagger.Binds
@@ -42,6 +44,12 @@ abstract class RepositoryModule {
     abstract fun bindFileRepository(
         fileRepository: FileRepositoryImpl
     ) : FileRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSearchRepository(
+        searchRepository: SearchRepositoryImpl
+    ) : SearchRepository
 
 
 }
