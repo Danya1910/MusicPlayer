@@ -34,6 +34,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.musicplayer.domain.model.PlaybackOrigin
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.presentation.main.MainViewModel
+import com.example.musicplayer.presentation.main.SearchViewModel
 import com.example.musicplayer.presentation.main.component.AddTrackToPlayListWidget
 import com.example.musicplayer.presentation.main.component.BottomBar
 import com.example.musicplayer.presentation.main.component.NowPlayingBar
@@ -53,7 +54,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainRootPagerScreen(
     mainViewModel: MainViewModel,
-    rootNavController: NavController
+    searchViewModel: SearchViewModel,
+    rootNavController: NavController,
 ) {
 
     val context = LocalContext.current
