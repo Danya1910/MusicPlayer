@@ -7,6 +7,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.example.musicplayer.presentation.main.MainViewModel
+import com.example.musicplayer.presentation.main.SearchViewModel
 import com.example.musicplayer.presentation.main.screen.MainRootPagerScreen
 
 fun NavGraphBuilder.mainGraph(
@@ -20,9 +21,11 @@ fun NavGraphBuilder.mainGraph(
                 navController.getBackStackEntry<Screen.MainGraph>()
             }
             val mainViewModel: MainViewModel = hiltViewModel(parentEntry)
+            val searchViewModel: SearchViewModel = hiltViewModel(parentEntry)
 
             MainRootPagerScreen(
                 mainViewModel = mainViewModel,
+                searchViewModel = searchViewModel,
                 rootNavController = navController,
             )
         }
