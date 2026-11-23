@@ -152,11 +152,9 @@ fun MainRootPagerScreen(
             }
 
             composable<TabScreen.Search> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(DeepBlack)
-                )
+               SearchScreen(
+                   searchViewModel = searchViewModel,
+               )
             }
 
             composable<TabScreen.Library> {
