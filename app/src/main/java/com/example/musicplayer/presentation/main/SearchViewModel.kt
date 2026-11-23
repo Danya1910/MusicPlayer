@@ -35,7 +35,7 @@ class SearchViewModel @Inject constructor(
                     emit(SearchUiState.Loading)
                     runCatching { searchRepository.search(query = query) }
                         .onSuccess { emit(SearchUiState.Success(it)) }
-                        .onFailure { emit(SearchUiState.Error(it.message) })
+                        .onFailure { emit(SearchUiState.Error(it.message)) }
                 }
             }
         }.stateIn(
@@ -44,5 +44,10 @@ class SearchViewModel @Inject constructor(
             initialValue = SearchUiState.Empty
         )
 
+    fun onQueryChanged(
+        query: String
+    ) {
+        _query.value = query
+    }
 
 }
