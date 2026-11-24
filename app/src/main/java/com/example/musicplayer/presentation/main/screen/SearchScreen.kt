@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -77,6 +78,11 @@ fun SearchScreen(
 
     val searchFieldHeight = 126.dp
 
+    val offsetY by animateDpAsState(
+        targetValue = if(isFocused) (-60).dp else 0.dp,
+        animationSpec = tween(250),
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -84,54 +90,61 @@ fun SearchScreen(
         AnimatedVisibility(
             visible = !isFocused,
             enter = slideInVertically(
-                initialOffsetY = { fullHeight -> fullHeight },
+                initialOffsetY = { fullHeight -> -fullHeight },
                 animationSpec = tween(250),
-            ) + fadeIn(tween(250)),
+            ),
             exit = slideOutVertically(
-                targetOffsetY = { fullHeight -> fullHeight },
+                targetOffsetY = { fullHeight -> -fullHeight },
                 animationSpec = tween(200),
-            ) + fadeOut(tween(200)),
+            ),
         ) {
             TopBar()
         }
 
 
-        LazyColumn(
-            contentPadding = PaddingValues(
-                top = searchFieldHeight + 12.dp
-            ),
-            modifier = Modifier
-                .fillMaxSize()
-                .haze(
-                    state = hazeState
-                )
-        ) { }
-
         Box(
             modifier = Modifier
-                .align(Alignment.TopCenter)
-                .statusBarsPadding()
-                .padding(
-                    top = 60.dp
+                .offset(
+                    y = offsetY
                 )
         ) {
-            SearchField(
-                value = query,
-                onQueryChange = {
-                    query = it
-                    searchViewModel.onQueryChanged(
-                        query = it
+            LazyColumn(
+                contentPadding = PaddingValues(
+                    top = searchFieldHeight + 12.dp
+                ),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .haze(
+                        state = hazeState
                     )
-                },
-                onCancelClick = {
-                    query = ""
-                    focusManager.clearFocus()
-                },
-                isFocused = isFocused,
-                interactionSource = interactionSource,
-                hintText = "What do you want to listen to?",
-                hazeState = hazeState,
-            )
+            ) { }
+
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .statusBarsPadding()
+                    .padding(
+                        top = 60.dp
+                    )
+            ) {
+                SearchField(
+                    value = query,
+                    onQueryChange = {
+                        query = it
+                        searchViewModel.onQueryChanged(
+                            query = it
+                        )
+                    },
+                    onCancelClick = {
+                        query = ""
+                        focusManager.clearFocus()
+                    },
+                    isFocused = isFocused,
+                    interactionSource = interactionSource,
+                    hintText = "What do you want to listen to?",
+                    hazeState = hazeState,
+                )
+            }
         }
     }
 }
