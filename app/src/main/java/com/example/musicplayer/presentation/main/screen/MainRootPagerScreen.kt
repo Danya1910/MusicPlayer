@@ -154,6 +154,7 @@ fun MainRootPagerScreen(
             composable<TabScreen.Search> {
                SearchScreen(
                    searchViewModel = searchViewModel,
+                   mainViewModel = mainViewModel,
                )
             }
 

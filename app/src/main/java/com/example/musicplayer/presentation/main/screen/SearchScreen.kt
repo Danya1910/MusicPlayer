@@ -50,6 +50,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.musicplayer.R
+import com.example.musicplayer.presentation.main.MainViewModel
 import com.example.musicplayer.presentation.main.SearchViewModel
 import com.example.musicplayer.presentation.main.component.SearchGenreItem
 import com.example.musicplayer.ui.theme.Black
@@ -66,6 +67,7 @@ import dev.chrisbanes.haze.hazeChild
 @Composable
 fun SearchScreen(
     searchViewModel: SearchViewModel,
+    mainViewModel: MainViewModel,
 ) {
 
     val hazeState = remember { HazeState() }
