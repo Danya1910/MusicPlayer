@@ -9,9 +9,11 @@ import com.example.musicplayer.data.local.MIGRATION_3_4
 import com.example.musicplayer.data.local.MIGRATION_4_5
 import com.example.musicplayer.data.local.MIGRATION_5_6
 import com.example.musicplayer.data.local.MIGRATION_6_7
+import com.example.musicplayer.data.local.MIGRATION_7_8
 import com.example.musicplayer.data.local.dao.AlbumDao
 import com.example.musicplayer.data.local.dao.LyricDao
 import com.example.musicplayer.data.local.dao.PlayListDao
+import com.example.musicplayer.data.local.dao.SearchDao
 import com.example.musicplayer.data.local.dao.TrackDao
 import dagger.Module
 import dagger.Provides
@@ -42,6 +44,7 @@ object DatabaseModule {
                 MIGRATION_4_5,
                 MIGRATION_5_6,
                 MIGRATION_6_7,
+                MIGRATION_7_8,
             )
             .build()
 
@@ -69,6 +72,12 @@ object DatabaseModule {
     @Singleton
     fun provideLyricsDao(database: AppDatabase): LyricDao {
         return database.lyricsDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideSearchDao(database: AppDatabase) : SearchDao {
+        return database.searchDao()
     }
 
 }
