@@ -2,12 +2,14 @@ package com.example.musicplayer.presentation.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.musicplayer.domain.model.SearchSuggestion
 import com.example.musicplayer.domain.repository.SearchRepository
 import com.example.musicplayer.presentation.main.state.SearchUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -24,7 +26,20 @@ class SearchViewModel @Inject constructor(
 
     private val _query = MutableStateFlow("")
 
-    val uiState: StateFlow<SearchUiState> = _query
+    val suggestions: StateFlow<List<SearchSuggestion>> = _query
+        .debounce(300)
+        .distinctUntilChanged()
+        .flatMapLatest { q ->
+            flow { emit(searchRepository.suggest(q, limit = 8)) }
+                .catch { emit(emptyList()) }
+        }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_000),
+            emptyList()
+        )
+
+    val results: StateFlow<SearchUiState> = _query
         .debounce(300)
         .distinctUntilChanged()
         .flatMapLatest<String, SearchUiState> { query ->
