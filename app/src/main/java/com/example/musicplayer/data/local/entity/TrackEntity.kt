@@ -1,11 +1,19 @@
 package com.example.musicplayer.data.local.entity
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.example.musicplayer.domain.model.Track
 
 
-@Entity(tableName = "tracks_table")
+@Entity(
+    tableName = "tracks_table",
+    indices = [
+        Index(value = ["artist"]),
+        Index(value = ["title"]),
+        Index(value = ["artist", "title"])
+    ]
+)
 data class TrackEntity(
     @PrimaryKey
     val id: String,
