@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -178,6 +179,19 @@ fun SearchScreen(
                         Spacer(modifier = Modifier.width(12.dp))
                         Spacer(modifier = Modifier.weight(1f))
                     }
+                }
+                item {
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+                items(
+                    items = suggestions
+                ) { suggestion ->
+                    SuggestionItem(
+                        title = suggestion.value,
+                        onClick = {
+                            query = suggestion.value
+                        }
+                    )
                 }
             }
 
@@ -428,6 +442,45 @@ private fun CloseButton(
             fontWeight = FontWeight.Medium,
             fontSize = 17.sp,
             color = White,
+        )
+    }
+
+}
+
+@Composable
+private fun SuggestionItem(
+    title: String,
+    onClick: () -> Unit,
+) {
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(40.dp)
+            .clickable{
+                onClick()
+            }
+            .padding(horizontal = 15.dp)
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_search_for_field),
+            contentDescription = null,
+            tint = White,
+            modifier = Modifier.size(21.dp)
+        )
+        Spacer(modifier = Modifier.width(20.dp))
+        Text(
+            text = title,
+            fontWeight = FontWeight.Medium,
+            fontSize = 16.sp,
+            color = White,
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        Icon(
+            painter = painterResource(R.drawable.ic_arrow_follow),
+            contentDescription = null,
+            tint = White,
         )
     }
 
