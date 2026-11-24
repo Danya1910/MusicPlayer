@@ -65,8 +65,7 @@ fun SearchGenreItem(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .offset(
-                    x = 36.dp,
-                    y = 3.dp
+                    x = 25.dp,
                 )
         ) {
             Icon(
