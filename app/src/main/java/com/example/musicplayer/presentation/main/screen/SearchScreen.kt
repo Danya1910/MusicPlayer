@@ -1,5 +1,6 @@
 package com.example.musicplayer.presentation.main.screen
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -33,6 +34,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,6 +51,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.musicplayer.R
 import com.example.musicplayer.presentation.main.MainViewModel
 import com.example.musicplayer.presentation.main.SearchViewModel
@@ -71,6 +74,17 @@ fun SearchScreen(
 ) {
 
     val hazeState = remember { HazeState() }
+
+    val results by searchViewModel.results.collectAsStateWithLifecycle()
+    val suggestions by searchViewModel.suggestions.collectAsStateWithLifecycle()
+
+    LaunchedEffect(results) {
+        Log.d("Match", results.toString())
+    }
+
+    LaunchedEffect(suggestions) {
+        Log.d("Suggestions", suggestions.toString())
+    }
 
     var query by remember { mutableStateOf("") }
 
