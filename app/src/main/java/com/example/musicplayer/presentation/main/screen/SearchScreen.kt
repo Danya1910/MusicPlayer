@@ -1,6 +1,7 @@
 package com.example.musicplayer.presentation.main.screen
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -100,6 +101,16 @@ private fun SearchField(
         animationSpec = tween(durationMillis = 250),
     )
 
+    val fieldColor by animateColorAsState(
+        targetValue = if(isFocused) DeepBlack else White,
+        animationSpec = tween(durationMillis = 250),
+    )
+
+    val textColor by animateColorAsState(
+        targetValue = if(isFocused) White else Black,
+        animationSpec = tween(durationMillis = 250),
+    )
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -114,7 +125,7 @@ private fun SearchField(
                     shape = RoundedCornerShape(cornerRadius)
                 )
                 .background(
-                    color = White
+                    color = fieldColor
                 )
                 .padding(
                     end = fieldPadding
@@ -127,7 +138,7 @@ private fun SearchField(
                 textStyle = TextStyle(
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
-                    color = Black
+                    color = textColor,
                 ),
                 decorationBox = { innerTextField ->
 
