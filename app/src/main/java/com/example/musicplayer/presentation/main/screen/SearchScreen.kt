@@ -162,13 +162,7 @@ fun SearchScreen(
                             modifier = Modifier.weight(1f)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
-                        SearchGenreItem(
-                            title = "Hip-Hop",
-                            color = Color(0xFF477D95),
-                            icon = R.drawable.hip_hop,
-                            onClick = {},
-                            modifier = Modifier.weight(1f)
-                        )
+                        Spacer(modifier = Modifier.weight(1f))
                     }
                 }
             }
