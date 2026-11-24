@@ -1,5 +1,6 @@
 package com.example.musicplayer.presentation.main.screen
 
+import android.widget.Space
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -10,10 +11,12 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -51,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.musicplayer.R
 import com.example.musicplayer.presentation.main.SearchViewModel
+import com.example.musicplayer.presentation.main.component.SearchGenreItem
 import com.example.musicplayer.ui.theme.Black
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
@@ -76,10 +80,10 @@ fun SearchScreen(
 
     val focusManager = LocalFocusManager.current
 
-    val searchFieldHeight = 126.dp
+    val searchFieldHeight = 166.dp
 
     val offsetY by animateDpAsState(
-        targetValue = if(isFocused) (-60).dp else 0.dp,
+        targetValue = if (isFocused) (-60).dp else 0.dp,
         animationSpec = tween(250),
     )
 
@@ -117,7 +121,33 @@ fun SearchScreen(
                     .haze(
                         state = hazeState
                     )
-            ) { }
+                    .padding(
+                        horizontal = 12.dp
+                    )
+            ) {
+                item {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        SearchGenreItem(
+                            title = "Pop",
+                            color = Color(0xFF477D95),
+                            icon = R.drawable.pop,
+                            onClick = {},
+                            modifier = Modifier.weight(1f)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        SearchGenreItem(
+                            title = "Pop",
+                            color = Color(0xFF477D95),
+                            icon = R.drawable.pop,
+                            onClick = {},
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
 
             Box(
                 modifier = Modifier
@@ -201,22 +231,22 @@ private fun SearchField(
 
 
     val cornerRadius by animateDpAsState(
-        targetValue = if(isFocused) 100.dp else 5.dp,
+        targetValue = if (isFocused) 100.dp else 5.dp,
         animationSpec = tween(durationMillis = 250),
     )
 
     val fieldPadding by animateDpAsState(
-        targetValue = if(showCancel) 8.dp else 0.dp,
+        targetValue = if (showCancel) 8.dp else 0.dp,
         animationSpec = tween(durationMillis = 250),
     )
 
     val fieldColor by animateColorAsState(
-        targetValue = if(isFocused) DeepBlack else White,
+        targetValue = if (isFocused) DeepBlack else White,
         animationSpec = tween(durationMillis = 250),
     )
 
     val textColor by animateColorAsState(
-        targetValue = if(isFocused) White else Black,
+        targetValue = if (isFocused) White else Black,
         animationSpec = tween(durationMillis = 250),
     )
 
@@ -353,7 +383,7 @@ private fun CloseButton(
                     end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
                 ),
             )
-            .clickable{
+            .clickable {
                 onClick()
             }
             .padding(
