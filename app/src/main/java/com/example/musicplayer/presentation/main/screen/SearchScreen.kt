@@ -7,7 +7,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -20,12 +22,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,10 +43,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.musicplayer.R
 import com.example.musicplayer.presentation.main.SearchViewModel
 import com.example.musicplayer.ui.theme.Black
 import com.example.musicplayer.ui.theme.DeepBlack
@@ -69,12 +75,26 @@ fun SearchScreen(
 
     val focusManager = LocalFocusManager.current
 
-    val searchFieldHeight = 66.dp
+    val searchFieldHeight = 126.dp
 
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
+        AnimatedVisibility(
+            visible = !isFocused,
+            enter = slideInVertically(
+                initialOffsetY = { fullHeight -> fullHeight },
+                animationSpec = tween(250),
+            ) + fadeIn(tween(250)),
+            exit = slideOutVertically(
+                targetOffsetY = { fullHeight -> fullHeight },
+                animationSpec = tween(200),
+            ) + fadeOut(tween(200)),
+        ) {
+            TopBar()
+        }
+
 
         LazyColumn(
             contentPadding = PaddingValues(
@@ -92,7 +112,7 @@ fun SearchScreen(
                 .align(Alignment.TopCenter)
                 .statusBarsPadding()
                 .padding(
-                    top = 10.dp
+                    top = 60.dp
                 )
         ) {
             SearchField(
@@ -114,8 +134,33 @@ fun SearchScreen(
             )
         }
     }
+}
 
+@Composable
+private fun TopBar() {
 
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .statusBarsPadding()
+            .padding(top = 10.dp)
+            .padding(horizontal = 16.dp)
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_user_avatar),
+            contentDescription = null,
+            tint = Color.Unspecified,
+            modifier = Modifier.size(35.dp)
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        Text(
+            text = "Search",
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 27.sp,
+            color = White,
+        )
+    }
 
 }
 
