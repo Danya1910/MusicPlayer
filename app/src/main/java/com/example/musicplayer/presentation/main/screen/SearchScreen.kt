@@ -53,6 +53,11 @@ fun SearchScreen(
 
     var query by remember { mutableStateOf("") }
 
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val focusManager = LocalFocusManager.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -69,7 +74,12 @@ fun SearchScreen(
                     query = it
                 )
             },
-            onCancelClick = {},
+            onCancelClick = {
+                query = ""
+                focusManager.clearFocus()
+            },
+            isFocused = isFocused,
+            interactionSource = interactionSource,
             hintText = "What do you want to listen to?"
         )
     }
@@ -81,13 +91,10 @@ private fun SearchField(
     value: String,
     onQueryChange: (String) -> Unit,
     onCancelClick: () -> Unit,
+    isFocused: Boolean,
+    interactionSource: MutableInteractionSource,
     hintText: String,
 ) {
-
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
-
-    val focusManager = LocalFocusManager.current
 
     val showCancel = isFocused
 
@@ -166,19 +173,18 @@ private fun SearchField(
         AnimatedVisibility(
             visible = showCancel,
             enter = slideInHorizontally(
-                initialOffsetX = { fullWidth -> fullWidth }, // из-за правого края
+                initialOffsetX = { fullWidth -> fullWidth },
                 animationSpec = tween(250),
             ) + fadeIn(tween(250)),
             exit = slideOutHorizontally(
-                targetOffsetX = { fullWidth -> fullWidth },  // уезжает вправо
+                targetOffsetX = { fullWidth -> fullWidth },
                 animationSpec = tween(200),
             ) + fadeOut(tween(200)),
         ) {
             CloseButton(
                 text = "Cancel",
                 onClick = {
-                    onQueryChange("")
-                    focusManager.clearFocus()
+                    onCancelClick()
                 }
             )
         }
