@@ -11,28 +11,25 @@ interface SearchDao {
     // ---------- Подсказки (suggest) ----------
 
     @Query("""
-        SELECT DISTINCT artist AS value
-        FROM tracks_table
-        WHERE artist LIKE :q || '%'
-        ORDER BY artist
+        SELECT DISTINCT artist AS value 
+        FROM tracks_table 
+        WHERE LOWER(artist) LIKE '%' || LOWER(:q) || '%' 
         LIMIT :limit
     """)
     suspend fun suggestArtistsByPrefix(q: String, limit: Int): List<String>
 
     @Query("""
-        SELECT DISTINCT title AS value
-        FROM tracks_table
-        WHERE title LIKE :q || '%'
-        ORDER BY title
+        SELECT DISTINCT title AS value 
+        FROM tracks_table 
+        WHERE LOWER(title) LIKE '%' || LOWER(:q) || '%' 
         LIMIT :limit
     """)
     suspend fun suggestTracksByPrefix(q: String, limit: Int): List<String>
 
     @Query("""
-        SELECT DISTINCT title AS value
-        FROM albums
-        WHERE title LIKE :q || '%'
-        ORDER BY title
+        SELECT DISTINCT title AS value 
+        FROM albums 
+        WHERE LOWER(title) LIKE '%' || LOWER(:q) || '%' 
         LIMIT :limit
     """)
     suspend fun suggestAlbumsByPrefix(q: String, limit: Int): List<String>
