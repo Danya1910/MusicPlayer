@@ -8,6 +8,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.musicplayer.data.local.dao.AlbumDao
 import com.example.musicplayer.data.local.dao.LyricDao
 import com.example.musicplayer.data.local.dao.PlayListDao
+import com.example.musicplayer.data.local.dao.SearchDao
 import com.example.musicplayer.data.local.dao.TrackDao
 import com.example.musicplayer.data.local.entity.AlbumEntity
 import com.example.musicplayer.data.local.entity.FavoriteAlbumEntity
@@ -26,7 +27,7 @@ import com.example.musicplayer.data.local.entity.TrackEntity
         FavoriteTrackEntity::class,
         FavoriteAlbumEntity::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = false,
 )
 
@@ -40,6 +41,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun playListDao(): PlayListDao
 
     abstract fun lyricsDao(): LyricDao
+
+    abstract fun searchDao() : SearchDao
 
 }
 
@@ -176,5 +179,33 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
         // 4. Удаляем старую и переименовываем новую
         db.execSQL("DROP TABLE albums")
         db.execSQL("ALTER TABLE albums_new RENAME TO albums")
+    }
+}
+
+val MIGRATION_7_8 = object : Migration(7, 8) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // Индексы для tracks_table
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_tracks_table_artist` " +
+                    "ON `tracks_table` (`artist`)"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_tracks_table_title` " +
+                    "ON `tracks_table` (`title`)"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_tracks_table_artist_title` " +
+                    "ON `tracks_table` (`artist`, `title`)"
+        )
+
+        // Индексы для albums
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_albums_artist` " +
+                    "ON `albums` (`artist`)"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_albums_title` " +
+                    "ON `albums` (`title`)"
+        )
     }
 }
