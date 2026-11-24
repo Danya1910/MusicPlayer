@@ -8,20 +8,19 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -34,6 +33,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -44,12 +46,19 @@ import com.example.musicplayer.ui.theme.Black
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
 import com.example.musicplayer.ui.theme.White
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.HazeTint
+import dev.chrisbanes.haze.haze
+import dev.chrisbanes.haze.hazeChild
 
 
 @Composable
 fun SearchScreen(
     searchViewModel: SearchViewModel,
 ) {
+
+    val hazeState = remember { HazeState() }
 
     var query by remember { mutableStateOf("") }
 
@@ -58,31 +67,53 @@ fun SearchScreen(
 
     val focusManager = LocalFocusManager.current
 
-    Column(
+    val searchFieldHeight = 66.dp
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .statusBarsPadding()
-
     ) {
-        Spacer(modifier = Modifier.height(20.dp))
 
-        SearchField(
-            value = query,
-            onQueryChange = {
-                query = it
-                searchViewModel.onQueryChanged(
-                    query = it
+        LazyColumn(
+            contentPadding = PaddingValues(
+                top = searchFieldHeight + 12.dp
+            ),
+            modifier = Modifier
+                .fillMaxSize()
+                .haze(
+                    state = hazeState
                 )
-            },
-            onCancelClick = {
-                query = ""
-                focusManager.clearFocus()
-            },
-            isFocused = isFocused,
-            interactionSource = interactionSource,
-            hintText = "What do you want to listen to?"
-        )
+        ) { }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .statusBarsPadding()
+                .padding(
+                    top = 10.dp
+                )
+        ) {
+            SearchField(
+                value = query,
+                onQueryChange = {
+                    query = it
+                    searchViewModel.onQueryChanged(
+                        query = it
+                    )
+                },
+                onCancelClick = {
+                    query = ""
+                    focusManager.clearFocus()
+                },
+                isFocused = isFocused,
+                interactionSource = interactionSource,
+                hintText = "What do you want to listen to?",
+                hazeState = hazeState,
+            )
+        }
     }
+
+
 
 }
 
@@ -94,9 +125,20 @@ private fun SearchField(
     isFocused: Boolean,
     interactionSource: MutableInteractionSource,
     hintText: String,
+    hazeState: HazeState,
 ) {
 
     val showCancel = isFocused
+
+    val gradientColors = listOf(
+        Color(0xFFFFFFFF).copy(alpha = 0.5f),
+        Color(0xFFFFFFFF).copy(alpha = 0.3f),
+        Color(0xFFFFFFFF).copy(alpha = 0.2f),
+        Color(0xFFFFFFFF).copy(alpha = 0.1f),
+        Color(0xFFFFFFFF).copy(alpha = 0.2f),
+        Color(0xFFFFFFFF).copy(alpha = 0.5f),
+    )
+
 
     val cornerRadius by animateDpAsState(
         targetValue = if(isFocused) 100.dp else 5.dp,
@@ -131,8 +173,23 @@ private fun SearchField(
                 .clip(
                     shape = RoundedCornerShape(cornerRadius)
                 )
-                .background(
-                    color = fieldColor
+                .hazeChild(
+                    state = hazeState,
+                    style = HazeStyle(
+                        backgroundColor = fieldColor,
+                        blurRadius = 10.dp,
+                        tint = HazeTint(color = DeepBlack.copy(alpha = 0.8f)),
+                        noiseFactor = 0.001f
+                    ),
+                )
+                .border(
+                    width = 1.dp,
+                    shape = CircleShape,
+                    brush = Brush.linearGradient(
+                        colors = gradientColors,
+                        start = Offset(0f, 0f),
+                        end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
+                    ),
                 )
                 .padding(
                     end = fieldPadding
@@ -185,7 +242,8 @@ private fun SearchField(
                 text = "Cancel",
                 onClick = {
                     onCancelClick()
-                }
+                },
+                hazeState = hazeState,
             )
         }
     }
@@ -196,7 +254,17 @@ private fun SearchField(
 private fun CloseButton(
     text: String,
     onClick: () -> Unit,
+    hazeState: HazeState,
 ) {
+
+    val gradientColors = listOf(
+        Color(0xFFFFFFFF).copy(alpha = 0.5f),
+        Color(0xFFFFFFFF).copy(alpha = 0.3f),
+        Color(0xFFFFFFFF).copy(alpha = 0.2f),
+        Color(0xFFFFFFFF).copy(alpha = 0.1f),
+        Color(0xFFFFFFFF).copy(alpha = 0.2f),
+        Color(0xFFFFFFFF).copy(alpha = 0.5f),
+    )
 
     Box(
         modifier = Modifier
@@ -204,13 +272,23 @@ private fun CloseButton(
             .clip(
                 shape = CircleShape
             )
-            .border(
-                shape = CircleShape,
-                width = 1.dp,
-                color = Gray
+            .hazeChild(
+                state = hazeState,
+                style = HazeStyle(
+                    backgroundColor = DeepBlack,
+                    blurRadius = 10.dp,
+                    tint = HazeTint(color = DeepBlack.copy(alpha = 0.8f)),
+                    noiseFactor = 0.001f
+                ),
             )
-            .background(
-                color = DeepBlack,
+            .border(
+                width = 1.dp,
+                shape = CircleShape,
+                brush = Brush.linearGradient(
+                    colors = gradientColors,
+                    start = Offset(0f, 0f),
+                    end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
+                ),
             )
             .clickable{
                 onClick()
