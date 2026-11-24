@@ -139,9 +139,31 @@ fun SearchScreen(
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         SearchGenreItem(
-                            title = "Pop",
+                            title = "Hip-Hop",
+                            color = Color(0xFFE13300),
+                            icon = R.drawable.hip_hop,
+                            onClick = {},
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+                item {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        SearchGenreItem(
+                            title = "Emo Rap",
+                            color = Color(0xFF51095E),
+                            icon = R.drawable.emo_rap,
+                            onClick = {},
+                            modifier = Modifier.weight(1f)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        SearchGenreItem(
+                            title = "Hip-Hop",
                             color = Color(0xFF477D95),
-                            icon = R.drawable.pop,
+                            icon = R.drawable.hip_hop,
                             onClick = {},
                             modifier = Modifier.weight(1f)
                         )
