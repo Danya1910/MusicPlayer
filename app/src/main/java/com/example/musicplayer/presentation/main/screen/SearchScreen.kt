@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -11,6 +12,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -42,7 +44,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -103,10 +108,20 @@ fun SearchScreen(
 
     var query by remember { mutableStateOf("") }
 
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
+    var isFocused by remember { mutableStateOf(false) }
+
+
+    var cancelRequested by remember { mutableStateOf(false) }
 
     val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(cancelRequested) {
+        if (cancelRequested) {
+            focusManager.clearFocus(force = true)
+            cancelRequested = false
+        }
+    }
+
 
     val searchFieldHeight = 166.dp
 
@@ -304,10 +319,10 @@ fun SearchScreen(
                     onCancelClick = {
                         query = ""
                         searchViewModel.onQueryChanged("")
-                        focusManager.clearFocus()
+                        cancelRequested = true
                     },
                     isFocused = isFocused,
-                    interactionSource = interactionSource,
+                    onFocusChanged = { isFocused = it },
                     hintText = "What do you want to listen to?",
                     hazeState = hazeState,
                 )
@@ -350,10 +365,15 @@ private fun SearchField(
     onQueryChange: (String) -> Unit,
     onCancelClick: () -> Unit,
     isFocused: Boolean,
-    interactionSource: MutableInteractionSource,
+    onFocusChanged: (Boolean) -> Unit,
     hintText: String,
     hazeState: HazeState,
 ) {
+
+    LaunchedEffect(isFocused) {
+        Log.d("Focus", "isFocused: $isFocused")
+    }
+
 
     val showCancel = isFocused
 
@@ -374,7 +394,7 @@ private fun SearchField(
 
     val fieldPadding by animateDpAsState(
         targetValue = if (showCancel) 8.dp else 0.dp,
-        animationSpec = tween(durationMillis = 250),
+        animationSpec = tween(durationMillis = 500),
     )
 
     val fieldColor by animateColorAsState(
@@ -385,6 +405,16 @@ private fun SearchField(
     val textColor by animateColorAsState(
         targetValue = if (isFocused) White else Black,
         animationSpec = tween(durationMillis = 250),
+    )
+
+    val cancelWidth by animateDpAsState(
+        targetValue = if (showCancel) 92.dp else 0.dp,
+        animationSpec = tween(250),
+    )
+
+    val cancelAlpha by animateFloatAsState(
+        targetValue = if (showCancel) 1f else 0f,
+        animationSpec = tween(250),
     )
 
     Row(
@@ -400,10 +430,13 @@ private fun SearchField(
                 .clip(
                     shape = RoundedCornerShape(cornerRadius)
                 )
+                .background(
+                    color = fieldColor
+                )
                 .hazeChild(
                     state = hazeState,
                     style = HazeStyle(
-                        backgroundColor = fieldColor,
+                        backgroundColor = Color.Transparent,
                         blurRadius = 10.dp,
                         tint = HazeTint(color = DeepBlack.copy(alpha = 0.0f)),
                         noiseFactor = 0.001f
@@ -425,7 +458,6 @@ private fun SearchField(
             BasicTextField(
                 value = value,
                 onValueChange = onQueryChange,
-                interactionSource = interactionSource,
                 textStyle = TextStyle(
                     fontWeight = FontWeight.Medium,
                     fontSize = 16.sp,
@@ -452,32 +484,30 @@ private fun SearchField(
                 },
                 modifier = Modifier
                     .fillMaxSize()
+                    .onFocusChanged {
+                        onFocusChanged(it.isFocused)
+                    },
             )
         }
-        AnimatedVisibility(
-            visible = showCancel,
-            enter = slideInHorizontally(
-                initialOffsetX = { fullWidth -> fullWidth },
-                animationSpec = tween(250),
-            ) + fadeIn(tween(250)),
-            exit = slideOutHorizontally(
-                targetOffsetX = { fullWidth -> fullWidth },
-                animationSpec = tween(200),
-            ) + fadeOut(tween(200)),
+        Box(
+            modifier = Modifier
+                .width(cancelWidth)
+                .alpha(cancelAlpha)
+                .clipToBounds(), // Важно: чтобы кнопка не вылезала за пределы при анимации ширины
+            contentAlignment = Alignment.CenterStart,
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Spacer(modifier = Modifier.width(8.dp))
-                CloseButton(
-                    text = "Cancel",
-                    onClick = {
-                        onCancelClick()
-                    },
-                    hazeState = hazeState,
-                )
+            if (showCancel) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Spacer(modifier = Modifier.width(8.dp)) // Вот он, единственный отступ между полем и кнопкой
+                    CloseButton(
+                        text = "Cancel",
+                        onClick = { onCancelClick() },
+                        hazeState = hazeState,
+                    )
+                }
             }
         }
     }
-
 }
 
 @Composable
@@ -531,7 +561,7 @@ private fun CloseButton(
         Text(
             text = text,
             fontWeight = FontWeight.Medium,
-            fontSize = 17.sp,
+            fontSize = 16.sp,
             color = White,
         )
     }
