@@ -155,6 +155,10 @@ fun MainRootPagerScreen(
                SearchScreen(
                    searchViewModel = searchViewModel,
                    mainViewModel = mainViewModel,
+                   onMoreClick = { track ->
+                       currentInfoToShow = track
+                       isTrackInfoVisible = true
+                   },
                )
             }
 
