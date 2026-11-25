@@ -229,6 +229,9 @@ fun SearchScreen(
                             title = suggestion.value,
                             onClick = {
                                 query = suggestion.value
+                                searchViewModel.onQueryChanged(
+                                    query = suggestion.value
+                                )
                             },
                         )
                     }
