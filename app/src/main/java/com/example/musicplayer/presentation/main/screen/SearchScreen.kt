@@ -303,6 +303,7 @@ fun SearchScreen(
                     },
                     onCancelClick = {
                         query = ""
+                        searchViewModel.onQueryChanged("")
                         focusManager.clearFocus()
                     },
                     isFocused = isFocused,
