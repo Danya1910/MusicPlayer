@@ -89,7 +89,6 @@ fun SearchScreen(
     val results by searchViewModel.results.collectAsStateWithLifecycle()
     val suggestions by searchViewModel.suggestions.collectAsStateWithLifecycle()
 
-    val albumsResult by searchViewModel.topAlbums.collectAsStateWithLifecycle()
     val tracksResult by searchViewModel.topTracks.collectAsStateWithLifecycle()
 
     val playerState by mainViewModel.playerState.collectAsStateWithLifecycle()
