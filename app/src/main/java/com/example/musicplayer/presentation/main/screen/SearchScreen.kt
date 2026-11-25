@@ -60,8 +60,10 @@ import com.example.musicplayer.domain.model.SearchSuggestion
 import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.presentation.main.MainViewModel
 import com.example.musicplayer.presentation.main.SearchViewModel
+import com.example.musicplayer.presentation.main.component.LoadingDots
 import com.example.musicplayer.presentation.main.component.SearchGenreItem
 import com.example.musicplayer.presentation.main.component.TrackItem
+import com.example.musicplayer.presentation.main.state.SearchUiState
 import com.example.musicplayer.presentation.main.util.buildHighlightedText
 import com.example.musicplayer.ui.theme.Black
 import com.example.musicplayer.ui.theme.DeepBlack
@@ -222,6 +224,18 @@ fun SearchScreen(
                 enter = fadeIn(tween(250)),
                 exit = fadeOut(tween(200)),
             ) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    if(results is SearchUiState.Success) {
+                        LoadingDots(
+                            modifier = Modifier
+                                .fillMaxSize()
+                        )
+                    }
+                }
                 LazyColumn(
                     contentPadding = PaddingValues(
                         top = searchFieldHeight + 12.dp
