@@ -58,6 +58,7 @@ import com.example.musicplayer.domain.model.SearchSuggestion
 import com.example.musicplayer.presentation.main.MainViewModel
 import com.example.musicplayer.presentation.main.SearchViewModel
 import com.example.musicplayer.presentation.main.component.SearchGenreItem
+import com.example.musicplayer.presentation.main.util.buildHighlightedText
 import com.example.musicplayer.ui.theme.Black
 import com.example.musicplayer.ui.theme.DeepBlack
 import com.example.musicplayer.ui.theme.Gray
@@ -223,6 +224,7 @@ fun SearchScreen(
                     ) { _, suggestion ->
                         SuggestionItem(
                             title = suggestion.value,
+                            query = query,
                             onClick = {
                                 query = suggestion.value
                                 searchViewModel.onQueryChanged(
@@ -489,6 +491,7 @@ private fun CloseButton(
 @Composable
 private fun SuggestionItem(
     title: String,
+    query: String,
     onClick: () -> Unit,
 ) {
 
@@ -510,10 +513,14 @@ private fun SuggestionItem(
         )
         Spacer(modifier = Modifier.width(20.dp))
         Text(
-            text = title,
+            text = buildHighlightedText(
+                full = title,
+                query = query,
+                matchedColor = Gray,
+                restColor = White,
+            ),
             fontWeight = FontWeight.Medium,
             fontSize = 16.sp,
-            color = White,
         )
         Spacer(modifier = Modifier.weight(1f))
         Icon(
