@@ -284,9 +284,8 @@ fun SearchScreen(
                                 if (playerState.isPlaying && playerState.currentTrack == track) {
                                     mainViewModel.togglePlayPause()
                                 } else {
-                                    mainViewModel.playTrackWithQueue(
+                                    mainViewModel.playTrack(
                                         track = track.track,
-                                        queue = emptyList(),
                                         playbackOrigin = PlaybackOrigin.Unknown
                                     )
                                 }
