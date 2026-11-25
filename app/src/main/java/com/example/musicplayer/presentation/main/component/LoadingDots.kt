@@ -11,14 +11,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.musicplayer.ui.theme.White
 
@@ -62,7 +63,7 @@ fun LoadingDots(
 
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(40.dp),
+        horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
@@ -71,12 +72,14 @@ fun LoadingDots(
                 .scale(scale1)
                 .background(color = White, shape = CircleShape)
         )
+        Spacer(modifier = Modifier.width(20.dp))
         Box(
             modifier = Modifier
                 .size(12.dp)
                 .scale(scale2)
                 .background(color = White, shape = CircleShape)
         )
+        Spacer(modifier = Modifier.width(20.dp))
         Box(
             modifier = Modifier
                 .size(12.dp)
