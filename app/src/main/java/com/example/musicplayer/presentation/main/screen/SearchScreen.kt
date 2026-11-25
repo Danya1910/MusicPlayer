@@ -228,7 +228,7 @@ fun SearchScreen(
                     modifier = Modifier
                         .fillMaxSize()
                 ) {
-                    if(results is SearchUiState.Success) {
+                    if(results is SearchUiState.Loading) {
                         LoadingDots(
                             modifier = Modifier
                                 .fillMaxSize()
