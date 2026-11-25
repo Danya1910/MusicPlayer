@@ -54,10 +54,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.musicplayer.R
+import com.example.musicplayer.domain.model.PlaybackOrigin
 import com.example.musicplayer.domain.model.SearchSuggestion
+import com.example.musicplayer.domain.model.Track
 import com.example.musicplayer.presentation.main.MainViewModel
 import com.example.musicplayer.presentation.main.SearchViewModel
 import com.example.musicplayer.presentation.main.component.SearchGenreItem
+import com.example.musicplayer.presentation.main.component.TrackItem
 import com.example.musicplayer.presentation.main.util.buildHighlightedText
 import com.example.musicplayer.ui.theme.Black
 import com.example.musicplayer.ui.theme.DeepBlack
@@ -74,12 +77,21 @@ import dev.chrisbanes.haze.hazeChild
 fun SearchScreen(
     searchViewModel: SearchViewModel,
     mainViewModel: MainViewModel,
-) {
+    onMoreClick: (Track) -> Unit,
+
+    ) {
 
     val hazeState = remember { HazeState() }
 
     val results by searchViewModel.results.collectAsStateWithLifecycle()
     val suggestions by searchViewModel.suggestions.collectAsStateWithLifecycle()
+
+    val albumsResult by searchViewModel.topAlbums.collectAsStateWithLifecycle()
+    val tracksResult by searchViewModel.topTracks.collectAsStateWithLifecycle()
+
+    val playerState by mainViewModel.playerState.collectAsStateWithLifecycle()
+
+    val downloads by mainViewModel.downloads.collectAsStateWithLifecycle()
 
     LaunchedEffect(results) {
         Log.d("Match", results.toString())
@@ -231,6 +243,43 @@ fun SearchScreen(
                                     query = suggestion.value
                                 )
                             },
+                        )
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
+                    itemsIndexed(
+                        items = tracksResult,
+                        key = { _, track ->
+                            track.track.id
+                        }
+                    ) { _, track ->
+                        TrackItem(
+                            track = track.track,
+                            onTrackClick = {
+                                if (playerState.isPlaying && playerState.currentTrack == track) {
+                                    mainViewModel.togglePlayPause()
+                                } else {
+                                    mainViewModel.playTrackWithQueue(
+                                        track = track.track,
+                                        queue = emptyList(),
+                                        playbackOrigin = PlaybackOrigin.Unknown
+                                    )
+                                }
+                            },
+                            onMoreClick = {
+                                onMoreClick(track.track)
+                            },
+                            toggleFavorite = {
+                                mainViewModel.toggleFavorite(track.track)
+                            },
+                            onDownloadClick = {
+                                mainViewModel.onDownloadClick(track.track)
+                            },
+                            isLoaded = !track.track.localAudioPath.isNullOrBlank(),
+                            downloads = downloads,
+                            currentPlayingId = playerState.currentTrack?.id ?: "",
+                            isPlaying = playerState.isPlaying,
                         )
                     }
                 }
