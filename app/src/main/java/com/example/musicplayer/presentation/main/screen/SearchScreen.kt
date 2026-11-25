@@ -228,7 +228,7 @@ fun SearchScreen(
                     modifier = Modifier
                         .fillMaxSize()
                 ) {
-                    if(results is SearchUiState.Loading) {
+                    if (results is SearchUiState.Loading) {
                         LoadingDots(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -281,7 +281,9 @@ fun SearchScreen(
                         TrackItem(
                             track = track.track,
                             onTrackClick = {
-                                if (playerState.isPlaying && playerState.currentTrack == track.track) {
+                                if (
+                                    playerState.currentTrack?.id == track.track.id
+                                ) {
                                     mainViewModel.togglePlayPause()
                                 } else {
                                     mainViewModel.playTrack(
