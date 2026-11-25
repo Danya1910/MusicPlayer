@@ -281,7 +281,7 @@ fun SearchScreen(
                         TrackItem(
                             track = track.track,
                             onTrackClick = {
-                                if (playerState.isPlaying && playerState.currentTrack == track) {
+                                if (playerState.isPlaying && playerState.currentTrack == track.track) {
                                     mainViewModel.togglePlayPause()
                                 } else {
                                     mainViewModel.playTrack(
