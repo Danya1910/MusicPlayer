@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -11,6 +12,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -29,6 +31,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -42,6 +45,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -54,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.musicplayer.R
+import com.example.musicplayer.domain.model.SearchSuggestion
 import com.example.musicplayer.presentation.main.MainViewModel
 import com.example.musicplayer.presentation.main.SearchViewModel
 import com.example.musicplayer.presentation.main.component.SearchGenreItem
@@ -126,72 +131,107 @@ fun SearchScreen(
                     y = offsetY
                 )
         ) {
-            LazyColumn(
-                contentPadding = PaddingValues(
-                    top = searchFieldHeight + 12.dp
-                ),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .haze(
-                        state = hazeState
-                    )
-                    .padding(
-                        horizontal = 12.dp
-                    )
+
+            AnimatedVisibility(
+                visible = !isFocused,
+                enter = fadeIn(tween(250)),
+                exit = fadeOut(tween(200)),
             ) {
-                item {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        SearchGenreItem(
-                            title = "Pop",
-                            color = Color(0xFF477D95),
-                            icon = R.drawable.pop,
-                            onClick = {},
-                            modifier = Modifier.weight(1f)
+                LazyColumn(
+                    contentPadding = PaddingValues(
+                        top = searchFieldHeight + 12.dp
+                    ),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .haze(
+                            state = hazeState
                         )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        SearchGenreItem(
-                            title = "Hip-Hop",
-                            color = Color(0xFFE13300),
-                            icon = R.drawable.hip_hop,
-                            onClick = {},
-                            modifier = Modifier.weight(1f)
+                        .padding(
+                            horizontal = 12.dp
                         )
-                    }
-                }
-                item {
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-                item {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        SearchGenreItem(
-                            title = "Emo Rap",
-                            color = Color(0xFF51095E),
-                            icon = R.drawable.emo_rap,
-                            onClick = {},
-                            modifier = Modifier.weight(1f)
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
-                }
-                item {
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-                items(
-                    items = suggestions
-                ) { suggestion ->
-                    SuggestionItem(
-                        title = suggestion.value,
-                        onClick = {
-                            query = suggestion.value
+                ) {
+                    item {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            SearchGenreItem(
+                                title = "Pop",
+                                color = Color(0xFF477D95),
+                                icon = R.drawable.pop,
+                                onClick = {},
+                                modifier = Modifier.weight(1f)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            SearchGenreItem(
+                                title = "Hip-Hop",
+                                color = Color(0xFFE13300),
+                                icon = R.drawable.hip_hop,
+                                onClick = {},
+                                modifier = Modifier.weight(1f)
+                            )
                         }
-                    )
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+                    item {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            SearchGenreItem(
+                                title = "Emo Rap",
+                                color = Color(0xFF51095E),
+                                icon = R.drawable.emo_rap,
+                                onClick = {},
+                                modifier = Modifier.weight(1f)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+                }
+            }
+
+            AnimatedVisibility(
+                visible = isFocused,
+                enter = fadeIn(tween(250)),
+                exit = fadeOut(tween(200)),
+            ) {
+                LazyColumn(
+                    contentPadding = PaddingValues(
+                        top = searchFieldHeight + 12.dp
+                    ),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .haze(
+                            state = hazeState
+                        )
+                        .padding(
+                            horizontal = 12.dp
+                        )
+                ) {
+                    itemsIndexed(
+                        items = suggestions,
+                        key = { _, suggestion ->
+                            when (suggestion) {
+                                is SearchSuggestion.Artist -> "artist:${suggestion.value}"
+                                is SearchSuggestion.Track -> "track:${suggestion.value}"
+                                is SearchSuggestion.Album -> "album:${suggestion.value}"
+                            }
+                        }
+                    ) { _, suggestion ->
+                        SuggestionItem(
+                            title = suggestion.value,
+                            onClick = {
+                                query = suggestion.value
+                            },
+                        )
+                    }
                 }
             }
 
@@ -458,7 +498,7 @@ private fun SuggestionItem(
         modifier = Modifier
             .fillMaxWidth()
             .height(40.dp)
-            .clickable{
+            .clickable {
                 onClick()
             }
             .padding(horizontal = 15.dp)
