@@ -377,7 +377,7 @@ private fun SearchField(
                 onValueChange = onQueryChange,
                 interactionSource = interactionSource,
                 textStyle = TextStyle(
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Medium,
                     fontSize = 16.sp,
                     color = textColor,
                 ),
@@ -393,7 +393,7 @@ private fun SearchField(
                             Text(
                                 hintText,
                                 fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.Medium,
                                 color = Gray
                             )
                         }
