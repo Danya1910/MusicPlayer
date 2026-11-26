@@ -350,7 +350,9 @@ class MainViewModel @Inject constructor(
         musicRepository.playTrackWithQueue(
             track = genreTracks.first(),
             queue = genreTracks,
-            playbackOrigin = PlaybackOrigin.Unknown,
+            playbackOrigin = PlaybackOrigin.Mix(
+                genre = genreLabel,
+            ),
         )
 
     }
