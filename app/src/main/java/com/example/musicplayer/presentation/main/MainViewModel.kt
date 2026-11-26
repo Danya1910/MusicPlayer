@@ -329,9 +329,12 @@ class MainViewModel @Inject constructor(
         genreFilter: String,
         genreLabel: String,
     ) {
-        if(uiState !is MainUiState.Success) return
 
-        val genreTracks = uiState.tracks.filter {
+        val state = uiState.value
+
+        if(state !is MainUiState.Success) return
+
+        val genreTracks = state.tracks.filter {
             it.genre.equals(genreFilter, ignoreCase = true)
         }
 
