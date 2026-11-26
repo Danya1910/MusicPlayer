@@ -180,7 +180,12 @@ fun SearchScreen(
                                 title = "Pop",
                                 color = Color(0xFF477D95),
                                 icon = R.drawable.pop,
-                                onClick = {},
+                                onClick = {
+                                    mainViewModel.playGenre(
+                                        genreFilter = "Pop",
+                                        genreLabel = "Pop",
+                                    )
+                                },
                                 modifier = Modifier.weight(1f)
                             )
                             Spacer(modifier = Modifier.width(12.dp))
@@ -188,7 +193,12 @@ fun SearchScreen(
                                 title = "Hip-Hop",
                                 color = Color(0xFFE13300),
                                 icon = R.drawable.hip_hop,
-                                onClick = {},
+                                onClick = {
+                                    mainViewModel.playGenre(
+                                        genreFilter = "HipHop",
+                                        genreLabel = "Hip-Hop",
+                                    )
+                                },
                                 modifier = Modifier.weight(1f)
                             )
                         }
@@ -205,7 +215,12 @@ fun SearchScreen(
                                 title = "Emo Rap",
                                 color = Color(0xFF51095E),
                                 icon = R.drawable.emo_rap,
-                                onClick = {},
+                                onClick = {
+                                    mainViewModel.playGenre(
+                                        genreFilter = "Emo Rap",
+                                        genreLabel = "Emo Rap",
+                                    )
+                                },
                                 modifier = Modifier.weight(1f)
                             )
                             Spacer(modifier = Modifier.width(12.dp))
