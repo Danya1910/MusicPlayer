@@ -325,6 +325,33 @@ class MainViewModel @Inject constructor(
         )
     }
 
+    fun playGenre(
+        genreFilter: String,
+        genreLabel: String,
+    ) {
+        if(uiState !is MainUiState.Success) return
+
+        val genreTracks = uiState.tracks.filter {
+            it.genre.equals(genreFilter, ignoreCase = true)
+        }
+
+        if(genreTracks.isEmpty()) {
+            _toast.value = ToastData(
+                title = "Genre",
+                message = "No tracks in $genreLabel yet",
+                type = ToastType.ERROR,
+            )
+            return
+        }
+
+        musicRepository.playTrackWithQueue(
+            track = genreTracks.first(),
+            queue = genreTracks,
+            playbackOrigin = PlaybackOrigin.Unknown,
+        )
+
+    }
+
     fun togglePlayPause() {
         musicRepository.togglePlayPause()
     }
