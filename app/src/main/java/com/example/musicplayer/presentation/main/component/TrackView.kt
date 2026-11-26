@@ -155,6 +155,7 @@ fun TrackView(
     val hatTitle = when(trackOrigin) {
         is PlaybackOrigin.Album -> trackOrigin.albumTitle
         is PlaybackOrigin.Playlist -> trackOrigin.playlistTitle
+        is PlaybackOrigin.Mix -> "Mix: ${trackOrigin.genre}"
         PlaybackOrigin.Unknown -> track.title
     }
 
