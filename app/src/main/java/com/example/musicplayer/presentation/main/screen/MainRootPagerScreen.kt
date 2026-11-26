@@ -414,7 +414,7 @@ fun MainRootPagerScreen(
                             mainViewModel.playTrackWithQueue(
                                 track = track,
                                 queue = currentQueue,
-                                playbackOrigin = PlaybackOrigin.Unknown,
+                                playbackOrigin = nowPlayingOrigin,
                             )
                         },
                         onMoveTrack = { fromIndex, toIndex ->
