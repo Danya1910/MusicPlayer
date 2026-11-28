@@ -27,7 +27,7 @@ import com.example.musicplayer.data.local.entity.TrackEntity
         FavoriteTrackEntity::class,
         FavoriteAlbumEntity::class,
     ],
-    version = 8,
+    version = 9,
     exportSchema = false,
 )
 
@@ -207,5 +207,14 @@ val MIGRATION_7_8 = object : Migration(7, 8) {
             "CREATE INDEX IF NOT EXISTS `index_albums_title` " +
                     "ON `albums` (`title`)"
         )
+    }
+}
+
+val MIGRATION_8_9 = object : Migration(8, 9) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "ALTER TABLE `albums` ADD COLUMN `artistImageUrl` TEXT NOT NULL DEFAULT ''"
+        )
+
     }
 }
