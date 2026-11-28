@@ -12,5 +12,6 @@ fun AlbumWithTracks.toDomain() : Album {
         imageUrl = album.imageUrl,
         tracks = this.tracks.map { it.toDomain() },
         artistImageUrl = album.artistImageUrl,
+        releaseDate = album.releaseDate,
     )
 }
