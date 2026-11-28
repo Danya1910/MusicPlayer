@@ -315,12 +315,22 @@ private fun AlbumInfo(
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = "Album * 2000",
-                fontWeight = FontWeight.Medium,
-                fontSize = 13.sp,
-                color = Gray
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "Album · ",
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 13.sp,
+                    color = Gray
+                )
+                Text(
+                    text = album.releaseDate,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 13.sp,
+                    color = Gray
+                )
+            }
             Spacer(modifier = Modifier.height(10.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically
