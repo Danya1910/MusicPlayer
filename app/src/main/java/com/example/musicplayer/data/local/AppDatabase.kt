@@ -27,7 +27,7 @@ import com.example.musicplayer.data.local.entity.TrackEntity
         FavoriteTrackEntity::class,
         FavoriteAlbumEntity::class,
     ],
-    version = 9,
+    version = 10,
     exportSchema = false,
 )
 
@@ -214,6 +214,15 @@ val MIGRATION_8_9 = object : Migration(8, 9) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL(
             "ALTER TABLE `albums` ADD COLUMN `artistImageUrl` TEXT NOT NULL DEFAULT ''"
+        )
+
+    }
+}
+
+val MIGRATION_9_10 = object : Migration(9, 10) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "ALTER TABLE `albums` ADD COLUMN `releaseDate` TEXT NOT NULL DEFAULT ''"
         )
 
     }
