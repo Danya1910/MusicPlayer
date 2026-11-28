@@ -301,7 +301,7 @@ private fun AlbumInfo(
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(24.dp)
+                        .size(34.dp)
                         .clip(
                             shape = CircleShape
                         )
@@ -310,7 +310,7 @@ private fun AlbumInfo(
                 Text(
                     text = album.artist,
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.sp,
+                    fontSize = 16.sp,
                     color = White,
                 )
             }
