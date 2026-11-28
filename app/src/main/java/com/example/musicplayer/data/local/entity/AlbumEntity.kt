@@ -19,6 +19,7 @@ data class AlbumEntity (
     val title: String = "",
     val artist: String = "",
     val imageUrl: String = "",
+    val artistImageUrl: String = "",
 )
 
 fun AlbumEntity.toDomain(): Album = Album(
@@ -27,6 +28,7 @@ fun AlbumEntity.toDomain(): Album = Album(
     artist = artist,
     imageUrl = imageUrl,
     isFavorite = false,
+    artistImageUrl = artistImageUrl,
     tracks = emptyList(),
 )
 
