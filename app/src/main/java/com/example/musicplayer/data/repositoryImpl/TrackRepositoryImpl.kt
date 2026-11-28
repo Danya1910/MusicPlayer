@@ -169,6 +169,7 @@ class TrackRepositoryImpl @Inject constructor(
                         artist = doc.getString("artist") ?: "Неизвестный исполнитель",
                         imageUrl = doc.getString("imageUrl") ?: "",
                         artistImageUrl = doc.getString("artistImageUrl") ?: "",
+                        releaseDate = doc.getString("releaseDate") ?: "",
                     )
                 }
                 albumDao.insertAlbums(entities)
