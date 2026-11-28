@@ -297,7 +297,7 @@ private fun AlbumInfo(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 AsyncImage(
-                    model = album.imageUrl,
+                    model = album.artistImageUrl,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
