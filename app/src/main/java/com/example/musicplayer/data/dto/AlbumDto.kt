@@ -5,5 +5,6 @@ data class AlbumDto (
     val title: String = "",
     val artist: String = "",
     val imageUrl: String = "",
+    val artistImageUrl: String = "",
     val isFavorite: Boolean = false,
 )
