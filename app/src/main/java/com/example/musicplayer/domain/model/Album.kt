@@ -6,5 +6,6 @@ data class Album (
     val artist: String,
     val imageUrl: String,
     val tracks: List<Track>,
+    val artistImageUrl: String,
     val isFavorite: Boolean = false,
 )
