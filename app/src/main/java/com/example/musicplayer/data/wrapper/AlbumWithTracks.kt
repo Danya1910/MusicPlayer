@@ -10,6 +10,7 @@ fun AlbumWithTracks.toDomain() : Album {
         title = album.title,
         artist = album.artist,
         imageUrl = album.imageUrl,
-        tracks = this.tracks.map { it.toDomain() }
+        tracks = this.tracks.map { it.toDomain() },
+        artistImageUrl = album.artistImageUrl,
     )
 }
